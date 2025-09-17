@@ -1,0 +1,14 @@
+.MeusDados .perfil {
+  text-align: center;
+}
+
+.MeusDados .perfil i{
+  font-size: 6rem;
+}
+
+/* Título */
+.MeusDados .dados-container h2 {
+  font-size: 1rem;
+  text-transform: lowercase;
+  font-weight: bold;
+}

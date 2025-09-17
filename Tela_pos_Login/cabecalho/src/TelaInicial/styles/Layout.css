@@ -1,0 +1,116 @@
+/* -------------------- */
+/* 🔹 Header */
+/* -------------------- */
+
+.cabecalho header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+.cabecalho .navbar {
+  backdrop-filter: blur(7px);
+  background: var(--cor-preto-transparente);
+  border-bottom: 1px solid var(--cor-texto-claro);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2vw;
+}
+.cabecalho .navbar img {
+  height: 12vh;
+  margin-left: 1vw;
+  transition: transform 0.3s;
+}
+.cabecalho .navbar img:hover {
+  transform: scale(0.98);
+}
+
+.cabecalho .subpage{
+  height: 15vh;
+}
+
+.cabecalho .menu {
+  display: flex;
+  gap: 4vw;
+  margin-right: 4vw;
+}
+.cabecalho .navbar a {
+  color: var(--cor-texto-claro);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+  position: relative;
+  padding: 8px 0;
+}
+.cabecalho .menu a::before,
+.cabecalho .menu a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 110%;
+  height: 1px;
+  background-color: var(--cor-texto-claro);
+  transition: all 0.3s ease;
+}
+.cabecalho .menu a::before {
+  top: 0;
+}
+.cabecalho .menu a::after {
+  bottom: 0;
+}
+.cabecalho .menu a:hover {
+  color: var(--cor-hover);
+}
+.cabecalho .menu a:hover::before {
+  top: -6px;
+  background-color: var(--cor-hover);
+}
+.cabecalho .menu a:hover::after {
+  bottom: -6px;
+  background-color: var(--cor-hover);
+}
+
+/* Mobile menu for landing (scoped) */
+@media (max-width: 900px) {
+    
+    .cabecalho .navbar img { height: 8vh; }
+    
+    .cabecalho header .menu {
+    position: fixed;
+    top: 0;
+    right: -100%; /* escondido fora da tela */
+    width: 50%;   /* metade da tela */
+    height: 58vh; /* altura total da tela */
+    flex-direction: column;
+    gap: 2rem;
+    padding: 5.5rem 2rem;
+    backdrop-filter: blur(20px);
+    background-color: var(--cor-preto-transparente-forte);
+    border-radius: 20px;
+    transition: right 0.4s ease-in-out;
+    z-index: 2000; /* sempre acima do conteúdo */
+  }
+
+  .cabecalho .menu.active {
+    right: -5%; /* aparece pela direita */
+  }
+}
+
+.cabecalho .hamburger, .cabecalho .close-menu {
+  display: none;
+  font-size: 3rem;
+  cursor: pointer;
+  color: white;
+  z-index: 2100;
+}
+
+@media (max-width: 900px) {
+  .cabecalho .hamburger { display: block; }
+  .cabecalho .close-menu { display: none; }
+
+  /* Quando o menu estiver ativo */
+  .cabecalho .menu.active ~ .hamburger { display: none; }
+  .cabecalho .menu.active ~ .close-menu { display: block; }
+}

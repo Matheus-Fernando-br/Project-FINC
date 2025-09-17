@@ -1,0 +1,83 @@
+/* Geral dos planos */
+.plano {
+    width: 50vw;
+    background: var(--cor-fundo-escuro);
+    color: #fff;
+    padding: 2vh;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 2vh;
+}
+
+.plano:hover {
+    background: var(--cor-texto-escuro);
+}
+
+/* Cabeçalho do plano */
+.plano-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.plano h3 {
+    padding-left: 1vw;   
+    padding-top: 2vh;    
+    font-size: 2rem;   
+    margin-bottom: 0.5vh; 
+}
+
+.plano p {
+    padding-left: 1vw;   
+    padding-bottom: 0.5vh;
+    font-size: 1rem;
+    margin: 0.5vh 0;     
+}
+
+.plano i {
+    font-size: 5vh;
+}
+
+/* Preço */
+.preco {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Detalhes (aberto/fechado) */
+.detalhes {
+    max-height: 0;            /* começa fechado */
+    overflow: hidden;         /* esconde conteúdo extra */
+    opacity: 0;               /* invisível no início */
+    transition: max-height 0.5s ease, opacity 0.5s ease; 
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 1vh;
+}
+
+.plano.ativo .detalhes {
+    max-height: 20vh;  /* espaço suficiente para caber o conteúdo */
+    opacity: 1;        /* visível quando ativo */
+    display: block;
+}
+
+/* Seções */
+.form-section {
+    margin-bottom: 4vh;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1vh;
+}
+
+.section-header .icon {
+    margin-right: 1vw;
+}
+
+.divider {
+    border: 0.5px solid #444;
+    margin-bottom: 2vh;
+}

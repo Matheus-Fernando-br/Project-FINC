@@ -1,0 +1,476 @@
+/* ================= VARIÁVEIS GLOBAIS ================= */
+:root {
+  /* Paleta baseada na logo FINC */
+  --cor-primaria: #2ecc71;
+  --cor-primaria-escura: #27ae60;
+  --cor-secundaria: #0d6630;
+  --cor-terciaria: #063e20;
+
+  /* Neutros */
+  --cor-fundo-claro: #f8f8f8;
+  --cor-fundo-escuro: #111;
+  --cor-texto-claro: #fff;
+  --cor-texto-escuro: #000;
+  --cor-cinza: #ddd;
+
+  /* Outros */
+  --cor-ok: #1e7d44;
+  --cor-pending: #b52d2d;
+}
+
+/* ================= DARK MODE ================= */
+body.dark-mode {
+  background: #121212;
+  color: #f1f1f1;
+}
+
+body.dark-mode .header {
+  background: #000 !important;
+  color: #f1f1f1;
+}
+
+body.dark-mode .sidebar {
+  background: #000 !important;
+  color: #f1f1f1;
+}
+
+body.dark-mode .sidebar ul li a {
+  color: #f1f1f1;
+}
+
+body.dark-mode .content {
+  background: var(--cor-texto-escuro) !important;
+  color: #f1f1f1;
+}
+
+
+/* ================= RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--cor-fundo-claro);
+  color: var(--cor-texto-escuro);
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to top,var(--cor-primaria)30%,var(--cor-secundaria));
+  color: var(--cor-texto-claro);
+  padding: 2vh 2vw;
+  position: fixed;
+  top: 0;
+  left: 3vw; 
+  right: 0;
+  z-index: 1000;
+}
+
+
+.header .msg {
+  margin-left: 1vw;
+  line-height: 1.2;
+}
+
+.search-bar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-bar input {
+  width: 50%;
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+}
+
+.search-bar i {
+  margin-left: -2rem;
+  color: var(--cor-pending);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.header-right a {
+  text-decoration: none;
+  color: var(--cor-texto-claro);
+}
+
+.header-right a:hover {
+  text-decoration:underline;
+  }
+
+.header-right .icons {
+  display: flex;
+  flex-direction: column; /* coloca em coluna */
+  gap: 0.5rem;
+  align-items: center;    /* centraliza horizontalmente */
+  cursor: pointer;
+}
+
+.header-right .icons i:hover {
+  transform: scale(1.1);
+}
+
+.profile i {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+  width: 3.5rem;
+  background: linear-gradient(to top,var(--cor-primaria)90%,var(--cor-secundaria));
+  color: var(--cor-texto-claro);
+  height: 100vh;
+  padding: 1rem 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1200;
+  overflow-y: auto;
+  transition: width 0.3s ease, left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Quando abrir */
+.sidebar.active {
+  width: 15.5vw;
+}
+
+/* Ícones + label */
+.sidebar ul {
+  list-style: none;
+  margin-top: 12vh;
+  margin-left: .5vw;
+}
+.sidebar ul li {
+  margin-bottom: 1.2rem;
+}
+.sidebar ul li a {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--cor-texto-claro);
+  text-decoration: none;
+  padding: 0.6rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+.sidebar ul li:hover {
+  background: #333;
+  border-radius: 5px;
+}
+.sidebar .label {
+  display: none;
+}
+.sidebar.active .label {
+  display: inline;
+}
+
+/* Divider */
+.divider {
+  width: 80%;
+  margin: 1rem auto;
+  border: 0;
+  height: 2px;
+  background: #fff;
+}
+
+/* ================= LOGO EMBAIXO ================= */
+.logo-baixo {
+  display: none;
+  text-align: center;
+}
+.logo-baixo img {
+  height: 3rem;
+  margin: 1rem auto;
+  transition: transform 0.2s ease-in-out;
+}
+.logo-baixo img:hover {
+  transform: scale(0.95);
+}
+
+/* ================= LAYOUT ================= */
+.layout {
+  display: flex;
+  margin-top: 20vh; /* altura do header */
+  margin-left: 20vw;
+  margin-right: 20vw;
+}
+
+/* ================= Conteúdo da Tela ================= */
+.content {
+  width: 62rem;
+  background: var(--cor-fundo-claro);
+  padding: 4rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* ================= DARK MODE ================= */
+
+body.dark-mode .form-section,
+body.dark-mode .form-section h3,
+body.dark-mode .form-section input,
+body.dark-mode .form-section .icon,
+body.dark-mode .form-section .bi {
+  color: #f1f1f1;
+  border-color: #444;
+}
+
+body.dark-mode .form-section input {
+  background: #222;
+  color: #f1f1f1;
+  border-color: #444;
+}
+
+body.dark-mode .form-footer i,
+body.dark-mode .form-footer a {
+  color: #f1f1f1;
+}
+
+/* ================= Seção de categorias ================= */
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+/* ================= Cabeçalho da seção ================= */
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-header .icon {
+    font-size: 1.5rem;
+    color: var(--cor-texto-escuro);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .section-header h3 {
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #333;
+  }
+  
+/* ================= Linha divisória entre cabeçalho e conteúdo ================= */
+
+.content .divider {
+  width: 100%;
+  margin: 1vh auto;
+  border: 0;
+  height: 1px;
+  background: var(--cor-texto-escuro);           
+  border-radius: 5px;
+  margin-bottom: 3vh;
+}
+
+/* ================= Conteúdo da seção ================= */
+
+.form-row {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+  /* ================= Botões ================= */
+  .botao_geral{
+    text-align: center;
+    padding: 2vh;
+  }
+
+  button {
+    background: var(--cor-primaria);
+    color: var(--cor-texto-claro);
+    border: none;
+    padding: 0.7rem 2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  button:hover {
+    background: #058831;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+  }
+
+
+
+  /* ================= Inputs da seção ================= */
+
+  .form-row.full input {
+    flex: 1;
+  }
+
+  .form-row input {
+    flex: 1;
+    padding: 0.7rem 3rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  /* ================= Rodapé do conteúdo ================= */
+
+  .form-footer {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.form-footer-voltar {
+  display: flex;
+  justify-content: flex-start;
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--cor-pending);
+}
+
+.form-footer-avancar {
+  display: flex;
+  justify-content: flex-end;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.form-footer a, .form-footer-avancar a, .form-footer-voltar a {
+  text-decoration: none;
+  color: var(--cor-primaria-escura);
+}
+
+.form-footer i, .form-footer-avancar i, .form-footer-voltar i{
+  font-size: 1rem;
+  color: var(--cor-primaria-escura);
+}
+
+.form-footer a:hover, .form-footer-avancar a:hover, .form-footer-voltar a:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1.095);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+
+/* ================= RESPONSIVO ================= */
+/* Botão hamburguer e fechar */
+.sidebar-hamburguer .hamburger {
+  font-size: 2.2rem;
+  cursor: pointer;
+  color: var(--cor-texto-claro);
+  z-index: 5001;   /* maior que a sidebar */
+  position: fixed;
+  top: 2rem;
+  left: 0.5rem;
+  background: transparent;
+}
+
+ /* Quando a sidebar estiver aberta */
+
+  .sidebar.active .logo-baixo{
+    display: block;
+  }
+  
+/* Mobile */
+@media (max-width: 1150px) {
+
+  .logo-baixo {
+    display: block;
+  }
+
+  .header {
+    left: 0;
+    padding: .3rem 1rem;
+  }
+
+  .header .msg {
+    margin-left: 2.5rem;
+    margin-top: 1rem;
+    width: 10rem;
+  }
+
+  .header .msg h2{
+    font-size: 1rem;
+  }
+
+  .header-right .user-name {
+    display: none;
+  }
+
+  .search-bar input {
+    width: 50%;
+    padding: 0.6rem 1.5rem;
+  }
+
+  .search-bar i {
+    margin-right: 1.5rem;
+  }
+
+  .sidebar {
+    display: flex;
+    left: -100%;
+    width: 50vw;
+    height: 100vh;        /* ocupa toda a tela */
+    overflow-y: auto;     /* rolagem vertical */
+    z-index: 3000;
+    border-radius: 15px;
+    transition: left 0.4s ease-in-out;
+  }
+
+  .sidebar.active {
+    left: 0;
+    width: 50vw;
+  }
+
+  .layout {
+    margin-left: 4vw;
+    margin-right: 4vw;
+  }
+
+  .content {
+    padding: 1rem;
+    width: 90vw;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+}

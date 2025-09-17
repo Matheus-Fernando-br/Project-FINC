@@ -1,0 +1,209 @@
+/* ==============================
+   RESET GLOBAL
+================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+
+/* ==============================
+   BODY
+================================= */
+.CadastroLogin {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10vw;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.CadastroLogin .Fundo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.CadastroLogin .Fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==============================
+   Voltar
+================================= */
+.CadastroLogin .rodape {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* ==============================
+   FORM WRAPPER
+================================= */
+.CadastroLogin .wrapper {
+  background: transparent;
+  border: 2px solid var(--cor-texto-claro);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px var(--bg-blur);
+  color: var(--cor-texto-claro);
+  padding: 2rem;
+  margin-top: 15vh;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 40vw;
+}
+
+.CadastroLogin .wrapper h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.CadastroLogin .wrapper .formulario {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 4vh; 
+}
+
+/* ==============================
+   INPUTS
+================================= */
+.CadastroLogin .wrapper .input-box {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  margin: 2vh 0;
+}
+
+.CadastroLogin .input-box input {
+  width: 100%;
+  height: 100%;
+  color: var(--cor-texto-claro);
+  background: transparent;
+  border: 1px solid #ccc;
+  outline: none;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+  border-radius: 40px;
+}
+
+.CadastroLogin .input-box input::placeholder {
+  color: var(--cor-cinza);
+}
+
+.CadastroLogin .input-box i {
+  position: absolute;
+  color: var(--cor-texto-claro);
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ==============================
+   ACEITAR TERMOS
+================================= */
+.CadastroLogin .wrapper .acept {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.CadastroLogin .wrapper .acept label input {
+  accent-color: var(--cor-primaria);
+  margin-right: 5px;
+}
+
+.CadastroLogin .wrapper .remember-forgot a:hover {
+  text-decoration: underline;
+  transform: scale(0.98);
+}
+
+/* ==============================
+   BOTÕES
+================================= */
+.CadastroLogin .wrapper .btn {
+  width: 100%;
+  height: 45px;
+  border-radius: 6px;
+  background: var(--cor-secundaria);
+  color: var(--cor-texto-claro);
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.CadastroLogin .wrapper .btn:hover {
+  transform: scale(0.98);
+  background: var(--cor-primaria);
+}
+
+.CadastroLogin .wrapper .divider {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+/* ==============================
+   RESPONSIVIDADE
+================================= */
+@media (max-width: 900px) {
+  .CadastroLogin {
+    justify-content: center;
+    padding-right: 0;
+    flex-direction: column; /* força rodapé + form em coluna */
+    align-items: center;
+  }
+
+  /* Rodapé embaixo do formulário */
+  .CadastroLogin .rodape {
+    position: static;
+    transform: none;
+    order: 2; /* garante que vem depois do form */
+    margin-top: 2vh;
+    margin-bottom: 8vh;
+    font-size: 1.2rem;
+  }
+
+  /* Wrapper (formulário) ocupa 90% */
+  .CadastroLogin .wrapper {
+    margin-top: 15vh;
+    margin-bottom: 2rem;
+    max-width: none;
+    width: 90%;
+    order: 1; /* vem antes do rodapé */
+  }
+
+  .CadastroLogin .wrapper .formulario {
+    display: contents; /* força inputs em 1 coluna */
+    width: 100%;
+    gap: 2vh; 
+  }
+
+  .CadastroLogin .wrapper h1 {
+    font-size: 2rem;
+  }
+
+  .CadastroLogin .input-box input {
+    padding-right: 2.5rem;
+  }
+
+  .CadastroLogin .input-box i {
+    right: 0.8rem;
+  }
+}

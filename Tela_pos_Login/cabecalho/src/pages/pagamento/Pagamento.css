@@ -1,0 +1,79 @@
+.pagamento-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+/* Títulos */
+.cartao-atual h3,
+.novo-cartao h3,
+.cadastro-cartao h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-transform: lowercase;
+  font-weight: bold;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.3rem;
+}
+
+/* Visual do cartão */
+.cartao-visual {
+  width: 260px;
+  height: 160px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7d00a9, #a100d6);
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cartao-header {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.cartao-numero {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.cartao-footer {
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+/* Checkboxes */
+.novo-cartao label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
+/* Cadastro novo cartão */
+.cadastro-cartao {
+  margin-top: 2rem;
+}
+
+.cadastro-cartao form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.cadastro-cartao form input {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.cadastro-cartao form input:focus {
+  border-color: #7d00a9;
+  box-shadow: 0 0 6px rgba(125, 0, 169, 0.4);
+}
