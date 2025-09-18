@@ -62,7 +62,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(to top,var(--cor-primaria)30%,var(--cor-secundaria));
+  background: linear-gradient(to top,var(--cor-terciaria)30%,var(--cor-secundaria));
   color: var(--cor-texto-claro);
   padding: 2vh 2vw;
   position: fixed;
@@ -132,7 +132,7 @@ body {
 /* ================= SIDEBAR ================= */
 .sidebar {
   width: 3.5rem;
-  background: linear-gradient(to top,var(--cor-primaria)90%,var(--cor-secundaria));
+  background: linear-gradient(to top,var(--cor-terciaria)90%,var(--cor-secundaria));
   color: var(--cor-texto-claro);
   height: 100vh;
   padding: 1rem 0;
@@ -209,7 +209,7 @@ body {
 .layout {
   display: flex;
   margin-top: 20vh; /* altura do header */
-  margin-left: 20vw;
+  margin-left: 15vw;
   margin-right: 20vw;
 }
 
@@ -217,7 +217,7 @@ body {
 .content {
   width: 62rem;
   background: var(--cor-fundo-claro);
-  padding: 4rem;
+  padding: 3rem;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   font-family: Arial, sans-serif;
@@ -248,7 +248,7 @@ body.dark-mode .form-footer a {
 /* ================= Seção de categorias ================= */
 
 .form-section {
-  margin-bottom: 2rem;
+  padding-bottom: 2rem;
 }
 
 /* ================= Cabeçalho da seção ================= */
@@ -260,7 +260,7 @@ body.dark-mode .form-footer a {
   }
 
   .section-header .icon {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     color: var(--cor-texto-escuro);
     width: 32px;
     height: 32px;
@@ -270,9 +270,10 @@ body.dark-mode .form-footer a {
   }
 
   .section-header h3 {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: normal;
-    color: #333;
+    color: var(--cor-texto-escuro);
+    font-weight: bold;
   }
   
 /* ================= Linha divisória entre cabeçalho e conteúdo ================= */
@@ -318,6 +319,56 @@ body.dark-mode .form-footer a {
     transition: all 0.2s ease-in-out;
   }
 
+  /* Grupo de radios */
+  .radio-group {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.1rem;
+  }
+
+  /* ================= Prefixos e sufixos dos inputs do conteúdo ================= */
+
+  /* Prefixo R$ e sufixo Kg nos inputs */
+.input-prefix,
+.input-suffix {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-prefix input,
+.input-suffix input {
+  padding-left: 2.2rem; /* espaço pro prefixo */
+}
+
+.input-suffix input {
+  padding-right: 2.2rem; /* espaço pro sufixo */
+}
+
+/* Prefixo (R$) */
+.prefix {
+  position: absolute;
+  left: 10px;
+  bottom: 12px;
+  color: var(--cor-texto-escuro);
+  font-size: 0.9rem;
+}
+
+/* Sufixo (Kg) */
+.suffix {
+  position: absolute;
+  right: 10px;
+  bottom: 12px;
+  color: var(--cor-texto-escuro);
+  font-size: 0.9rem;
+}
 
 
   /* ================= Inputs da seção ================= */
@@ -333,6 +384,31 @@ body.dark-mode .form-footer a {
     border-radius: 6px;
     font-size: 0.9rem;
   }
+
+/* ================= Label do conteúdo ================= */
+
+  .form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.form-group label, .radio-group .label-radio {
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+  font-weight: bold;
+  font-style: italic;
+  color: var(--cor-fundo-escuro);
+}
+
+.radio-group .label-radio {
+  margin-bottom: 0;
+}
+
+.radio-option label {
+  font-size: .9rem;
+}
+
 
   /* ================= Rodapé do conteúdo ================= */
 

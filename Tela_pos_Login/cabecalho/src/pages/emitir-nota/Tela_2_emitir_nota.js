@@ -11,7 +11,7 @@ function Tela_2_emitir_nota() {
           </div>
           <hr className="divider" />
           <div className="form-row">
-            <input type="text" placeholder="Consulte sua nota aqui" />
+            <input type="text" placeholder="Aqui o back-end vai mostrar todas as informações preenchidas anteriormente em formato já de NF" />
           </div>
         </section>
 
