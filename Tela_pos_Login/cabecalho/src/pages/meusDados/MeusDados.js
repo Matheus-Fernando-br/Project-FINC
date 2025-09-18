@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import icons from "../../components/Icons";
 import React, { useState } from "react";
 import './MeusDados.css'
 
@@ -6,8 +7,11 @@ function MeusDados() {
 
     return (
         <main className="content MeusDados">
+            <section className='titulo-secao'>
+                <h1><i className={icons.clientePerson}></i> Meu Perfil</h1>
+            </section>            
             <div className="perfil">
-                <i class="bi bi-person-circle"></i>
+                <i class="bi bi-person-circle"></i> {/*foto da pessoa aqui*/}
                 <h2>Gabriel Moreninho Tupinambá</h2>
             </div>
 

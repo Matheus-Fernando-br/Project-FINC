@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useState } from "react";
 import "./produtos.css";
@@ -22,6 +23,9 @@ function Cadastro_produtos() {
 
   return (
       <main className="content">
+        <section className='titulo-secao'>
+          <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Produto/Serviço</h1>
+        </section>
         <div className="form-footer-voltar">
           <Link to="/produtos" className="previous-step">
             Voltar <i className="bi bi-chevron-double-left"></i>
@@ -31,7 +35,7 @@ function Cadastro_produtos() {
 
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-plus"></i></span>
+            <span className="icon"><i className={icons.relatorioAdd}></i></span>
             <h3>Cadastrar novo Produto/Serviço</h3>
           </div>
           <hr />

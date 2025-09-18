@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import './notificacao.css'
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -21,7 +22,7 @@ function Tela_1_notificacao() {
       <main className="content">
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-text"></i></span>
+            <span className="icon"><i className={icons.notificacoes}></i></span>
             <h3>Notificações</h3>
           </div>
           <hr className="divider" />

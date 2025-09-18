@@ -1,22 +1,29 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 
 function Tela_1_emitir_nota() {
   return (
     <main className="content">
+      <section className='titulo-secao'>
+        <h1><i className={icons.emitirNota}></i> Emitir Nota Fiscal</h1>
+      </section>
       <section className="form-section">
+          <p className="frase-campo-asterisco">
+            Os campos que contêm um asterisco (<span className="campo-obrigatório">*</span>) são de preenchimento obrigatório.
+          </p>
         <div className="section-header">
-          <span className="icon"><i className="bi bi-person-circle"></i></span>
+          <span className="icon"><i className={icons.clientes}></i></span>
           <h3>Cliente</h3>
         </div>
         <hr className="divider" />
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="nome-social">Nome Social</label>
+            <label htmlFor="nome-social">Nome Social <span className='campo-obrigatório'>*</span></label>
             <input id="nome-social" type="text" placeholder="Selecione" />
           </div>
           <div className="form-group">
-            <label htmlFor="cpf-cnpj">CPF/CNPJ</label>
+            <label htmlFor="cpf-cnpj">CPF/CNPJ <span className='campo-obrigatório'>*</span></label>
             <input id="cpf-cnpj" type="text" placeholder="Selecione" />
           </div>
         </div>
@@ -24,12 +31,12 @@ function Tela_1_emitir_nota() {
 
       <section className="form-section">
         <div className="section-header">
-          <span className="icon"><i className="bi bi-tools"></i></span>
+          <span className="icon"><i className={icons.produtos}></i></span>
           <h3>Produto/Serviço</h3>
         </div>
         <hr className="divider" />
         <div className="form-row radio-group">
-          <label className="label-radio">Selecione o tipo:</label>
+          <label className="label-radio">Selecione o tipo: <span className='campo-obrigatório'>*</span></label>
           <div className="radio-option">
             <input type="radio" id="produto" name="tipo" value="produto" />
             <label htmlFor="produto">Produto</label>
@@ -41,11 +48,11 @@ function Tela_1_emitir_nota() {
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="item">Selecione o produto/serviço</label>
+            <label htmlFor="item">Selecione o produto/serviço <span className='campo-obrigatório'>*</span></label>
             <input id="item" type="text" placeholder="Selecione" />
           </div>
           <div className="form-group">
-            <label htmlFor="quantidade">Quantidade</label>
+            <label htmlFor="quantidade">Quantidade <span className='campo-obrigatório'>*</span></label>
             <input id="quantidade" type="text" placeholder="Digite a quantidade de itens" />
           </div>
         </div>
@@ -63,12 +70,12 @@ function Tela_1_emitir_nota() {
 
       <section className="form-section">
         <div className="section-header">
-          <span className="icon"><i className="bi bi-bus-front"></i></span>
+          <span className="icon"><i className={icons.transporte}></i></span>
           <h3>Transporte</h3>
         </div>
         <hr className="divider" />
         <div className="form-row radio-group">
-          <label className="label-radio">Frete por conta?</label>
+          <label className="label-radio">Frete por conta? <span className='campo-obrigatório'>*</span></label>
           <div className="radio-option">
             <input type="radio" id="sim" name="frete" value="sim" />
             <label htmlFor="sim">Sim</label>
@@ -118,16 +125,11 @@ function Tela_1_emitir_nota() {
 
       <section className="form-section">
         <div className="section-header">
-          <span className="icon"><i className="bi bi-coin"></i></span>
+          <span className="icon"><i className={icons.moeda}></i></span>
           <h3>Valores</h3>
         </div>
         <hr className="divider" />
         <div className="form-row">
-          <div className="form-group input-prefix">
-            <label htmlFor="valor">Valor Bruto</label>
-            <span className="prefix">R$</span>
-            <input id="valor" type="number" placeholder="0,00" />
-          </div>
           <div className="form-group input-prefix">
             <label htmlFor="desc-incond">Desconto incondicionado</label>
             <span className="prefix">R$</span>

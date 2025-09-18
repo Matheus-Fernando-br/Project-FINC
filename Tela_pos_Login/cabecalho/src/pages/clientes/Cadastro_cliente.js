@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 
@@ -7,6 +8,9 @@ function Cadastro_cliente() {
     return (
 
             <main className="content">
+                 <section className='titulo-secao'>
+                    <h1><i className={icons.clientesAdd}></i> Cadastro de um novo cliente</h1>
+                 </section>
                     <div className="form-footer voltar">
                         <Link to="/clientes" className="previous-step">
                              Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
@@ -14,7 +18,7 @@ function Cadastro_cliente() {
                     </div>
                 <section className="form-section">
                     <div className="section-header">
-                        <span className="icon"><i className="bi bi-journal-plus"></i></span>
+                        <span className="icon"><i className={icons.relatorioAdd}></i></span>
                         <h3>Cadastrar novo cliente</h3>
                     </div>
                     <hr />

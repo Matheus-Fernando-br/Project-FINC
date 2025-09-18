@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 import './sair.css';
 
@@ -7,7 +8,7 @@ function MenuSair() {
             <main className="content">
                 <section className="form-section">
                     <div className="section-header">
-                        <span className="icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span className="icon"><i className={icons.sair}></i></span>
                         <h3>Loggof</h3>
                     </div>
                     <hr className="divider" />

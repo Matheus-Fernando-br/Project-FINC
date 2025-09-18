@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
+import icons from "../../components/Icons";
 import React from "react";
 import "./Pagamento.css";
 
 function Pagamento() {
   return (
     <div className="content">
+      <section className='titulo-secao'>
+        <h1><i className={icons.pagamento}></i> Pagamento</h1>
+      </section>        
       <div className="pagamento-container">
         {/* Cartão atual */}
         <div className="cartao-atual">

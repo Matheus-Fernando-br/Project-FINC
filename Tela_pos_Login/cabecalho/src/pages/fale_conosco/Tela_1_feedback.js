@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -8,7 +9,7 @@ function Tela_1_feedback() {
       <main className="content">
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i class="bi bi-telephone-forward"></i></span>
+            <span className="icon"><i className={icons.feedback}></i></span>
             <h3>Fale Conosco</h3>
           </div>
           <hr className="divider" />
@@ -22,7 +23,7 @@ function Tela_1_feedback() {
 
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i class="bi bi-telephone-forward"></i></span>
+            <span className="icon"><i className={icons.feedbackTel}></i></span>
             <h3>Entre em contato de outra forma...</h3>
           </div>
           <hr className="divider" />

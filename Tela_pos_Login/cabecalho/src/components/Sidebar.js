@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import icons from "./Icons";
 
 function Sidebar() {
   const [active, setActive] = useState(false);
@@ -10,19 +11,15 @@ function Sidebar() {
 
   return (
     <>
-      {/* Botão hamburguer (vira X quando ativo) */}
+      {/* Botão hamburguer */}
       <div className="sidebar-hamburguer">
-      <div
-        className="hamburger"
-        onClick={toggleMenu}
-        aria-label={active ? "Fechar menu" : "Abrir menu"}
-      >
-        {active ? (
-          <i className="bi bi-x"></i>   // X quando aberto
-        ) : (
-          <i className="bi bi-list"></i> // Hamburguer quando fechado
-        )}
-      </div>
+        <div
+          className="hamburger"
+          onClick={toggleMenu}
+          aria-label={active ? "Fechar menu" : "Abrir menu"}
+        >
+          <i className={active ? icons.menuAberto : icons.menuFechado}></i>
+        </div>
       </div>
 
       {/* Sidebar */}
@@ -30,57 +27,52 @@ function Sidebar() {
         <ul className="menu">
           <li>
             <Link to="/emitir-nota/Dados">
-              <i className="bi bi-file-earmark-plus"></i>
+              <i className={icons.emitirNota}></i>
               <span className="label">Emitir nota</span>
             </Link>
           </li>
           <li>
-            <Link to="/MeusDados">
-              <i className="bi bi-person"></i>
-              <span className="label">Meus dados</span>
-            </Link>
-          </li>
-          <li>
             <Link to="/clientes">
-              <i className="bi bi-people"></i>
+              <i className={icons.clientes}></i>
               <span className="label">Meus clientes</span>
             </Link>
           </li>
           <li>
             <Link to="/produtos">
-              <i className="bi bi-box"></i>
+              <i className={icons.produtos}></i>
               <span className="label">Produtos e serviços</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/notificacao">
-              <i className="bi bi-bell"></i>
-              <span className="label">Notificações</span>
             </Link>
           </li>
           <hr className="divider" />
           <li>
             <Link to="/planos">
-              <i className="bi bi-card-list"></i>
+              <i className={icons.planos}></i>
               <span className="label">Planos</span>
             </Link>
           </li>
           <li>
             <Link to="/pagamento">
-              <i className="bi bi-credit-card"></i>
+              <i className={icons.pagamento}></i>
               <span className="label">Pagamento</span>
             </Link>
           </li>
           <hr className="divider" />
           <li>
-            <Link to="/feedback">
-              <i className="bi bi-chat-dots"></i>
-              <span className="label">Converse com a gente</span>
+            <Link to="/notificacao">
+              <i className={icons.notificacoes}></i>
+              <span className="label">Notificações</span>
             </Link>
           </li>
           <li>
+            <Link to="/feedback">
+              <i className={icons.feedback}></i>
+              <span className="label">Converse com a gente</span>
+            </Link>
+          </li>
+          <hr className="divider" />
+          <li>
             <Link to="/sair">
-              <i className="bi bi-box-arrow-right"></i>
+              <i className={icons.sair}></i>
               <span className="label">Sair</span>
             </Link>
           </li>

@@ -1,12 +1,16 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 
 function Tela_2_emitir_nota() {
   return (
       <main className="content">
+         <section className='titulo-secao'>
+           <h1><i className={icons.emitirNota}></i> Emitir Nota Fiscal</h1>
+         </section>
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-text"></i></span>
+            <span className="icon"><i className={icons.relatorio}></i></span>
             <h3>Consulta da nota</h3>
           </div>
           <hr className="divider" />
@@ -17,7 +21,7 @@ function Tela_2_emitir_nota() {
 
         <section className="emitir">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-text"></i></span>
+            <span className="icon"><i className={icons.relatorioAdd}></i></span>
             <h3>Emitir nota</h3>
           </div>
           <hr className="divider" />

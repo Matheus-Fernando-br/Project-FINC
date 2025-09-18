@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { useState } from 'react';
 import './plano.css'
 
@@ -12,9 +13,12 @@ function Tela_1_planos() {
 
   return (
       <main className="content">
-        <section className="form-section">
+          <section className='titulo-secao'>
+            <h1><i className={icons.planos}></i> Planos</h1>
+          </section>        
+          <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-check"></i></span>
+            <span className="icon"><i className={icons.relatorioOk}></i></span>
             <h3>Meu plano atual</h3>
           </div>
           <hr className="divider" />
@@ -41,7 +45,7 @@ function Tela_1_planos() {
 
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-check"></i></span>
+            <span className="icon"><i className={icons.relatorio}></i></span>
             <h3>Planos Disponíveis</h3>
           </div>
           <hr className="divider" />

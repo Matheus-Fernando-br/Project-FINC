@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 
@@ -13,9 +14,12 @@ function Tela_1_produtos() {
 
   return (
       <main className="content">
+        <section className='titulo-secao'>
+          <h1><i className={icons.produtos}></i> Meus Produtos/Serviços</h1>
+        </section>
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-person-circle"></i></span>
+            <span className="icon"><i className={icons.produtosAdd}></i></span>
             <h3>Cadastrar um novo Produto/Serviço</h3>
           </div>
           <hr className="divider"/>
@@ -28,7 +32,7 @@ function Tela_1_produtos() {
 
         <section className="form-section">
           <div className="section-header">
-            <span className="icon"><i className="bi bi-journal-text"></i></span>
+            <span className="icon"><i className={icons.relatorio}></i></span>
             <h3>Meus Produtos/Serviços</h3>
           </div>
           <hr className="divider" />

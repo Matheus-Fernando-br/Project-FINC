@@ -1,4 +1,5 @@
 import Layout from '../../components/Layout';
+import icons from "../../components/Icons";
 import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 
@@ -6,6 +7,9 @@ function Tela_Cadastro_Servico() {
 
     return (
             <main className="content">
+                    <section className='titulo-secao'>
+                        <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Serviço</h1>
+                    </section>
                     <div className="form-footer-voltar">
                         <Link to="/produtos/cadastro" className="previous-step">
                              Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
@@ -13,7 +17,7 @@ function Tela_Cadastro_Servico() {
                     </div>
                 <section className="form-section">
                     <div className="section-header">
-                        <span className="icon"><i className="bi bi-journal-plus"></i></span>
+                        <span className="icon"><i className={icons.relatorioAdd}></i></span>
                         <h3>Cadastrar novo Serviço</h3>
                     </div>
                     <hr />

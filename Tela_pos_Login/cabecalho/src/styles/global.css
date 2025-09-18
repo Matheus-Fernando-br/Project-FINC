@@ -155,11 +155,11 @@ body {
 /* Ícones + label */
 .sidebar ul {
   list-style: none;
-  margin-top: 12vh;
+  margin-top: 13vh;
   margin-left: .5vw;
 }
 .sidebar ul li {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 .sidebar ul li a {
   display: flex;
@@ -208,7 +208,7 @@ body {
 /* ================= LAYOUT ================= */
 .layout {
   display: flex;
-  margin-top: 20vh; /* altura do header */
+  margin-top: 18vh; /* altura do header */
   margin-left: 15vw;
   margin-right: 20vw;
 }
@@ -217,7 +217,10 @@ body {
 .content {
   width: 62rem;
   background: var(--cor-fundo-claro);
-  padding: 3rem;
+  padding-top: 2rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  padding-bottom: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   font-family: Arial, sans-serif;
@@ -245,6 +248,14 @@ body.dark-mode .form-footer a {
   color: #f1f1f1;
 }
 
+  /* ================= Título da Seção ================= */
+  .content .titulo-secao {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 3rem;
+    color: var(--cor-terciaria);
+  }
+
 /* ================= Seção de categorias ================= */
 
 .form-section {
@@ -252,6 +263,8 @@ body.dark-mode .form-footer a {
 }
 
 /* ================= Cabeçalho da seção ================= */
+
+
 
   .section-header {
     display: flex;
@@ -408,6 +421,22 @@ body.dark-mode .form-footer a {
 .radio-option label {
   font-size: .9rem;
 }
+
+.form-row .campo-obrigatório {
+  color: var(--cor-pending);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.frase-campo-asterisco {
+  text-align: right;
+  color: var(--cor-pending);
+  font-weight: bold;
+  font-style: italic;
+  font-size: 0.7rem;
+  margin-bottom: 1rem;
+}
+
 
 
   /* ================= Rodapé do conteúdo ================= */
