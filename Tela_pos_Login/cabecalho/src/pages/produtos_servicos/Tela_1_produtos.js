@@ -6,7 +6,7 @@ import React, { useState } from "react";
 function Tela_1_produtos() {
 
   const [servicos, setServicos] = useState([
-    { nome: "Bater um quequete", tipo: "Prazer" },
+    { nome: "Bater um concreto", tipo: "Construção" },
     { nome: "Camisinha PP", tipo: "Gabriel" },
     { nome: "Tijolo", tipo: "Evandro MG" }
     // ...os dados reais virão do backend
@@ -43,12 +43,21 @@ function Tela_1_produtos() {
             {servicos.map((servicos, idx) => (
               <React.Fragment key={idx}>
                 <hr className="divider" />
-                <h4>{servicos.nome}</h4>
-                <p>{servicos.tipo}</p>
+                <div className='card-cliente'>
+                  <div>
+                    <h4>{servicos.nome}</h4>
+                    <p>{servicos.tipo}</p>
+                  </div>
+                  <div className="editar-acao">
+                    <i className={icons.edit}></i>
+                    <p>Editar</p>
+                  </div>
+                </div>
               </React.Fragment>
             ))}
             <hr className="divider" />
           </div>
+          
           <div className="form-footer">
             <Link to="#" >
               <a>Veja mais</a>

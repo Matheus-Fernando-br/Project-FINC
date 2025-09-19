@@ -4,50 +4,118 @@ import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 
 function Tela_Cadastro_Servico() {
-
     return (
-            <main className="content">
-                    <section className='titulo-secao'>
-                        <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Serviço</h1>
-                    </section>
-                    <div className="form-footer-voltar">
-                        <Link to="/produtos/cadastro" className="previous-step">
-                             Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
-                        </Link>
+        <main className="content">
+            {/* Título */}
+            <section className="titulo-secao">
+                <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Serviço</h1>
+            </section>
+
+            {/* Botão Voltar */}
+            <div className="form-footer voltar">
+                <Link to="/produtos/cadastro" className="previous-step">
+                    Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
+                </Link>
+            </div>
+
+            {/* Seção 1 - Informações Básicas */}
+            <section className="form-section">
+                <p className="frase-campo-asterisco">
+                    Os campos que contêm um asterisco (<span className="campo-obrigatório">*</span>) são de preenchimento obrigatório.
+                </p>
+                <div className="section-header">
+                    <span className="icon"><i className={icons.produtos}></i></span>
+                    <h3>Informações Básicas</h3>
+                </div>
+                <hr className="divider" />
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Nome do Serviço: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o nome do serviço" />
                     </div>
-                <section className="form-section">
-                    <div className="section-header">
-                        <span className="icon"><i className={icons.relatorioAdd}></i></span>
-                        <h3>Cadastrar novo Serviço</h3>
+                    <div className="form-group">
+                        <label>Categoria: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Ex.: Consultoria, Manutenção, Transporte, etc." />
                     </div>
-                    <hr />
-                    <div className="form-row">
-                        <input type="text" placeholder="Nome do Serviço" />
-                        <input type="text" placeholder="Categoria (ex.: Consultoria, Manutenção, Transporte, etc.)" />
-                        <input type="text" placeholder="Código interno (opcional)" />
+                    <div className="form-group">
+                        <label>Código Interno:</label>
+                        <input type="text" placeholder="Digite o código interno" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Descrição detalhada" />
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Descrição Detalhada: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite a descrição detalhada do serviço" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Preço" />
-                        <input type="text" placeholder="Unidade de medida (ex.: hora, mês, diária, projeto)" />
+                </div>
+            </section>
+
+            {/* Seção 2 - Precificação */}
+            <section className="form-section">
+                <div className="section-header">
+                    <span className="icon"><i className={icons.cash}></i></span>
+                    <h3>Precificação</h3>
+                </div>
+                <hr className="divider" />
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Preço: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o preço do serviço" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="CNAE (Classificação Nacional de Atividades Econômicas)" />
-                        <input type="text" placeholder="Código do Serviço na lista da Lei Complementar 116/2003" />
-                        <input type="text" placeholder="Item da Lista de Serviços" />
+                    <div className="form-group">
+                        <label>Unidade de Medida: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Ex.: hora, mês, diária, projeto" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Alíquota de ISS (Imposto Sobre Serviços)" />
-                        <input type="text" placeholder="CST PIS/COFINS" />
-                        <input type="text" placeholder="Regime Especial de Tributação (se aplicável) (opcional)" />
+                </div>
+            </section>
+
+            {/* Seção 3 - Tributação */}
+            <section className="form-section">
+                <div className="section-header">
+                    <span className="icon"><i className={icons.moeda}></i></span>
+                    <h3>Tributação</h3>
+                </div>
+                <hr className="divider" />
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>CNAE: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código CNAE" />
                     </div>
-                    <div className="botao_geral">
-                     <button className="btn">Cadastrar </button>
+                    <div className="form-group">
+                        <label>Código do Serviço (Lei 116/2003): <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código do serviço na lista da lei" />
                     </div>
-                </section>
-            </main>
+                    <div className="form-group">
+                        <label>Item da Lista de Serviços: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o item da lista de serviços" />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Alíquota de ISS: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite a alíquota do ISS" />
+                    </div>
+                    <div className="form-group">
+                        <label>CST PIS/COFINS: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código CST PIS/COFINS" />
+                    </div>
+                    <div className="form-group">
+                        <label>Regime Especial de Tributação:</label>
+                        <input type="text" placeholder="Informe caso aplicável" />
+                    </div>
+                </div>
+            </section>
+
+            {/* Botão Final */}
+            <div className="botao_geral">
+                <button className="btn">Cadastrar</button>
+            </div>
+        </main>
     );
 }
 

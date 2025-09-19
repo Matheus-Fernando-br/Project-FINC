@@ -39,16 +39,26 @@ function Tela_1_clientes() {
           <div className="form-row">
             <input type="text" placeholder="Pesquisar cliente..." />
           </div>
-          <div className="cards">
+         <div className="cards">
             {clientes.map((cliente, idx) => (
               <React.Fragment key={idx}>
                 <hr className="divider" />
-                <h4>{cliente.nome}</h4>
-                <p>{cliente.tipo}</p>
+                <div className="card-cliente">
+                  <div>
+                    <h4>{cliente.nome}</h4>
+                    <p>{cliente.tipo}</p>
+                  </div>
+                  <div className="editar-acao">
+                    <i className={icons.edit}></i>
+                    <p>Editar</p>
+                  </div>
+                </div>
               </React.Fragment>
             ))}
             <hr className="divider" />
           </div>
+
+
           <div className="form-footer">
             <Link to="#" >
               <a>Veja mais</a>

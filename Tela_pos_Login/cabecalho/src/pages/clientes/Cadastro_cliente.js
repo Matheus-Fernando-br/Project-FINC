@@ -8,48 +8,115 @@ function Cadastro_cliente() {
     return (
 
             <main className="content">
-                 <section className='titulo-secao'>
-                    <h1><i className={icons.clientesAdd}></i> Cadastro de um novo cliente</h1>
-                 </section>
+                <section className='titulo-secao'>
+                <h1><i className={icons.clientesAdd}></i> Cadastro de um novo cliente</h1>
+                </section>
                     <div className="form-footer voltar">
                         <Link to="/clientes" className="previous-step">
                              Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
                         </Link>
                     </div>
                 <section className="form-section">
+                    <p className="frase-campo-asterisco">
+                        Os campos que contêm um asterisco (<span className="campo-obrigatório">*</span>) são de preenchimento obrigatório.
+                    </p>
                     <div className="section-header">
                         <span className="icon"><i className={icons.relatorioAdd}></i></span>
-                        <h3>Cadastrar novo cliente</h3>
+                        <h3>Dados Pessoais</h3>
                     </div>
-                    <hr />
+                    <hr className='divider'/>
                     <div className="form-row">
-                        <input type="text" placeholder="Nome Social" />
-                        <input type="text" placeholder="CPF / CNPJ" />
-                        <input type="text" placeholder="CEP" />
+                        <div className='form-group'>
+                            <label>Nome Social <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Digite o nome completo do cliente" />
+                        </div>
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Logradouro" />
-                        <input type="text" placeholder="Número" />
-                        <input type="text" placeholder="Bairro" />
-                    </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Cidade" />
-                        <input type="text" placeholder="Estado" />
-                        <input type="text" placeholder="Referência (opcional)" />
-                    </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="E-mail" />
-                        <input type="text" placeholder="Telefone" />
-                        <input type="text" placeholder="Whatssap" />
-                    </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Apelido (opcional)" />
-                        <input type="text" placeholder="Tipo de serviço/Produto que oferece (opcional)" />
-                    </div>
-                    <div className="botao_geral">
-                     <button className="btn">Cadastrar </button>
+                    <div className='form-row'>
+                        <div className='form-group'>
+                            <label className="label-radio">Selecione o tipo: <span className='campo-obrigatório'>*</span></label>
+                            <div className="radio-group-row">
+                                <div className="radio-option">
+                                <input type="radio" id="fisica" name="tipo" value="fisica" />
+                                <label htmlFor="fisica">Pessoa Física</label>
+                                </div>
+                                <div className="radio-option">
+                                <input type="radio" id="juridica" name="tipo" value="juridica" />
+                                <label htmlFor="juridica">Pessoa Jurídica</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className='form-group'>
+                            <label>CPF / CNPJ: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Informe o CPF/CNPJ do cliente" />
+                        </div>
                     </div>
                 </section>
+                <section className='form-section'>
+                    <div className="section-header">
+                        <span className="icon"><i className={icons.mapa}></i></span>
+                        <h3>Endereço</h3>
+                    </div>
+                    <hr className='divider'/>
+
+                    <div className="form-row">
+                        <div className='form-group'>
+                            <label>CEP: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="00-000.000" />
+                        </div>
+                    </div>
+                    <div className="form-row">
+                        <div className='form-group'>
+                            <label>UF: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Selecione" />
+                        </div>
+                        <div className='form-group'>
+                            <label>Cidade: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Selecione" />
+                        </div>
+                        <div className='form-group'>
+                            <label>Bairro: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Digite o nome do bairro" />
+                        </div>
+                     </div>   
+                     <div className="form-row">
+                        <div className='form-group'>
+                            <label>Logradouro: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Digite o nome da rua" />
+                        </div>
+                        <div className='form-group'>
+                            <label>Número: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Informe o número referente ao endereço" />
+                        </div>
+                        <div className='form-group'>
+                            <label>Complemento:</label>
+                            <input type="text" placeholder="Informe o complemento referente ao endereço" />
+                        </div>
+                    </div>
+                </section>
+                <section className='section-form'>
+                    <div className="section-header">
+                        <span className="icon"><i className={icons.feedbackTel}></i></span>
+                        <h3>Contato</h3>
+                    </div>
+                    <hr className='divider'/>
+
+                    <div className="form-row">
+                        <div className='form-group'>
+                            <label>E-mail: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Informe o e-mail do cliente" />
+                        </div><div className='form-group'>
+                            <label>Telefone: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Informe o número de Telefone para ligações" />
+                        </div><div className='form-group'>
+                            <label>Whatssap:</label>
+                            <input type="text" placeholder="Informe o número de telefone de Whatssap" />
+                        </div>
+                    </div>
+            </section>
+                <div className="botao_geral">
+                    <button className="btn">Cadastrar </button>
+                </div>
             </main> 
     );
 }

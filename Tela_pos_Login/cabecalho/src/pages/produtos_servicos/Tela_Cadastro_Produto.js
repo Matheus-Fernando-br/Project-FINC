@@ -4,56 +4,129 @@ import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 
 function Tela_Cadastro_Produto() {
-
     return (
+        <main className="content">
+            {/* Título */}
+            <section className='titulo-secao'>
+                <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Produto</h1>
+            </section>
 
-            <main className="content">
-                    <section className='titulo-secao'>
-                        <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Produto</h1>
-                    </section>
-                    <div className="form-footer voltar">
-                        <Link to="/produtos/cadastro" className="previous-step">
-                             Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
-                        </Link>
+            {/* Botão Voltar */}
+            <div className="form-footer voltar">
+                <Link to="/produtos/cadastro" className="previous-step">
+                    Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
+                </Link>
+            </div>
+
+            {/* Seção 1 - Informações Básicas */}
+            <section className="form-section">
+                <p className="frase-campo-asterisco">
+                    Os campos que contêm um asterisco (<span className="campo-obrigatório">*</span>) são de preenchimento obrigatório.
+                </p>
+                <div className="section-header">
+                    <span className="icon"><i className={icons.produtos}></i></span>
+                    <h3>Informações Básicas</h3>
+                </div>
+                <hr className="divider" />
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Nome: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o nome do produto" />
                     </div>
-                <section className="form-section">
-                    <div className="section-header">
-                        <span className="icon"><i className={icons.relatorioAdd}></i></span>
-                        <h3>Cadastrar novo Produto</h3>
+                    <div className="form-group">
+                        <label>Categoria: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite a categoria" />
                     </div>
-                    <hr className="divider"/>
-                    <div className="form-row">
-                        <input type="text" placeholder="Nome" />
-                        <input type="text" placeholder="Categoria" />
-                        <input type="text" placeholder="Marca/Fabricante" />
+                    <div className="form-group">
+                        <label>Marca/Fabricante:</label>
+                        <input type="text" placeholder="Digite a marca ou fabricante" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Descrição" />
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Descrição:</label>
+                        <input type="text" placeholder="Digite a descrição do produto" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Código interno / SKU" />
-                        <input type="text" placeholder="Unidade de Medida" />
-                        <input type="text" placeholder="Preço Unitário" />
+                </div>
+            </section>
+
+            {/* Seção 2 - Identificação */}
+            <section className="form-section">
+                <div className="section-header">
+                    <span className="icon"><i className={icons.produtoIdentidade}></i></span>
+                    <h3>Identificação</h3>
+                </div>
+                <hr className="divider" />
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Código interno / SKU: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código ou SKU" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="NCM (Nomenclatura Comum do Mercosul)" />
-                        <input type="text" placeholder="CFOP(Código Fiscal de Operações e Prestações)" />
+                    <div className="form-group">
+                        <label>Unidade de Medida: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Ex: UN, KG, CX" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="CST/CSOSN ICMS" />
-                        <input type="text" placeholder="CST IPI (Opcional)" />
-                        <input type="text" placeholder="E-CST PIS/COFINS" />
+                    <div className="form-group">
+                        <label>Preço Unitário: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o valor unitário" />
                     </div>
-                    <div className="form-row">
-                        <input type="text" placeholder="Alíquotas de impostos (ICMS, IPI, PIS, COFINS)" />
-                        <input type="text" placeholder="Origem do produto (0 = Nacional, 1 = Estrangeira)" />
+                </div>
+            </section>
+
+            {/* Seção 3 - Tributação */}
+            <section className="form-section">
+                <div className="section-header">
+                    <span className="icon"><i className={icons.moeda}></i></span>
+                    <h3>Tributação</h3>
+                </div>
+                <hr className="divider" />
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>NCM: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código NCM" />
                     </div>
-    
-                    <div className="botao_geral">
-                     <button className="btn">Cadastrar </button>
+                    <div className="form-group">
+                        <label>CFOP: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código CFOP" />
                     </div>
-                </section>
-            </main>
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>CST/CSOSN ICMS: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código ICMS" />
+                    </div>
+                    <div className="form-group">
+                        <label>CST IPI:</label>
+                        <input type="text" placeholder="Digite o código IPI" />
+                    </div>
+                    <div className="form-group">
+                        <label>E-CST PIS/COFINS: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="Digite o código PIS/COFINS" />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Alíquotas de Impostos: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="ICMS, IPI, PIS, COFINS" />
+                    </div>
+                    <div className="form-group">
+                        <label>Origem do Produto: <span className="campo-obrigatório">*</span></label>
+                        <input type="text" placeholder="0 = Nacional, 1 = Estrangeira" />
+                    </div>
+                </div>
+            </section>
+
+            {/* Botão Final */}
+            <div className="botao_geral">
+                <button className="btn">Cadastrar</button>
+            </div>
+        </main>
     );
 }
 

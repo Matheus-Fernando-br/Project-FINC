@@ -334,9 +334,18 @@ body.dark-mode .form-footer a {
 
   /* Grupo de radios */
   .radio-group {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 2rem;
+  }
+
+  .radio-group-row {
+    display: flex;
+    flex-direction:row;
+    align-items: flex-start;
+    gap: 4rem;
+    align-items: center;
   }
 
   .radio-option {
@@ -345,6 +354,30 @@ body.dark-mode .form-footer a {
     gap: 0.4rem;
     margin-bottom: 0.1rem;
   }
+
+  .card-cliente {
+    display: flex;
+    justify-content: space-between; /* nome/tipo à esquerda e edição à direita */
+    align-items: center;
+    padding: 0.5rem 0;
+  }
+
+  .editar-acao {
+    display: flex;
+    flex-direction: column; /* ícone em cima, texto embaixo */
+    align-items: center;    /* centraliza o p abaixo do ícone */
+    font-size: 0.8rem;
+    color: var(--cor-primaria-escura); /* opcional */
+    cursor: pointer;
+  }
+
+  .editar-acao i {
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+  }
+
+
+
 
   /* ================= Prefixos e sufixos dos inputs do conteúdo ================= */
 
@@ -416,6 +449,8 @@ body.dark-mode .form-footer a {
 
 .radio-group .label-radio {
   margin-bottom: 0;
+   margin-right: 1rem; 
+  white-space: nowrap;
 }
 
 .radio-option label {
