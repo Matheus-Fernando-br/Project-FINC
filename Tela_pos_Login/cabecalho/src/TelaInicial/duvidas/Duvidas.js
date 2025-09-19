@@ -26,13 +26,26 @@ function Duvidas() {
 
           <div className="Duvidas-contato">
             <h3>Nos envie sua dúvida</h3>
-            <button className="Duvidas-btn">
-              <i className="bi bi-envelope-at"></i> contato@finc.com.br
-            </button>
-            <button className="Duvidas-btn">
-              <i className="bi bi-whatsapp"></i> Whatsapp
-            </button>
+
+            {/* Botão de Email */}
+            <a
+              href={`mailto:r2m.tec.adm@gmail.com?subject=Duvidas%20sobre%20a%20plataforma%20Finc&body=Prezada%20FINC,%0D%0A%0D%0AEstou%20com%20a%20seguinte%20d%C3%BAvida%20sobre%20a%20plataforma:%0D%0A%0D%0A`}
+              className="Duvidas-btn"
+            >
+              <i className="bi bi-envelope-at"></i>r2m.tec.adm@gmail.com
+            </a>
+
+            {/* Botão de WhatsApp */}
+            <a
+              href={`https://wa.me/553185684262?text=Prezada%20FINC,%0D%0A%0D%0AEstou%20com%20a%20seguinte%20d%C3%BAvida%20sobre%20a%20plataforma:%0D%0A%0D%0A`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="Duvidas-btn"
+            >
+              <i className="bi bi-whatsapp"></i>Whatsapp
+            </a>
           </div>
+
         </div>
 
         {/* Lado Direito */}

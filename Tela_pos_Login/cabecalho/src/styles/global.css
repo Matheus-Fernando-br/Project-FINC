@@ -43,6 +43,24 @@ body.dark-mode .content {
   color: #f1f1f1;
 }
 
+/* Divider no dark mode */
+body.dark-mode .divider {
+  background: #444 !important;
+}
+
+/* Labels no dark mode */
+body.dark-mode .form-group label,
+body.dark-mode .radio-group .label-radio {
+  color: #f1f1f1 !important;
+}
+
+/* Prefixo e sufixo no dark mode */
+body.dark-mode .prefix,
+body.dark-mode .suffix {
+  color: #f1f1f1 !important;
+}
+
+
 
 /* ================= RESET ================= */
 * {
@@ -208,9 +226,9 @@ body {
 /* ================= LAYOUT ================= */
 .layout {
   display: flex;
+  justify-content: center;
   margin-top: 18vh; /* altura do header */
-  margin-left: 15vw;
-  margin-right: 20vw;
+  padding: 0 2vw;
 }
 
 /* ================= Conteúdo da Tela ================= */

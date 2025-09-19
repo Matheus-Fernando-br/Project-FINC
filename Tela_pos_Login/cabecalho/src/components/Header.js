@@ -9,7 +9,7 @@ const [fontSize, setFontSize] = useState(100);
   function zoomIn() {
     setFontSize(prev => {
       const newSize = prev + 10;
-      document.body.style.fontSize = newSize + "%";
+      document.documentElement.style.fontSize = newSize + "%";
       return newSize;
     });
   }
@@ -17,10 +17,11 @@ const [fontSize, setFontSize] = useState(100);
   function zoomOut() {
     setFontSize(prev => {
       const newSize = prev > 50 ? prev - 10 : prev;
-      document.body.style.fontSize = newSize + "%";
+      document.documentElement.style.fontSize = newSize + "%";
       return newSize;
     });
-  }  
+  }
+
 
 // Função para alternar o dark mode
   function toggleDarkMode() {

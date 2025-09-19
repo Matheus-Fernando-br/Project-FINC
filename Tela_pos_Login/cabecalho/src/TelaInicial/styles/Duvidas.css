@@ -15,7 +15,7 @@
 .Duvidas-conteudo {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5vw;
+  gap: 10vw;
   flex: 1; /* ocupa espaço e empurra rodapé */
 }
 
@@ -66,6 +66,10 @@
 
 .Duvidas-btn:hover {
   background: var(--cor-card-hover, #202020);
+}
+
+.Duvidas-contato a {
+  text-decoration: none;
 }
 
 /* ==============================
@@ -141,10 +145,10 @@
 /* ==============================
    Responsividade
 ================================= */
-@media (max-width: 992px) {
+@media (max-width: 900px) {
   .Duvidas-conteudo {
     grid-template-columns: 1fr;
-    gap: 3vh;
+    gap: 8vh;
   }
 
   .Duvidas-lado-esquerdo {

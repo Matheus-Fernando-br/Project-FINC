@@ -3,8 +3,6 @@ export default function initScripts() {
   window.setTimeout(() => {
 
   // ================== ELEMENTOS ==================
-  const zoomInBtn = document.querySelector(".bi-zoom-in");
-  const zoomOutBtn = document.querySelector(".bi-zoom-out");
   const darkModeBtn = document.querySelector(".bi-moon");
 
   const hamburger = document.querySelector(".hamburger");
@@ -36,8 +34,6 @@ export default function initScripts() {
   }
 
   // ================== EVENTOS ==================
-  if (zoomInBtn) zoomInBtn.addEventListener("click", zoomIn);
-  if (zoomOutBtn) zoomOutBtn.addEventListener("click", zoomOut);
   if (darkModeBtn) darkModeBtn.addEventListener("click", toggleDarkMode);
 
   if (hamburger && closeMenu && sidebar) {
