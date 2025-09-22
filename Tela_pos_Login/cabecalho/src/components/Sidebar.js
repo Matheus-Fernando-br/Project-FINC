@@ -26,6 +26,12 @@ function Sidebar() {
       <aside className={`sidebar${active ? " active" : " collapsed"}`}>
         <ul className="menu">
           <li>
+            <Link to="/app">
+              <i className={icons.casa}></i>
+              <span className="label">Home</span>
+            </Link>
+          </li>
+          <li>
             <Link to="/emitir-nota/Dados">
               <i className={icons.emitirNota}></i>
               <span className="label">Emitir nota</span>

@@ -40,28 +40,32 @@ function Cadastro_produtos() {
           </div>
           <hr />
 
-          <div className="escolha">
-            <label>Escolha um tipo:</label><br />
+          <div className="escolha form group radio-group">
+            <label className='label-radio'>Escolha um tipo:</label><br />
 
-            <input
-              type="radio"
-              id="produto"
-              name="tipo"
-              value="produto"
-              checked={tipo === "produto"}
-              onChange={(e) => setTipo(e.target.value)}
-            />
-            <label htmlFor="produto">Produto</label><br />
+            <div className="radio-option">
+              <input
+                type="radio"
+                id="produto"
+                name="tipo"
+                value="produto"
+                checked={tipo === "produto"}
+                onChange={(e) => setTipo(e.target.value)}
+              />
+              <label htmlFor="produto">Produto (NF-e/ NFC-e)</label>
+            </div>
 
-            <input
-              type="radio"
-              id="servico"
-              name="tipo"
-              value="servico"
-              checked={tipo === "servico"}
-              onChange={(e) => setTipo(e.target.value)}
-            />
-            <label htmlFor="servico">Serviço</label><br /><br />
+            <div className="radio-option">
+              <input
+                type="radio"
+                id="servico"
+                name="tipo"
+                value="servico"
+                checked={tipo === "servico"}
+                onChange={(e) => setTipo(e.target.value)}
+              />
+              <label htmlFor="servico">Serviço (NFS-e)</label>
+            </div>
           </div>
 
           <div className="botao_geral">

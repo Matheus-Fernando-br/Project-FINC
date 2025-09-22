@@ -33,17 +33,12 @@ function Cadastro_cliente() {
                     </div>
                     <div className='form-row'>
                         <div className='form-group'>
-                            <label className="label-radio">Selecione o tipo: <span className='campo-obrigatório'>*</span></label>
-                            <div className="radio-group-row">
-                                <div className="radio-option">
-                                <input type="radio" id="fisica" name="tipo" value="fisica" />
-                                <label htmlFor="fisica">Pessoa Física</label>
-                                </div>
-                                <div className="radio-option">
-                                <input type="radio" id="juridica" name="tipo" value="juridica" />
-                                <label htmlFor="juridica">Pessoa Jurídica</label>
-                                </div>
-                            </div>
+                            <label className="label-radio">Selecione o tipo de Pessoa: <span className='campo-obrigatório'>*</span></label>
+                            <select defaultValue="">
+                            <option value="" disabled>Selecione o Tipo</option>
+                            <option value="PFisica" >Pessoa Física</option>
+                            <option value="PJuridica" >Pessoa Jurídica</option>
+                            </select>
                         </div>
 
                         <div className='form-group'>

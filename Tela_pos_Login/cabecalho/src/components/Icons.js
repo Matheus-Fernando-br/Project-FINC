@@ -1,4 +1,5 @@
 const icons = {
+  casa: "bi bi-house",
   emitirNota: "bi bi-file-earmark-plus",
   clientePerson: "bi bi-person-circle",
   clientes: "bi bi-people",

@@ -30,10 +30,19 @@ function Tela_Cadastro_Servico() {
                 <hr className="divider" />
 
                 <div className="form-row">
-                    <div className="form-group">
+                    <div className='form-group'>
                         <label>Nome do Serviço: <span className="campo-obrigatório">*</span></label>
                         <input type="text" placeholder="Digite o nome do serviço" />
                     </div>
+                </div>
+                <div className='form-row'>
+                    <div className="form-group">
+                        <label>Tipo de nota:</label>
+                        <select defaultValue="nfs">
+                            <option value="nfs">NFS-e (Serviço)</option>
+                        </select>
+                    </div>
+
                     <div className="form-group">
                         <label>Categoria: <span className="campo-obrigatório">*</span></label>
                         <input type="text" placeholder="Ex.: Consultoria, Manutenção, Transporte, etc." />

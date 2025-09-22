@@ -35,12 +35,26 @@ function Tela_Cadastro_Produto() {
                         <input type="text" placeholder="Digite o nome do produto" />
                     </div>
                     <div className="form-group">
+                        <label>Marca/Fabricante:</label>
+                        <input type="text" placeholder="Digite a marca ou fabricante" />
+                    </div>
+                </div>
+
+                <div className='form-row'>
+                    <div className="form-group">
                         <label>Categoria: <span className="campo-obrigatório">*</span></label>
                         <input type="text" placeholder="Digite a categoria" />
                     </div>
                     <div className="form-group">
-                        <label>Marca/Fabricante:</label>
-                        <input type="text" placeholder="Digite a marca ou fabricante" />
+                        <label>
+                            Que tipo de nota deseja para esse produto?:
+                            <span className="campo-obrigatório"> *</span>
+                        </label>
+                        <select defaultValue="">
+                            <option value="" disabled>Selecione o Tipo</option>
+                            <option value="nfe">NF-e (Produto)</option>
+                            <option value="nfce">NFC-e (Consumidor)</option>
+                        </select>
                     </div>
                 </div>
 

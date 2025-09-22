@@ -1,10 +1,12 @@
 import Layout from '../../components/Layout';
+import PlanoBasico from '../../components/planos/planoBasico';
+import PlanoPremium from '../../components/planos/planoPremium';
+import PlanoBlack from '../../components/planos/planoBlack';
 import icons from "../../components/Icons";
 import { useState } from 'react';
 import './plano.css'
 
 function Tela_1_planos() {
-  // Estado para controlar qual plano está ativo
   const [ativo, setAtivo] = useState(null);
 
   const togglePlano = (plano) => {
@@ -12,83 +14,41 @@ function Tela_1_planos() {
   };
 
   return (
-      <main className="content">
-          <section className='titulo-secao'>
-            <h1><i className={icons.planos}></i> Planos</h1>
-          </section>        
-          <section className="form-section">
-          <div className="section-header">
-            <span className="icon"><i className={icons.relatorioOk}></i></span>
-            <h3>Meu plano atual</h3>
-          </div>
-          <hr className="divider" />
+    <main className="content">
+      <section className='titulo-secao'>
+        <h1><i className={icons.planos}></i> Planos</h1>
+      </section>        
 
-          <div
-            className={`plano ${ativo === 'basico' ? 'ativo' : ''}`}
-            onClick={() => togglePlano('basico')}
-          >
-            <div className="plano-header">
-              <h3>BÁSICO</h3>
-              <span className="preco">R$ 19,90</span>
-            </div>
-            <div className="icon-veja">
-            </div>
-            <p>até 80 notas/boletos mensais</p>
-            <div className="detalhes">
-              <p>• Emissão MANUAL agilizada de notas e boletos</p>
-              <p>• Auxílio da IA para preenchimento</p>
-              <p>• Cobrança extra de R$1,50 por nota adicional</p>
-              <p>• 300MB de armazenamento</p>
-            </div>
-          </div>
-        </section>
+      <section className="form-section">
+        <div className="section-header">
+          <span className="icon"><i className={icons.relatorioOk}></i></span>
+          <h3>Meu plano atual</h3>
+        </div>
+        <hr className="divider" />
 
-        <section className="form-section">
-          <div className="section-header">
-            <span className="icon"><i className={icons.relatorio}></i></span>
-            <h3>Planos Disponíveis</h3>
-          </div>
-          <hr className="divider" />
+        <PlanoBasico 
+          ativo={ativo === "basico"} 
+          onClick={() => togglePlano("basico")} 
+        />
+      </section>
 
-          <div
-            className={`plano ${ativo === 'premium' ? 'ativo' : ''}`}
-            onClick={() => togglePlano('premium')}
-          >
-            <div className="plano-header">
-              <h3>PREMIUM</h3>
-              <span className="preco">R$ 45,50</span>
-            </div>
-            <div className="icon-veja">
-            </div>
-            <p>até 1.500 notas/boletos mensais</p>
-            <div className="detalhes">
-              <p>• Tudo do Básico +</p>
-              <p>• Maior limite de emissão</p>
-              <p>• Mais espaço de armazenamento</p>
-            </div>
-          </div>
-        </section>
+      <section className="form-section">
+        <div className="section-header">
+          <span className="icon"><i className={icons.relatorio}></i></span>
+          <h3>Planos Disponíveis</h3>
+        </div>
+        <hr className="divider" />
 
-        <section className="form-section">
-          <div
-            className={`plano ${ativo === 'black' ? 'ativo' : ''}`}
-            onClick={() => togglePlano('black')}
-          >
-            <div className="plano-header">
-              <h3>BLACK</h3>
-              <span className="preco">R$ 185,60</span>
-            </div>
-            <div className="icon-veja">
-            </div>
-            <p>emissões ilimitadas</p>
-            <div className="detalhes">
-              <p>• Tudo do Premium +</p>
-              <p>• Emissões ilimitadas</p>
-              <p>• Armazenamento ampliado</p>
-            </div>
-          </div>
-        </section>
-      </main>
+        <PlanoPremium 
+          ativo={ativo === "premium"} 
+          onClick={() => togglePlano("premium")} 
+        />
+        <PlanoBlack 
+          ativo={ativo === "black"} 
+          onClick={() => togglePlano("black")} 
+        />
+      </section>
+    </main>
   );
 }
 
