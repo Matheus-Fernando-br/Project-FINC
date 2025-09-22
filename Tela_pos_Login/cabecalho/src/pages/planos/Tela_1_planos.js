@@ -4,7 +4,6 @@ import PlanoPremium from '../../components/planos/planoPremium';
 import PlanoBlack from '../../components/planos/planoBlack';
 import icons from "../../components/Icons";
 import { useState } from 'react';
-import './plano.css'
 
 function Tela_1_planos() {
   const [ativo, setAtivo] = useState(null);

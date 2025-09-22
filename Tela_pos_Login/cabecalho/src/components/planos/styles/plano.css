@@ -1,0 +1,98 @@
+/* Geral dos planos */
+.plano {
+    width: 65.5vw;
+    background: var(--cor-fundo-escuro);
+    color: #fff;
+    padding: 4vh 2vw;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 2vh;
+}
+
+.plano:hover {
+    background: var(--cor-texto-escuro);
+}
+
+/* Cabeçalho do plano (usando grid) */
+.plano-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* 3 colunas: título | preço | veja mais */
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Título */
+.plano h3 {
+    font-size: 2rem;
+    margin: 0;
+    justify-self: start; /* fixa à esquerda */
+    flex-shrink: 0;
+}
+
+/* Container central (preço + descrição) */
+.preco-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    text-align: center;
+    justify-self: center; /* sempre centralizado */
+}
+
+/* Preço */
+.preco {
+    color: var(--cor-primaria);
+    font-size: 1.7rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* Linha vertical */
+.linha-vertical {
+    width: 2px;
+    height: 2.2rem;
+    background-color: var(--cor-texto-claro);
+}
+
+/* Descrição */
+.descricao {
+    font-size: 1rem;
+    color: #fff;
+    white-space: nowrap; /* impede quebra feia */
+}
+
+/* "Veja mais" (lado direito) */
+.veja-mais {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #ccc;
+    justify-self: end; /* fixa à direita */
+}
+
+.veja-mais i {
+    font-size: 1.5rem;
+    margin-top: 0.2rem;
+    color: var(--cor-primaria);
+}
+
+/* Detalhes */
+.detalhes {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 1vh;
+    padding-left: 1vw;
+}
+
+.plano.ativo .detalhes {
+    max-height: 20vh;
+    opacity: 1;
+    display: block;
+}
