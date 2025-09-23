@@ -37,7 +37,7 @@ function Tela_1_produtos() {
           </div>
           <hr className="divider" />
           <div className="form-row">
-            <input type="text" placeholder="Pesquisar cliente..." />
+            <input type="text" placeholder="Pesquisar produto/serviço..." />
           </div>
           <div className="cards">
             {servicos.map((servicos, idx) => (

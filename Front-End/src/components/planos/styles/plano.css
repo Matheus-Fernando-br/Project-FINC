@@ -1,6 +1,6 @@
 /* Geral dos planos */
 .plano {
-    width: 65.5vw;
+    width: 100%;
     background: var(--cor-fundo-escuro);
     color: #fff;
     padding: 4vh 2vw;
@@ -95,4 +95,48 @@
     max-height: 20vh;
     opacity: 1;
     display: block;
+}
+
+@media (max-width: 1150px) {
+  .plano-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* continua 3 colunas */
+    grid-template-areas:
+      "titulo preco veja"
+      "descricao descricao descricao"; /* descrição ocupa a segunda linha */
+    row-gap: 0.5rem;
+  }
+
+  .plano h3 {
+    font-size: 1rem;
+    grid-area: titulo;
+  }
+
+  .preco-container {
+    grid-area: preco;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0;
+  }
+
+  .preco {
+    font-size: 1rem;
+  }
+
+  .linha-vertical {
+    height: 1rem;
+  }
+
+  .descricao {
+    grid-area: descricao;
+    font-size: 0.9rem;
+    white-space: normal; /* permite quebrar em linhas */
+    text-align: center;
+  }
+
+  .veja-mais {
+    grid-area: veja;
+    font-size: 0.8rem;
+  }
 }

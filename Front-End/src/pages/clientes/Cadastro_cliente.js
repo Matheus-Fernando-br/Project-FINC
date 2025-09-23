@@ -59,8 +59,6 @@ function Cadastro_cliente() {
                             <label>CEP: <span className='campo-obrigatório'>*</span></label>
                             <input type="text" placeholder="00-000.000" />
                         </div>
-                    </div>
-                    <div className="form-row">
                         <div className='form-group'>
                             <label>UF: <span className='campo-obrigatório'>*</span></label>
                             <input type="text" placeholder="Selecione" />
@@ -69,15 +67,17 @@ function Cadastro_cliente() {
                             <label>Cidade: <span className='campo-obrigatório'>*</span></label>
                             <input type="text" placeholder="Selecione" />
                         </div>
-                        <div className='form-group'>
-                            <label>Bairro: <span className='campo-obrigatório'>*</span></label>
-                            <input type="text" placeholder="Digite o nome do bairro" />
-                        </div>
-                     </div>   
-                     <div className="form-row">
+                    </div>
+                    <div className="form-row">
                         <div className='form-group'>
                             <label>Logradouro: <span className='campo-obrigatório'>*</span></label>
                             <input type="text" placeholder="Digite o nome da rua" />
+                        </div>
+                    </div>   
+                     <div className="form-row">
+                        <div className='form-group'>
+                            <label>Bairro: <span className='campo-obrigatório'>*</span></label>
+                            <input type="text" placeholder="Digite o nome do bairro" />
                         </div>
                         <div className='form-group'>
                             <label>Número: <span className='campo-obrigatório'>*</span></label>

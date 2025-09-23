@@ -1,0 +1,115 @@
+:root {
+  --anim-dur: 360ms; /* mantenha igual ao ANIM_MS no componente */
+}
+
+/* -------------------------
+   ANIMAÇÃO: Produto/Serviço (entrada/saída)
+   ------------------------- */
+.produto-servico-bloco {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition:
+    max-height var(--anim-dur) ease,
+    opacity var(--anim-dur) ease,
+    transform var(--anim-dur) ease;
+  margin: 0; /* quando fechado não ocupa espaço extra */
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* quando aberto mostra o conteúdo */
+.produto-servico-bloco.open {
+  max-height: 1200px; /* valor grande suficiente p/ o conteúdo */
+  opacity: 1;
+  transform: translateY(0);
+  margin: 1rem 0; /* mantém espaçamento como antes */
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+}
+
+
+/* -------------------------
+   Botões adicionar / remover
+   ------------------------- */
+.btn-adicionar {
+  padding: 0.6rem 1rem;
+  background: var(--cor-primaria);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-remover {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--cor-pending);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-remover:hover {
+    background: var(--cor-pending);
+    transform: scale(0.98);
+}
+
+
+
+/* -------------------------
+   TRANSPORT SECTION (substitui "frete-fields")
+   - transport-section: wrapper que define se a seção está visível (temNFCe)
+   - transport-inner: o conteúdo da seção (header + campos)
+   - transport-panel: os campos do frete (abrem quando incluirFrete === 'sim')
+   ------------------------- */
+.transport-section {
+  overflow: hidden;
+  /* a transição é aplicada na inner para manter a estrutura do HTML */
+}
+
+.transport-inner {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height var(--anim-dur) ease, opacity var(--anim-dur) ease;
+}
+
+/* quando temNFCe adiciona classe open -> expande a seção transporte */
+.transport-section.open .transport-inner {
+  max-height: 1000px; /* bastante espaço para header + campos */
+  opacity: 1;
+}
+
+/* transport-panel: os campos de frete que abrem ao marcar "Sim" */
+.transport-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height var(--anim-dur) ease, opacity var(--anim-dur) ease, transform var(--anim-dur) ease;
+  transform: translateY(-6px);
+}
+
+/* quando incluirFrete === 'sim' */
+.transport-panel.open {
+  max-height: 800px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* evitar que inputs saltem visualmente ao expandir */
+.transport-panel .form-row {
+  margin-top: 0.4rem;
+}
+
+
+/* ajuste para garantir que quando a seção estiver fechada ela não capture eventos */
+.transport-inner[aria-hidden="true"],
+.produto-servico-bloco[aria-hidden="true"] {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Se necessário adapte alturas máximas (max-height) para seu conteúdo real */
