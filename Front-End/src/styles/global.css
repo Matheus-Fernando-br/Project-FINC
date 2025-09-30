@@ -430,6 +430,7 @@ body.dark-mode .form-footer a {
   left: 10px;
   bottom: 12px;
   color: var(--cor-texto-escuro);
+  font-weight: bold;
   font-size: 0.9rem;
 }
 
@@ -451,7 +452,7 @@ body.dark-mode .form-footer a {
 
   .form-row input {
     flex: 1;
-    padding: 0.7rem 3rem;
+    padding: 0.7rem 2rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 0.9rem;
