@@ -31,7 +31,7 @@ function Login() {
     <main>
       <section className="Login">
         <div className="Fundo">
-          <img src="/Images/Fundo-Login-teste.jpg" alt="Fundo" />
+          <img src="/Images/Fundo-Login-teste.png" alt="Fundo" />
         </div>
 
         <div className="rodape form-footer voltar">
@@ -75,6 +75,7 @@ function Login() {
               <a href="#">Esqueceu a senha?</a>
             </div>
 
+            <div className="Interação">
             <button type="submit" className="btn">
               Entrar
             </button>
@@ -88,6 +89,7 @@ function Login() {
                 Criar Conta
               </button>
             </Link>
+            </div>
           </form>
         </div>
       </section>

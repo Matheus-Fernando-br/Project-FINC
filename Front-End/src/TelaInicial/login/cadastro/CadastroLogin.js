@@ -6,7 +6,7 @@ function CadastroLogin() {
   return (
     <section className="CadastroLogin">
       <div className="Fundo">
-        <img src="/Images/Fundo-Login-teste.jpg" alt="Fundo" />
+        <img src="/Images/Fundo-Login-teste.png" alt="Fundo" />
       </div>
 
       {/* Botão Voltar */}

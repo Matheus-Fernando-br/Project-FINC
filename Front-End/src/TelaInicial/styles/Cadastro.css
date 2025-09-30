@@ -53,14 +53,12 @@
    FORM WRAPPER
 ================================= */
 .CadastroLogin .wrapper {
-  background: transparent;
-  border: 2px solid var(--cor-texto-claro);
+  background: var(--cor-texto-claro);
+  border: 2px solid var(--cor-texto-escuro);
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 30px var(--bg-blur);
-  color: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
   padding: 2rem;
   margin-top: 15vh;
-  border-radius: 8px;
   width: 100%;
   max-width: 40vw;
 }
@@ -90,21 +88,20 @@
 .CadastroLogin .input-box input {
   width: 100%;
   height: 100%;
-  color: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
   background: transparent;
-  border: 1px solid #ccc;
+  border: 1px solid var(--cor-texto-escuro);
   outline: none;
   padding: 0.75rem 3rem 0.75rem 1rem;
-  border-radius: 40px;
 }
 
 .CadastroLogin .input-box input::placeholder {
-  color: var(--cor-cinza);
+  color: var(--cor-preta-apagada);
 }
 
 .CadastroLogin .input-box i {
   position: absolute;
-  color: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
