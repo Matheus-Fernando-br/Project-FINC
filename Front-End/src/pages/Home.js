@@ -91,7 +91,7 @@ function Home() {
             <h3>Clientes que mais compram</h3>
           </div>
           <hr className="divider" />
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={180}>
             <BarChart data={clientes}>
               <XAxis dataKey="nome" />
               <YAxis />
@@ -108,7 +108,7 @@ function Home() {
             <h3>Produtos mais vendidos</h3>
           </div>
           <hr className="divider" />
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={180}>
             <BarChart data={produtos}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="nome" />
@@ -126,7 +126,7 @@ function Home() {
             <h3>Evolução de Notas Emitidas</h3>
           </div>
           <hr className="divider" />
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={180}>
             <LineChart data={notasEmitidas}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="ano" />
@@ -144,13 +144,13 @@ function Home() {
             <h3>Distribuição de Vendas por Produto</h3>
           </div>
           <hr className="divider" />
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie
                 data={distribuicaoProdutos}
                 cx="50%"
                 cy="50%"
-                outerRadius={90}
+                outerRadius={70}   // menor que os 90 originais
                 dataKey="value"
                 label
               >
