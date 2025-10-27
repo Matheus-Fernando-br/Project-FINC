@@ -76,6 +76,7 @@
    Lado Direito (FAQ)
 ================================= */
 .Duvidas-lado-direito {
+  margin-top: 8vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

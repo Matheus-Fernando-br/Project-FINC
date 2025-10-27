@@ -34,8 +34,7 @@ function Home() {
   const distribuicaoProdutos = [
     { name: "Produto X", value: 200 },
     { name: "Produto Y", value: 150 },
-    { name: "Produto Z", value: 80 },
-    { name: "Produto W", value: 40 }
+    { name: "Produto Z", value: 80 }
   ];
 
   const COLORS = ["#2ecc71", "#27ae60", "#0d6630", "#063e20"];

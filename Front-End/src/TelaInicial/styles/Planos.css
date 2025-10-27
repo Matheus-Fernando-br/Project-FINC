@@ -144,6 +144,7 @@
   .tela-planos .planos {
     gap: 3vh;
     align-items: center;
+    max-width: 100vw;
   }
 
   .tela-planos .plano {
