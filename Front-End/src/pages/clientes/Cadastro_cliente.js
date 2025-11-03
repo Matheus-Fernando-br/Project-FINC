@@ -2,8 +2,13 @@ import Layout from "../../components/Layout";
 import icons from "../../components/Icons";
 import { Link } from "react-router-dom";
 import React, { useState } from "react";
+import './cliente.css'
+
 
 function Cadastro_cliente() {
+
+  const [tipoPessoa, setTipoPessoa] = useState("");
+
   return (
     <main className="content">
       <section className="titulo-secao">
@@ -47,7 +52,9 @@ function Cadastro_cliente() {
               Selecione o tipo de Pessoa:{" "}
               <span className="campo-obrigatório">*</span>
             </label>
-            <select defaultValue="">
+            <select value={tipoPessoa}
+              onChange={(e) => setTipoPessoa(e.target.value)}
+            >
               <option value="" disabled>
                 Selecione o Tipo
               </option>
@@ -56,13 +63,36 @@ function Cadastro_cliente() {
             </select>
           </div>
 
-          <div className="form-group">
-            <label>
-              CPF / CNPJ: <span className="campo-obrigatório">*</span>
-            </label>
-            <input type="text" placeholder="Informe o CPF/CNPJ do cliente" />
-          </div>
+          {/* campo condicional */}
+          {/* CPF */}
+          {tipoPessoa === "PFisica" && (
+            <div className="form-group fade-in">
+              <label>
+                CPF: <span className="campo-obrigatório">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Informe o CPF do cliente"
+                maxLength="14"
+              />
+            </div>
+          )}
+
+          {/* CNPJ */}
+          {tipoPessoa === "PJuridica" && (
+            <div className="form-group fade-in">
+              <label>
+                CNPJ: <span className="campo-obrigatório">*</span>
+              </label>
+               <input
+                  type="text"
+                  placeholder="Informe o CNPJ do cliente"
+                  maxLength="18"
+                />
+            </div>
+          )}
         </div>
+
       </section>
       <section className="form-section">
         <div className="section-header">
