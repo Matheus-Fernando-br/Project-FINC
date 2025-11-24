@@ -12,7 +12,7 @@ function MeusDados() {
             </section>            
             <div className="perfil">
                 <i class="bi bi-person-circle"></i> {/*foto da pessoa aqui*/}
-                <h2>Gabriel Moreninho Tupinambá</h2>
+                <h2>Gabriel Moreira Carvalho</h2>
             </div>
 
              <section className="form-section">

@@ -31,7 +31,7 @@ const [fontSize, setFontSize] = useState(100);
   return (
     <header className="header">
       <div className="msg">
-        <h2>Olá, MEPHINS Engenharia!</h2>
+        <h2>Olá, Gabriel</h2>
         <p>Estamos felizes em te ver novamente.</p>
       </div>
 
@@ -44,7 +44,7 @@ const [fontSize, setFontSize] = useState(100);
       {/* Informações do Usuário */}
       <div className="header-right">
           <Link to="/MeusDados">
-           <span className="user-name">Paulo Alcântara Engenharia</span>
+           <span className="user-name">Gabriel Moreira Carvalho</span>
           </Link>
         <div className="profile">
           <Link to="/MeusDados">
