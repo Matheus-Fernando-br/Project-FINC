@@ -23,7 +23,7 @@ const icons = {
   menuFechado: "bi bi-list",
   mapa: "bi bi-geo-alt-fill",
   edit: "bi bi-pencil-square",
-  contador: "bi bi-currency-exchange"
+  contador: "bi-calculator"
 };
 
 export default icons;
