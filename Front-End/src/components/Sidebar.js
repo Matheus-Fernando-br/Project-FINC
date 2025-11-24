@@ -1,92 +1,120 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import icons from "./Icons";
 
 function Sidebar() {
   const [active, setActive] = useState(false);
+  const location = useLocation();
+  const sidebarRef = useRef(null);
 
-  const toggleMenu = () => {
-    setActive(!active);
-  };
+  const toggleMenu = () => setActive(!active);
+  const closeMenu = () => setActive(false);
+
+  useEffect(() => {
+    function clickOutside(e) {
+      if (active && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        closeMenu();
+      }
+    }
+    document.addEventListener("mousedown", clickOutside);
+    return () => document.removeEventListener("mousedown", clickOutside);
+  }, [active]);
+
+  // bloqueia scroll
+  useEffect(() => {
+    document.body.style.overflow = active ? "hidden" : "auto";
+  }, [active]);
 
   return (
     <>
       {/* Botão hamburguer */}
-      <div className="sidebar-hamburguer">
-        <div
-          className="hamburger"
-          onClick={toggleMenu}
-          aria-label={active ? "Fechar menu" : "Abrir menu"}
-        >
-          <i className={active ? icons.menuAberto : icons.menuFechado}></i>
+      <div className="sidebar-hamburguer" onClick={toggleMenu}>
+        <div className={`hamburger-icon ${active ? "open" : ""}`}>
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
       </div>
 
-      {/* Sidebar */}
-      <aside className={`sidebar${active ? " active" : " collapsed"}`}>
+      {/* Overlay */}
+      {active && <div className="sidebar-overlay"></div>}
+
+      <aside ref={sidebarRef} className={`sidebar ${active ? "active" : ""}`}>
         <ul className="menu">
-          <li>
-            <Link to="/app">
+
+          <li className={location.pathname.includes("/app") ? "ativo" : ""}>
+            <Link to="/app" onClick={closeMenu}>
               <i className={icons.casa}></i>
               <span className="label">Home</span>
             </Link>
           </li>
-          <li>
-            <Link to="/emitir-nota/Dados">
+
+          <li className={location.pathname.includes("/emitir-nota") ? "ativo" : ""}>
+            <Link to="/emitir-nota/Dados" onClick={closeMenu}>
               <i className={icons.emitirNota}></i>
               <span className="label">Emitir nota</span>
             </Link>
           </li>
-          <li>
-            <Link to="/clientes">
+
+          <li className={location.pathname.includes("/clientes") ? "ativo" : ""}>
+            <Link to="/clientes" onClick={closeMenu}>
               <i className={icons.clientes}></i>
               <span className="label">Meus clientes</span>
             </Link>
           </li>
-          <li>
-            <Link to="/produtos">
+
+          <li className={location.pathname.includes("/produtos") ? "ativo" : ""}>
+            <Link to="/produtos" onClick={closeMenu}>
               <i className={icons.produtos}></i>
               <span className="label">Produtos e serviços</span>
             </Link>
           </li>
+
           <hr className="divider" />
-          <li>
-            <Link to="/planos">
+
+          <li className={location.pathname.includes("/planos") ? "ativo" : ""}>
+            <Link to="/planos" onClick={closeMenu}>
               <i className={icons.planos}></i>
               <span className="label">Planos</span>
             </Link>
           </li>
-          <li>
-            <Link to="/pagamento">
+
+          <li className={location.pathname.includes("/pagamento") ? "ativo" : ""}>
+            <Link to="/pagamento" onClick={closeMenu}>
               <i className={icons.pagamento}></i>
               <span className="label">Pagamento</span>
             </Link>
           </li>
+
           <hr className="divider" />
-          <li>
-            <Link to="/notificacao">
+
+          <li className={location.pathname.includes("/notificacao") ? "ativo" : ""}>
+            <Link to="/notificacao" onClick={closeMenu}>
               <i className={icons.notificacoes}></i>
               <span className="label">Notificações</span>
             </Link>
           </li>
-          <li>
-            <Link to="/contador">
+
+          <li className={location.pathname.includes("/contador") ? "ativo" : ""}>
+            <Link to="/contador" onClick={closeMenu}>
               <i className={icons.contador}></i>
               <span className="label">Contador</span>
             </Link>
           </li>
+
           <hr className="divider" />
-          <li>
-            <Link to="/sair">
+
+          <li className={location.pathname === "/sair" ? "ativo" : ""}>
+            <Link to="/sair" onClick={closeMenu}>
               <i className={icons.sair}></i>
               <span className="label">Sair</span>
             </Link>
           </li>
+
         </ul>
 
-        {/* Logo sempre embaixo */}
         <div className="logo-baixo">
-          <Link to="/app">
+          <Link to="/app" onClick={closeMenu}>
             <img src="/Images/FINC.png" alt="Logo FINC" />
           </Link>
         </div>
