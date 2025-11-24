@@ -15,6 +15,21 @@
   color: white;
 }
 
+.msg-sistema {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.msg-sistema:contains("sucesso") {
+  color: #0f0;
+}
+
+.msg-sistema:contains("Preencha") {
+  color: #f33;
+}
+
 @media (max-width: 1150px) {
   .botoes {
     margin-top: 2rem;

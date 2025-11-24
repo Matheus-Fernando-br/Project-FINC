@@ -70,9 +70,9 @@ function Sidebar() {
             </Link>
           </li>
           <li>
-            <Link to="/feedback">
-              <i className={icons.feedback}></i>
-              <span className="label">Converse com a gente</span>
+            <Link to="/contador">
+              <i className={icons.contador}></i>
+              <span className="label">Contador</span>
             </Link>
           </li>
           <hr className="divider" />

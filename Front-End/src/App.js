@@ -25,7 +25,7 @@ import Tela_Cadastro_Servico from './pages/produtos_servicos/Tela_Cadastro_Servi
 import Tela_1_notificacao from './pages/notificacao/Tela_1_notificacao';
 import Tela_1_planos from './pages/planos/Tela_1_planos';
 import Pagamento from './pages/pagamento/Tela_1_Pagamento';
-import Tela_1_feedback from './pages/fale_conosco/Tela_1_feedback';
+import Tela_1_contador from './pages/contador/Tela_1_contador';
 import MenuSair from './pages/sair/MenuSair';
 
 
@@ -57,7 +57,7 @@ function App() {
       <Route path="/notificacao" element={<Layout><Tela_1_notificacao /></Layout>} />
       <Route path="/planos" element={<Layout><Tela_1_planos /></Layout>} />
       <Route path="/pagamento" element={<Layout><Pagamento /></Layout>} />
-      <Route path="/feedback" element={<Layout><Tela_1_feedback /></Layout>} />
+      <Route path="/contador" element={<Layout><Tela_1_contador /></Layout>} />
       <Route path="/sair" element={<Layout><MenuSair /></Layout>} />
     </Routes>
   );

@@ -22,7 +22,8 @@ const icons = {
   menuAberto: "bi bi-x",
   menuFechado: "bi bi-list",
   mapa: "bi bi-geo-alt-fill",
-  edit: "bi bi-pencil-square"
+  edit: "bi bi-pencil-square",
+  contador: "bi bi-currency-exchange"
 };
 
 export default icons;
