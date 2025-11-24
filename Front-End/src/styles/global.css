@@ -802,17 +802,23 @@ body.dark-mode .form-footer a {
     font-size: 1rem;
   }
 
+  .header .msg p{
+    display: none;
+  }
+
   .header-right .user-name {
     display: none;
   }
 
   .search-bar input {
-    width: 50%;
+    width: 80%;
     padding: 0.6rem 1.5rem;
   }
 
-  .search-bar i {
-    margin-right: 1.5rem;
+  .search-dropdown {
+    width: 200%;
+    left: -60%;
+    text-align: center;
   }
 
   .sidebar {
