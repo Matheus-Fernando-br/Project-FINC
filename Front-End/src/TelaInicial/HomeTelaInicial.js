@@ -135,7 +135,7 @@ function HomeTelaInicial() {
           <hr className="linha" />
           <div className="print scroll-fade delay-1">
             <img src="/Images/print.png" alt="Print da plataforma" />
-            <a href="https://drive.google.com/file/d/1MZ0AMvsA2O6vZ5ZWFwJj96cHy3g-xcZz/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
+            <a href="https://drive.google.com/file/d/1Kc2OVb9b1q8j8dSnsXDZ7HlbiD-3HFf5/view?usp=sharing" target="_blank" rel="noopener noreferrer">
               <i className="bi bi-play-circle-fill"></i>
             </a>
           </div>
@@ -202,22 +202,20 @@ function HomeTelaInicial() {
         </div>
         <div className="conteudo-sobre">
           <div className="lado-esquerdo scroll-fade">
-            <h2>pensada<br />para os<br />pequenos<br />empreendedores.</h2>
+            <h2>Pensada<br />para os<br />pequenos<br />empreendedores.</h2>
           </div>
           <hr className="linha" />
           <div className="lado-direito scroll-fade delay-1">
             <p>
-              a <span className="bold">finc</span> surgiu com o intuito de ser<br />
-              uma plataforma <span className="bold">acessível</span>, que<br />
-              integra emissão de notas fiscais,<br />
-              geração de boletos, controle<br />
-              financeiro de pequenos e médios<br />
-              negócios.<br /><br />
-              <span className="bold">
-                Modernizando o<br />
-                empreendedorismo nacional.
-              </span>
+              <span>A <span class="bold">finc</span> surgiu com o intuito de ser</span><br />
+              <span>uma plataforma <span class="bold">acessível</span>, que</span><br />
+              <span>integra emissão de notas fiscais,</span><br />
+              <span>geração de boletos, controle</span><br />
+              <span>financeiro de pequenos e médios</span><br />
+              <span>negócios.</span><br /><br />
+              <h2>Modernizando o empreendedorismo nacional.</h2>
             </p>
+
           </div>
         </div>
       </section>
