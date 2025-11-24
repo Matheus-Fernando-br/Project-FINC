@@ -10,17 +10,25 @@ function Sidebar() {
   const toggleMenu = () => setActive(!active);
   const closeMenu = () => setActive(false);
 
-  useEffect(() => {
-    function clickOutside(e) {
-      if (active && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        closeMenu();
-      }
+    // FECHAR ao clicar fora
+    useEffect(() => {
+      function clickOutside(e) {
+        if (
+          active &&
+          sidebarRef.current &&
+          !sidebarRef.current.contains(e.target) &&
+          !e.target.closest(".hamburger-icon")
+        ) {
+          closeMenu();
+        }
     }
+
     document.addEventListener("mousedown", clickOutside);
+
     return () => document.removeEventListener("mousedown", clickOutside);
   }, [active]);
 
-  // bloqueia scroll
+  // bloquear scroll
   useEffect(() => {
     document.body.style.overflow = active ? "hidden" : "auto";
   }, [active]);
