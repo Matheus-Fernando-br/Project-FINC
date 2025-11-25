@@ -85,7 +85,6 @@ function Header() {
     <header className="header">
       <div className="msg">
         <h2>Olá, Gabriel</h2>
-        <p>Estamos felizes em te ver novamente.</p>
       </div>
 
       <div className="search-wrapper">

@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
+import icons from "../components/Icons";
 import "./styles/Layout.css";
 
 function LayoutTelaInicial({ children }) {
@@ -7,14 +8,14 @@ function LayoutTelaInicial({ children }) {
   useEffect(() => {
     // Seletores
     const hamburger = document.querySelector(".hamburger");
-    const closeMenu = document.querySelector(".close-menu");
+    const closeMenuX = document.querySelector(".close-menux");
     const menu = document.querySelector(".menu");
 
     const openMenu = () => menu?.classList.add("active");
     const closeMenuFn = () => menu?.classList.remove("active");
 
     if (hamburger) hamburger.addEventListener("click", openMenu);
-    if (closeMenu) closeMenu.addEventListener("click", closeMenuFn);
+    if (closeMenuX) closeMenuX.addEventListener("click", closeMenuFn);
 
     const menuLinks = menu ? Array.from(menu.querySelectorAll("a")) : [];
     menuLinks.forEach((link) => link.addEventListener("click", closeMenuFn));
@@ -22,35 +23,59 @@ function LayoutTelaInicial({ children }) {
     // Cleanup
     return () => {
       if (hamburger) hamburger.removeEventListener("click", openMenu);
-      if (closeMenu) closeMenu.removeEventListener("click", closeMenuFn);
+      if (closeMenuX) closeMenuX.removeEventListener("click", closeMenuFn);
       menuLinks.forEach((link) =>
         link.removeEventListener("click", closeMenuFn)
       );
     };
   }, []);
 
+const [active, setActive] = useState(false);
+const sidebarRef = useRef(null);
+
+const openMenu = () => setActive(true);
+const closeMenu = () => setActive(false);
+
+useEffect(() => {
+  function clickOutside(e) {
+    if (active && sidebarRef.current && !sidebarRef.current.contains(e.target) && !e.target.closest(".navbar")) {
+      closeMenu();
+    }
+  }
+  document.addEventListener("mousedown", clickOutside);
+  return () => document.removeEventListener("mousedown", clickOutside);
+}, [active]);
+
+
   return (
     <div className="cabecalho">
       <header>
-        <nav className="navbar">
+        <nav className="navbar" ref={sidebarRef}>
           {/* Logo */}
           <Link to="/">
             <img src="/Images/FINC.png" alt="Logo" />
           </Link>
 
+          {/* Ícones Mobile */}
+          <i className="bi bi-list hamburger" onClick={openMenu}></i>
+          <i className="bi bi-x-lg close-menux"onClick={openMenu}></i>
+          
+
           {/* Menu */}
-          <div className="menu">
-            <Link to="/TelaInicial/Planos">Planos</Link>
-            <Link to="/TelaInicial/Duvidas">Dúvidas</Link>
-            <Link to="/TelaInicial/QuemSomos">Quem Somos</Link>
+          <div className={`menu ${active ? "active" : ""}`}>
+            <Link to="/">
+              <i className={icons.casa}></i> Home</Link>
+            <Link to="/TelaInicial/Planos">
+               <i className={icons.cash}></i> Planos</Link>
+            <Link to="/TelaInicial/Duvidas">
+              <i className={icons.duvidas}></i> Dúvidas</Link>
+            <Link to="/TelaInicial/QuemSomos">
+              <i className={icons.clientes}></i> Quem Somos</Link>
             <Link to="/TelaInicial/Login">
-              <i className="bi bi-person-circle"></i> Login
+              <i className={icons.clientePerson}></i> Login
             </Link>
           </div>
 
-          {/* Ícones Mobile */}
-          <i className="bi bi-list hamburger"></i>
-          <i className="bi bi-x-lg close-menu"></i>
         </nav>
       </header>
 

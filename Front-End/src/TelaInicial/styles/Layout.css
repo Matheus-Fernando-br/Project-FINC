@@ -2,6 +2,14 @@
 /* 🔹 Header */
 /* -------------------- */
 
+.cabecalho .hamburger, .cabecalho .close-menux {
+  display: none;
+  font-size: 3rem;
+  cursor: pointer;
+  color: white;
+  z-index: 2100;
+}
+
 .cabecalho header {
   position: fixed;
   top: 0;
@@ -81,11 +89,11 @@
     position: fixed;
     top: 0;
     right: -100%; /* escondido fora da tela */
-    width: 50%;   /* metade da tela */
-    height: 58vh; /* altura total da tela */
+    width: 60%;   /* metade da tela */
+    height: 60vh; /* altura total da tela */
     flex-direction: column;
     gap: 2rem;
-    padding: 5.5rem 2rem;
+    padding: 4.5rem 2rem;
     backdrop-filter: blur(20px);
     background-color: var(--cor-preto-transparente-forte);
     border-radius: 20px;
@@ -96,21 +104,11 @@
   .cabecalho .menu.active {
     right: -5%; /* aparece pela direita */
   }
-}
 
-.cabecalho .hamburger, .cabecalho .close-menu {
-  display: none;
-  font-size: 3rem;
-  cursor: pointer;
-  color: white;
-  z-index: 2100;
-}
-
-@media (max-width: 900px) {
   .cabecalho .hamburger { display: block; }
   .cabecalho .close-menu { display: none; }
 
   /* Quando o menu estiver ativo */
   .cabecalho .menu.active ~ .hamburger { display: none; }
-  .cabecalho .menu.active ~ .close-menu { display: block; }
+  .cabecalho .menu.active ~ .close-menux { display: block; }
 }
