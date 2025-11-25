@@ -57,9 +57,10 @@ useEffect(() => {
           </Link>
 
           {/* Ícones Mobile */}
-          <i className="bi bi-list hamburger" onClick={openMenu}></i>
-          <i className="bi bi-x-lg close-menux"onClick={openMenu}></i>
-          
+          <i 
+            className={`bi ${active ? "bi-x-lg" : "bi-list"} hamburger`}
+            onClick={() => setActive(!active)}
+          ></i>
 
           {/* Menu */}
           <div className={`menu ${active ? "active" : ""}`}>

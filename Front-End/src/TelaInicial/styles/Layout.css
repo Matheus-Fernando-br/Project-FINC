@@ -2,13 +2,6 @@
 /* 🔹 Header */
 /* -------------------- */
 
-.cabecalho .hamburger, .cabecalho .close-menux {
-  display: none;
-  font-size: 3rem;
-  cursor: pointer;
-  color: white;
-  z-index: 2100;
-}
 
 .cabecalho header {
   position: fixed;
@@ -80,12 +73,20 @@
   background-color: var(--cor-hover);
 }
 
+.cabecalho .hamburger, .cabecalho .close-menux {
+  display: none;
+  font-size: 3rem;
+  cursor: pointer;
+  color: white;
+  z-index: 2100;
+}
+
 /* Mobile menu for landing (scoped) */
 @media (max-width: 900px) {
-    
-    .cabecalho .navbar img { height: 8vh; }
-    
-    .cabecalho header .menu {
+  
+  .cabecalho .navbar img { height: 8vh; }
+  
+  .cabecalho header .menu {
     position: fixed;
     top: 0;
     right: -100%; /* escondido fora da tela */
@@ -105,10 +106,17 @@
     right: -5%; /* aparece pela direita */
   }
 
-  .cabecalho .hamburger { display: block; }
-  .cabecalho .close-menu { display: none; }
+  .cabecalho .hamburger {
+    display: block;
+  }
 
-  /* Quando o menu estiver ativo */
-  .cabecalho .menu.active ~ .hamburger { display: none; }
-  .cabecalho .menu.active ~ .close-menux { display: block; }
+  /* Quando ativo, esconde o hamburger e mostra o X */
+  .cabecalho .close-menux.show {
+    display: block;
+  }
+
+  .cabecalho .hamburger .hide {
+    display: none;
+  }
+
 }
