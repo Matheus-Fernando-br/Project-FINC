@@ -385,7 +385,7 @@ body {
 
 /* ANIMAÇÃO DO X */
 .hamburger-icon.open span:nth-child(1) {
-  transform: rotate(45deg) translateY(9px);
+  transform: rotate(35deg) translateY(12px);
 }
 .hamburger-icon.open span:nth-child(2) {
   opacity: 0;
@@ -844,6 +844,10 @@ body.dark-mode .form-footer a {
   .hamburger-icon {
     width: 7vw;
     height: 4vh;
+  }
+
+  .hamburger-icon.open span {
+    margin-left: 1rem;
   }
 
   .layout {

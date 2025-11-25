@@ -23,3 +23,11 @@
 .card-permissao .btn2 {
   width: 10vw;
 }
+
+@media (max-width: 900px) {
+
+
+  .card-permissao .btn2 {
+    width: 60vw;
+  }
+}

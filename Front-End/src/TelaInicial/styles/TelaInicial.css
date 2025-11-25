@@ -611,11 +611,11 @@ html {
     margin-right: -1rem;
     padding-left: -10rem;
   }
-  .tela-inicial .secao-sobre { height: auto; padding: 5vh 0; }
+  .tela-inicial .secao-sobre { height: auto; padding: 2vh 0; }
   .tela-inicial .conteudo-sobre {padding-top: 5rem; flex-direction: column; gap: 3vh; width: 90%; }
   .tela-inicial .conteudo-sobre .lado-esquerdo h2 { font-size: 5vh; text-align: center; }
 .tela-inicial .conteudo-sobre .lado-direito p {
-  font-size: 2.5vh;
+  font-size: 2.3vh;
   text-align: center;
   max-width: 100%;
   background-color: rgba(0, 0, 0, 0.5); /* preto apagado */
