@@ -97,30 +97,25 @@ function HomeTelaInicial() {
 
         <div className="hero-textos" id="secao-hero-texto">
           <div className="frase-um fade-in delay-1">
-            <p>
-              Com a <span>FINC</span>, você deixa o <br />
-              financeiro mais
-            </p>
-            <h2>simples.</h2>
-          </div>
-
-          <div className="frase-dois fade-in delay-2">
-            <h2>
-              Emissão automática de notas <br />
-              boletos... e muito mais
-            </h2>
-            <p>
-              soluções integradas com bancos e <br />
-              plataformas de e-commerce por <br />
-              um preço justo
-            </p>
+            <p1>
+              <h2>Simplifique</h2><br />
+              <span>Emissão automática de notas fiscais</span> e boletos.<br />
+            </p1>
+            <p2>
+              Soluções integradas com bancos e plataformas<br />
+              de e-commerce por um preço justo.
+            </p2>
           </div>
 
           <hr className="linha fade-in delay-3" />
 
           <div className="plano fade-in delay-4">
             <p>planos a partir de</p>
-            <h2>R$ 19,90</h2>
+            <Link to="/TelaInicial/Planos">
+             <a>
+               <h2>R$ 19,90</h2>
+             </a>
+            </Link>
           </div>
 
         </div>
