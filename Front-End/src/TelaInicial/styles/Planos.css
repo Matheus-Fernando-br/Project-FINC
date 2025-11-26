@@ -49,7 +49,7 @@
 .tela-planos .plano {
   background: var(--cor-card);
   padding: 3vh 4vh;
-  border-radius: 12px;
+  border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -75,6 +75,19 @@
   margin: 0.5vh 0;
   color: var(--cor-texto-claro);
 }
+
+
+.tela-planos .preco-container.mobile {
+  display: none;
+}
+
+.tela-planos .linha-vertical {
+  width: 2px;
+  height: 1.2rem;
+  background-color: var(--cor-texto-claro);
+  opacity: .3;
+}
+
 
 /* Preço */
 .tela-planos .preco {
@@ -136,36 +149,53 @@
     grid-template-columns: 1fr;
   }
 
-  .tela-planos .titulo {
-    text-align: center;
-    margin-left: 0;
+   .tela-planos .preco-container.desktop {
+    display: none;
   }
 
-  .tela-planos .planos {
-    gap: 3vh;
-    align-items: center;
-    max-width: 100vw;
-  }
-
-  .tela-planos .plano {
-    width: 90%;
-    padding: 1rem;
-    margin: 0 auto;
-  }
-
-  /* 🔹 Ajuste específico no header */
   .tela-planos .plano-header {
-    display: flex;
-    justify-content: space-between; /* título à esquerda, preço à direita */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "titulo veja"
+      "preco preco";
+    row-gap: 0.6rem;
     width: 100%;
   }
 
-  .tela-planos .preco {
-    text-align: right;
-    color: var(--cor-preco);
+  .tela-planos .plano-header h3 {
+    grid-area: titulo;
   }
 
-  .tela-planos .text {
-    margin-top: 5vh;
+  .tela-planos .veja-mais {
+    grid-area: veja;
+    justify-self: end;
+  }
+
+  /* Esconde versão desktop */
+  .tela-planos .preco-container.desktop {
+    display: none;
+  }
+
+  /* Mostra preço embaixo */
+  .tela-planos .preco-container.mobile {
+    grid-area: preco;
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .tela-planos .preco {
+    font-size: 1.3rem;
+  }
+
+  .tela-planos .descricao {
+    font-size: 0.9rem;
+    white-space: normal;
+  }
+
+  .tela-planos .linha-vertical {
+    height: 1rem;
   }
 }
