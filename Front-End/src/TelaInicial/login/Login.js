@@ -47,6 +47,7 @@ function Login() {
             <h1>Login</h1>
 
             <div className="input-box">
+              <div className="label">Usuário: </div>
               <input
                 type="text"
                 placeholder="admin"
@@ -56,6 +57,7 @@ function Login() {
             </div>
 
             <div className="input-box">
+              <div className="label">Senha: </div>
               <input
                 type={mostrarSenha ? "text" : "password"}
                 placeholder="1234"

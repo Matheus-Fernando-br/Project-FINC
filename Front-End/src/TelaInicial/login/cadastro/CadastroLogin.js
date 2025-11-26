@@ -15,7 +15,7 @@ function CadastroLogin() {
     email: "",
     telefone: "",
     ramoTrabalho: "",
-    localTrabalho: "",
+    tipoPessoa: "",
     termos: false,
   });
 
@@ -36,7 +36,7 @@ function CadastroLogin() {
       email,
       telefone,
       ramoTrabalho,
-      localTrabalho,
+      tipoPessoa,
       termos,
     } = formData;
 
@@ -46,7 +46,7 @@ function CadastroLogin() {
       !email ||
       !telefone ||
       !ramoTrabalho ||
-      !localTrabalho
+      !tipoPessoa
     ) {
       alert("Preencha todos os campos!");
       return false;
@@ -121,17 +121,10 @@ function CadastroLogin() {
           <h1>CRIE SUA CONTA</h1>
 
           <section className="formulario">
+
+
             <div className="input-box">
-              <input
-                type="text"
-                id="cpf"
-                value={formData.cpf}
-                onChange={handleChange}
-                placeholder="CPF (somente números)"
-              />
-              <i className="bi bi-person"></i>
-            </div>
-            <div className="input-box">
+              <label className="label">Nome Social: </label>
               <input
                 type="text"
                 id="socialName"
@@ -141,7 +134,36 @@ function CadastroLogin() {
               />
               <i className="bi bi-person-badge"></i>
             </div>
+
             <div className="input-box">
+              <label className="label">Tipo de Pessoa</label>
+
+              <select
+                id="tipoPessoa"
+                value={formData.tipoPessoa}
+                onChange={handleChange}
+              >
+                <option value="">Selecione...</option>
+                <option value="FISICA">Pessoa Física</option>
+                <option value="JURIDICA">Pessoa Jurídica</option>
+              </select>
+
+            </div>
+
+            <div className="input-box">
+              <label className="label">CPF: </label>
+              <input
+                type="text"
+                id="cpf"
+                value={formData.cpf}
+                onChange={handleChange}
+                placeholder="CPF (somente números)"
+              />
+              <i className="bi bi-person"></i>
+            </div>
+
+            <div className="input-box">
+              <label className="label">E-mail: </label>
               <input
                 type="email"
                 id="email"
@@ -151,7 +173,9 @@ function CadastroLogin() {
               />
               <i className="bi bi-envelope"></i>
             </div>
+
             <div className="input-box">
+              <label className="label">Telefone: </label>
               <input
                 type="text"
                 id="telefone"
@@ -161,27 +185,32 @@ function CadastroLogin() {
               />
               <i className="bi bi-telephone"></i>
             </div>
+
             <div className="input-box">
-              <input
-                type="text"
+              <label className="label">Ramo de Trabalho</label>
+
+              <select
                 id="ramoTrabalho"
                 value={formData.ramoTrabalho}
                 onChange={handleChange}
-                placeholder="Ramo de trabalho"
-              />
-              <i className="bi bi-houses"></i>
+              >
+                <option value="">Selecione...</option>
+                <option value="Comércio">Comércio</option>
+                <option value="Tecnologia">Tecnologia</option>
+                <option value="Educação">Educação</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Construção Civil">Construção Civil</option>
+                <option value="Transporte e Logística">Transporte e Logística</option>
+                <option value="Alimentício">Alimentício</option>
+                <option value="Serviços Gerais">Serviços Gerais</option>
+                <option value="Marketing e Publicidade">Marketing e Publicidade</option>
+                <option value="Financeiro e Contábil">Financeiro e Contábil</option>
+              </select>
+
             </div>
-            <div className="input-box">
-              <input
-                type="text"
-                id="localTrabalho"
-                value={formData.localTrabalho}
-                onChange={handleChange}
-                placeholder="Local de trabalho"
-              />
-              <i className="bi bi-cursor"></i>
-            </div>
+
           </section>
+
 
           <div className="acept">
             <label>
