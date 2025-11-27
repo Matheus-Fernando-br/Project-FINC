@@ -27,7 +27,12 @@ import Tela_1_planos from './pages/planos/Tela_1_planos';
 import Pagamento from './pages/pagamento/Tela_1_Pagamento';
 import Tela_1_contador from './pages/contador/Tela_1_contador';
 import MenuSair from './pages/sair/MenuSair';
+import ImportClientes from './pages/ImportSheet/ImportClientes';
+import ImportProduto from './pages/ImportSheet/ImportProduto';
+import ImportServico from './pages/ImportSheet/ImportServico';
 
+//const importRoutes = require("./ImportSheet/importRoutes");
+//app.use("/api/import", importRoutes);
 
 function App() {
   useEffect(() => {
@@ -59,6 +64,10 @@ function App() {
       <Route path="/pagamento" element={<Layout><Pagamento /></Layout>} />
       <Route path="/contador" element={<Layout><Tela_1_contador /></Layout>} />
       <Route path="/sair" element={<Layout><MenuSair /></Layout>} />
+      <Route path="/import/clientes" element={<ImportClientes />} />
+      <Route path="/import/produto" element={<ImportProduto />} />
+      <Route path="/import/servico" element={<ImportServico />} />
+
     </Routes>
   );
 }

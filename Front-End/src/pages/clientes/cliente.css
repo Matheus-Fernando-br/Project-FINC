@@ -67,3 +67,7 @@
   color: #fff;
   border: 1px solid var(--cor-texto-escuro);
 }
+
+.botao_geral .btn{
+margin: auto 2vw
+}

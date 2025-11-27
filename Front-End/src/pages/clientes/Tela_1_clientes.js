@@ -82,6 +82,9 @@ function Tela_1_clientes() {
           <Link to="/clientes/cadastro">
             <button className="btn">Cadastrar</button>
           </Link>
+          <Link to="/import/clientes">
+            <button className="btn">Importar de uma Planilha</button>
+          </Link>
         </div>
       </section>
 
