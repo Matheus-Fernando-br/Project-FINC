@@ -4,7 +4,26 @@ import { useState } from "react";
 import { Link } from 'react-router-dom';
 import '..//styles/global.css';
 
-function ImportSheetBase({type}) {
+function ImportSheetBase({ type }) {
+
+    const downloadModel = () => {
+        const fileMap = {
+            "clientes": "/ImportSheet/modelo-clientes.xlsx",
+            "serviços": "/ImportSheet/modelo-servicos.xlsx",
+            "produtos": "/ImportSheet/modelo-produtos.xlsx",
+        };
+
+        const fileUrl = fileMap[type];
+
+        // Força download
+        const link = document.createElement("a");
+        link.href = fileUrl;
+        link.download = fileUrl.split("/").pop();
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <Layout>
             <main className="content import-sheet">
@@ -23,7 +42,7 @@ function ImportSheetBase({type}) {
                     <label>Baixe abaixo o modelo da planilha (.xlsx), preencha com os novos dados dos clientes e, em seguida, clique em Carregar Planilha para enviar as informações ao sistema.</label>
                 
                     <section className="botoes">
-                        <button className="btn btn-azul">
+                        <button className="btn btn-azul" onClick={downloadModel}>
                             Baixar Modelo
                         </button>
 
