@@ -1,10 +1,9 @@
-import Layout from '../../components/Layout';
 import icons from "../../components/Icons";
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useState } from "react";
 import "./produtos.css";
 
-function Cadastro_produtos() {
+function Cadastro_produtos_planilha() {
   const [tipo, setTipo] = useState("");
   const navigate = useNavigate();
 
@@ -15,9 +14,9 @@ function Cadastro_produtos() {
     }
 
     if (tipo === "produto") {
-      navigate("/produtos/cadastro/produto"); // vai pra rota já registrada
+      navigate("/import/produto"); // vai pra rota já registrada
     } else if (tipo === "servico") {
-      navigate("/produtos/cadastro/servico"); // vai pra rota já registrada
+      navigate("import/servico"); // vai pra rota já registrada
     }
   };
 
@@ -76,4 +75,4 @@ function Cadastro_produtos() {
   );
 }
 
-export default Cadastro_produtos;
+export default Cadastro_produtos_planilha;

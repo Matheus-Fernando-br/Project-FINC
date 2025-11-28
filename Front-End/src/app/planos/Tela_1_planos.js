@@ -1,4 +1,3 @@
-import Layout from '../../components/Layout';
 import PlanoBasico from '../../components/planos/planoBasico';
 import PlanoPremium from '../../components/planos/planoPremium';
 import PlanoBlack from '../../components/planos/planoBlack';

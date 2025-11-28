@@ -1,5 +1,4 @@
-import Layout from '../../components/Layout';
-import icons from "../../components/Icons";
+import icons from "../../../components/Icons";
 import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 

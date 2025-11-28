@@ -1,4 +1,3 @@
-import Layout from '../../components/Layout';
 import icons from "../../components/Icons";
 import './notificacao.css'
 import { Link } from 'react-router-dom';

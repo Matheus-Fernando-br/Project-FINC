@@ -1,4 +1,3 @@
-import Layout from '../../components/Layout';
 import icons from "../../components/Icons";
 import { Link, useNavigate } from 'react-router-dom';
 import './sair.css';

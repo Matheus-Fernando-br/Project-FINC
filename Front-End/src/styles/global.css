@@ -760,6 +760,21 @@ body.dark-mode .form-footer a {
   }
 }
 
+/* ImportSheet */
+.import-sheet {
+  margin-top: -8rem;
+}
+
+.import-sheet .tabela-planilha {
+  width: 100%;
+  height: 80vh;
+  background: #2a7efc0c;
+  border: 5px dashed var(--cor-cinza);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+
 
 /* ================= RESPONSIVO ================= */
 /* Botão hamburguer e fechar */

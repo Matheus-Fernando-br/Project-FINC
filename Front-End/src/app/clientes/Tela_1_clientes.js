@@ -1,28 +1,27 @@
-import Layout from '../../components/Layout';
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import icons from "../../components/Icons";
-import "./produtos.css";
+import "./cliente.css";
 
-function Tela_1_produtos() {
-  
-const listaCompleta = [
-  { nome: "Limpeza Predial", categoria: "serviço", tipo: "Predial" },
-  { nome: "Pregos 10mm", categoria: "produto", tipo: "Construção" },
-  { nome: "Instalação de Ar-Condicionado", categoria: "serviço", tipo: "Climatização" },
-  { nome: "Cabo de Rede CAT6", categoria: "produto", tipo: "Rede" },
-  { nome: "Consultoria Financeira", categoria: "serviço", tipo: "Financeira" },
-  { nome: "Serviço de Jardinagem", categoria: "serviço", tipo: "Jardinagem" },
-  { nome: "Manutenção de Impressora", categoria: "serviço", tipo: "Informática" },
-  { nome: "Serviço de Solda", categoria: "serviço", tipo: "Soldagem" },
-  { nome: "Mangueira PVC 30m", categoria: "produto", tipo: "Hidráulica" },
-  { nome: "Limpeza de Piscina", categoria: "serviço", tipo: "Piscinas" },
-  { nome: "Suporte Técnico TI", categoria: "serviço", tipo: "TI" },
-  { nome: "Cadeira Escritório Pro", categoria: "produto", tipo: "Mobília" },
-  { nome: "Consultoria Contábil", categoria: "serviço", tipo: "Contábil" },
-  { nome: "Câmera de Segurança HD", categoria: "produto", tipo: "Segurança" },
-  { nome: "Monitor 27''", categoria: "produto", tipo: "Eletrônicos" },
-];
+function Tela_1_clientes() {
+
+  const listaCompleta = [
+    { nome: "Pedreira VMIX", tipo: "Insumos", categoria: "PJ" },
+    { nome: "Marmoraria PS", tipo: "Insumos", categoria: "PJ" },
+    { nome: "ProTransportes", tipo: "Logística", categoria: "PJ" },
+    { nome: "Gabriel Torres", tipo: "Autônomo", categoria: "PF" },
+    { nome: "Construtec Brasil", tipo: "Construção", categoria: "PJ" },
+    { nome: "Alpha Motors", tipo: "Automotivo", categoria: "PJ" },
+    { nome: "MegaLimp Service", tipo: "Serviços Gerais", categoria: "PJ" },
+    { nome: "Bruna Oliveira", tipo: "Consumidor", categoria: "PF" },
+    { nome: "SoftCode TI", tipo: "Tecnologia", categoria: "PJ" },
+    { nome: "Doces da Serra", tipo: "Alimentos", categoria: "PJ" },
+    { nome: "EcoVerde", tipo: "Ambiental", categoria: "PJ" },
+    { nome: "HidroVale", tipo: "Hidráulica", categoria: "PJ" },
+    { nome: "SolarMax", tipo: "Energia", categoria: "PJ" },
+    { nome: "Prime Seguros", tipo: "Seguros", categoria: "PJ" },
+    { nome: "Felipe Andrade", tipo: "Autônomo", categoria: "PF" }
+  ];
 
   const [pesquisa, setPesquisa] = useState("");
   const [abaAtual, setAbaAtual] = useState("todos");
@@ -65,43 +64,39 @@ const listaCompleta = [
   };
 
   return (
-    <main className="content">
+    <main className="content fade-in">
 
-      {/* TÍTULO */}
       <section className='titulo-secao'>
-        <h1>
-          <i className={icons.produtos}></i> Meus Produtos/Serviços
-        </h1>
+        <h1><i className={icons.clientes}></i> Meus Clientes</h1>
       </section>
 
       {/* CADASTRAR */}
-      <section className="form-section">
+      <section className="form-section fade-in">
         <div className="section-header">
-          <span className="icon"><i className={icons.produtosAdd}></i></span>
-          <h3>Cadastrar novo</h3>
+          <span className="icon"><i className={icons.clientesAdd}></i></span>
+          <h3>Cadastrar um novo Cliente</h3>
         </div>
-
-        <hr className="divider" />
-
+        <hr className="divider"/>
         <div className="botao_geral">
-          <Link to="/Produtos/cadastro">
+          <Link to="/clientes/cadastro">
             <button className="btn">Cadastrar</button>
+          </Link>
+          <Link to="/import/clientes">
+            <button className="btn">Importar de uma Planilha</button>
           </Link>
         </div>
       </section>
 
-      {/* LISTA */}
-      <section className="form-section">
+      {/* LISTA DE CLIENTES */}
+      <section className="form-section fade-in">
 
-        {/* CABEÇALHO */}
         <div className="section-header">
           <span className="icon"><i className={icons.relatorio}></i></span>
-          <h3>Meus Produtos/Serviços</h3>
+          <h3>Meus Clientes</h3>
         </div>
+        <hr className="divider"/>
 
-        <hr className="divider" />
-
-        {/* ABAS */}
+         {/* ABAS */}
         <div className="abas-container">
           <button 
             className={abaAtual === "todos" ? "aba ativa" : "aba"}
@@ -111,17 +106,17 @@ const listaCompleta = [
           </button>
 
           <button 
-            className={abaAtual === "produto" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("produto")}
+            className={abaAtual === "PJ" ? "aba ativa" : "aba"}
+            onClick={() => trocarAba("PJ")}
           >
-            Produtos
+            Pessoa Jurídica
           </button>
 
           <button 
-            className={abaAtual === "serviço" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("serviço")}
+            className={abaAtual === "PF" ? "aba ativa" : "aba"}
+            onClick={() => trocarAba("PF")}
           >
-            Serviços
+            Pessoa Física
           </button>
         </div>
 
@@ -131,10 +126,10 @@ const listaCompleta = [
             type="text"
             value={pesquisa}
             onChange={handlePesquisa}
-            placeholder="Pesquisar produto ou serviço"
+            placeholder="Pesquisar cliente..."
           />
-
-          {pesquisa !== "" && (
+        
+        {pesquisa !== "" && (
             <button onClick={limparPesquisa} className="btn-limpar">
               Limpar
             </button>
@@ -186,4 +181,4 @@ const listaCompleta = [
   );
 }
 
-export default Tela_1_produtos;
+export default Tela_1_clientes;

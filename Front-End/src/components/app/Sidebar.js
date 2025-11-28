@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import icons from "./Icons";
+import icons from "../Icons";
 
 function Sidebar() {
   const [active, setActive] = useState(false);
