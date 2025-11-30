@@ -16,7 +16,7 @@ function Cadastro_produtos_planilha() {
     if (tipo === "produto") {
       navigate("/import/produto"); // vai pra rota já registrada
     } else if (tipo === "servico") {
-      navigate("import/servico"); // vai pra rota já registrada
+      navigate("/import/servico"); // vai pra rota já registrada
     }
   };
 
