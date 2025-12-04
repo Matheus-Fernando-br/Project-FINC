@@ -767,12 +767,56 @@ body.dark-mode .form-footer a {
 
 .import-sheet .tabela-planilha {
   width: 100%;
-  height: 80vh;
+  height: 70vh;
   background: #2a7efc0c;
   border: 5px dashed var(--cor-cinza);
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
+
+/* Área da tabela com rolagem horizontal e vertical */
+.import-sheet .preview-wrapper {
+    width: 100%;
+    max-height: 100%;
+    overflow: auto; /* rolagem em ambos sentidos */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* Estilo básico */
+.import-sheet .preview-table {
+    width: max-content; /* evita "espremer" a tabela */
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+/* Linhas e colunas separadas */
+.import-sheet .preview-table th,
+.import-sheet .preview-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    white-space: nowrap; /* evita quebra feia */
+}
+
+/* Cabeçalho fixo (congelado) */
+.import-sheet .preview-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f1f1f1;
+    font-weight: bold;
+    z-index: 2;
+}
+
+/* Alternância de linhas (zebra) */
+.import-sheet .preview-table tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+/* Hover */
+.import-sheet .preview-table tbody tr:hover {
+    background: #f0f7ff;
+}
+
 
 
 
@@ -880,4 +924,15 @@ body.dark-mode .form-footer a {
     flex-direction: column;
     justify-content: flex-start;
   }
+
+    .botao_geral {
+      width: 100%;
+      display: flex;
+        flex-direction: column; /* um botão embaixo do outro */
+        gap: 12px; /* distância no modo responsivo */
+    }
+
+    .botao_geral button {
+        width: 100%;
+    }
 }

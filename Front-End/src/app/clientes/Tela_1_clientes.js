@@ -82,7 +82,7 @@ function Tela_1_clientes() {
             <button className="btn">Cadastrar</button>
           </Link>
           <Link to="/import/clientes">
-            <button className="btn">Importar de uma Planilha</button>
+            <button className="btn btn-importSheet">Importar de uma Planilha</button>
           </Link>
         </div>
       </section>
