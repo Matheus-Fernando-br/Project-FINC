@@ -65,7 +65,7 @@
 
 .CadastroLogin .wrapper h1 {
   font-size: 2.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
   text-align: center;
 }
 
@@ -81,7 +81,6 @@
 .formulario .input-box .label {
   font-size: 1rem;
   margin-bottom: 0.3rem;
-  margin-top: 1rem;
   color: var(--cor-texto-escuro);
   font-weight: bold;
   display: block;
@@ -111,7 +110,7 @@
 .CadastroLogin .input-box i{
   position: absolute;
   right: 1rem;
-  bottom: 12px; /* alinhado ao centro vertical do input */
+  bottom: 2vh;
   font-size: 18px;
   color: var(--cor-texto-escuro);
   pointer-events: none;
@@ -165,6 +164,15 @@
 }
 
 /* ==============================
+    INPUTS DUPLOS
+================================= */
+
+.input-box.full {
+  grid-column: span 2;
+}
+
+
+/* ==============================
    RESPONSIVIDADE
 ================================= */
 @media (max-width: 900px) {
@@ -210,5 +218,9 @@
 
   .CadastroLogin .input-box i {
     right: 0.8rem;
+  }
+
+  .CadastroLogin .wrapper .label {
+    margin-top: 2vh;
   }
 }

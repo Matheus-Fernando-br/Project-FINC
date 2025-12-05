@@ -5,57 +5,24 @@ import "../../styles/Cadastro.css";
 function CadastroLogin() {
   const navigate = useNavigate();
 
-  // Array local (só para simular antes de enviar ao backend)
   const [usuarios, setUsuarios] = useState([]);
 
-  // Estado dos campos
   const [formData, setFormData] = useState({
-    cpf: "",
     socialName: "",
+    tipoPessoa: "",
+    cpf: "",
     email: "",
     telefone: "",
-    ramoTrabalho: "",
-    tipoPessoa: "",
+    senha: "",
+    repitaSenha: "",
     termos: false,
   });
 
-  // Atualiza os campos dinamicamente
-  const handleChange = (e) => {
-    const { id, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  // Validações antes de enviar
   const validarFormulario = () => {
-    const {
-      cpf,
-      socialName,
-      email,
-      telefone,
-      ramoTrabalho,
-      tipoPessoa,
-      termos,
-    } = formData;
+    const { socialName, tipoPessoa, cpf, email, telefone, senha, repitaSenha , termos } = formData;
 
-    if (
-      !cpf ||
-      !socialName ||
-      !email ||
-      !telefone ||
-      !ramoTrabalho ||
-      !tipoPessoa
-    ) {
+    if (!socialName || !tipoPessoa || !cpf || !email || !telefone || !senha || !repitaSenha) {
       alert("Preencha todos os campos!");
-      return false;
-    }
-
-    // Confere se CPF tem só números e 11 dígitos
-    const cpfRegex = /^[0-9]{11}$/;
-    if (!cpfRegex.test(cpf)) {
-      alert("O CPF deve conter apenas números e ter 11 dígitos.");
       return false;
     }
 
@@ -63,28 +30,104 @@ function CadastroLogin() {
       alert("Você precisa aceitar os Termos e Serviços.");
       return false;
     }
+    
+    if (senha !== repitaSenha) {
+      alert("As senhas não coincidem! Verifique e tente novamente.");
+      return false;
+    }
 
+    if (senha.length < 8) {
+      alert("A senha deve ter pelo menos 8 caracteres.");
+      return false;
+    }
+
+    if (cpf.length < 11) {
+      alert("CPF/CNPJ inválido. Verifique e tente novamente.");
+      return false;
+    }
+    
     return true;
   };
 
-  // Enviar ao backend
+  const labelTipo =
+  formData.tipoPessoa === "FISICA"
+    ? "CPF"
+    : formData.tipoPessoa === "JURIDICA"
+    ? "CNPJ"
+    : "CPF/CNPJ";
+    
+    const formatarDocumento = (valor, tipoPessoa) => {
+      valor = valor.replace(/\D/g, ""); // remove tudo que não for número
+      
+      if (tipoPessoa === "FISICA") {
+      // CPF → 000.000.000-00
+      return valor
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+        .slice(0, 14);
+    }
+    
+    if (tipoPessoa === "JURIDICA") {
+      // CNPJ → 00.000.000/0000-00
+      return valor
+        .replace(/(\d{2})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1/$2")
+        .replace(/(\d{4})(\d{1,2})$/, "$1-$2")
+        .slice(0, 18);
+      }
+
+    return valor;
+  };
+
+  const formatarTelefone = (valor) => {
+    valor = valor.replace(/\D/g, ""); // remove tudo que não for número
+
+    return valor
+      .replace(/^(\d{2})(\d)/, "($1) $2")      // (31) 9...
+      .replace(/(\d{5})(\d)/, "$1-$2")         // (31) 98676-3...
+      .slice(0, 15);                           // limita no tamanho do telefone
+    };
+
+    const handleChange = (e) => {
+      const { id, value, type, checked } = e.target;
+  
+      let novoValor = type === "checkbox" ? checked : value;
+  
+      // Bloqueia CPF/CNPJ se o tipo não foi escolhido
+      if (id === "cpf") {
+        if (!formData.tipoPessoa) {
+          alert("Selecione o Tipo de Pessoa antes de digitar o CPF/CNPJ.");
+          return;
+        }
+        novoValor = formatarDocumento(novoValor, formData.tipoPessoa);
+      }
+  
+      //TELEFONE
+      if (id === "telefone") {
+        novoValor = formatarTelefone(novoValor);
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        [id]: novoValor,
+      }));
+    };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validarFormulario()) return;
 
     try {
-      // Atualiza o array local
       setUsuarios((prev) => [...prev, formData]);
 
-      // Envia ao backend (Spring Boot em localhost:8080)
       const response = await fetch(
         "https://rolf-aquarial-nontelegraphically.ngrok-free.dev/finc/criaUsuario",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
@@ -101,17 +144,17 @@ function CadastroLogin() {
     }
   };
 
+
+
   return (
     <section className="CadastroLogin">
       <div className="Fundo">
         <img src="/Images/Fundo-Login-teste.png" alt="Fundo" />
       </div>
 
-      {/* Botão Voltar */}
       <div className="rodape form-footer voltar">
         <Link to="/TelaInicial/Login">
-          Voltar para Tela de Login{" "}
-          <i className="bi bi-chevron-double-left"></i>
+          Voltar para Tela de Login <i className="bi bi-chevron-double-left"></i>
           <i className="bi bi-chevron-double-left"></i>
         </Link>
       </div>
@@ -122,9 +165,9 @@ function CadastroLogin() {
 
           <section className="formulario">
 
-
-            <div className="input-box">
-              <label className="label">Nome Social: </label>
+            {/* Nome */}
+            <div className="input-box full">
+              <div className="label">Nome Social:</div>
               <input
                 type="text"
                 id="socialName"
@@ -135,9 +178,9 @@ function CadastroLogin() {
               <i className="bi bi-person-badge"></i>
             </div>
 
+            {/* Tipo pessoa + CPF */}
             <div className="input-box">
-              <label className="label">Tipo de Pessoa</label>
-
+              <div className="label">Tipo de Pessoa</div>
               <select
                 id="tipoPessoa"
                 value={formData.tipoPessoa}
@@ -147,23 +190,23 @@ function CadastroLogin() {
                 <option value="FISICA">Pessoa Física</option>
                 <option value="JURIDICA">Pessoa Jurídica</option>
               </select>
-
             </div>
 
             <div className="input-box">
-              <label className="label">CPF: </label>
+              <div className="label">{labelTipo}:</div>
               <input
                 type="text"
                 id="cpf"
                 value={formData.cpf}
                 onChange={handleChange}
-                placeholder="CPF (somente números)"
+                placeholder="Digite apenas números"
               />
               <i className="bi bi-person"></i>
             </div>
 
+            {/* Email + Telefone */}
             <div className="input-box">
-              <label className="label">E-mail: </label>
+              <div className="label">E-mail:</div>
               <input
                 type="email"
                 id="email"
@@ -175,7 +218,7 @@ function CadastroLogin() {
             </div>
 
             <div className="input-box">
-              <label className="label">Telefone: </label>
+              <div className="label">Telefone:</div>
               <input
                 type="text"
                 id="telefone"
@@ -186,31 +229,34 @@ function CadastroLogin() {
               <i className="bi bi-telephone"></i>
             </div>
 
-            <div className="input-box">
-              <label className="label">Ramo de Trabalho</label>
-
-              <select
-                id="ramoTrabalho"
-                value={formData.ramoTrabalho}
+            {/* Senha */}
+            <div className="input-box full">
+              <div className="label">Senha:</div>
+              <input
+                type={"password"}
+                id="senha"
+                value={formData.senha}
                 onChange={handleChange}
-              >
-                <option value="">Selecione...</option>
-                <option value="Comércio">Comércio</option>
-                <option value="Tecnologia">Tecnologia</option>
-                <option value="Educação">Educação</option>
-                <option value="Saúde">Saúde</option>
-                <option value="Construção Civil">Construção Civil</option>
-                <option value="Transporte e Logística">Transporte e Logística</option>
-                <option value="Alimentício">Alimentício</option>
-                <option value="Serviços Gerais">Serviços Gerais</option>
-                <option value="Marketing e Publicidade">Marketing e Publicidade</option>
-                <option value="Financeiro e Contábil">Financeiro e Contábil</option>
-              </select>
-
+                placeholder="Digite sua senha"
+              />
+              <i class="bi bi-lock-fill"></i>
             </div>
 
-          </section>
+            {/* Repita a senha */}
+          <div className="input-box full">
+            <div className="label">Repita sua senha:</div>
+            <input
+              type={"password"}
+              id="repitaSenha"
+              value={formData.repitaSenha}
+              onChange={handleChange}
+              placeholder="Repita a senha digitada anteriormente"
+            />
+            <i class="bi bi-lock-fill"></i>
+          </div>
 
+
+          </section>
 
           <div className="acept">
             <label>
@@ -219,15 +265,13 @@ function CadastroLogin() {
                 id="termos"
                 checked={formData.termos}
                 onChange={handleChange}
-              />{" "}
+              />
               Aceito os Termos e Serviços
             </label>
           </div>
 
           <hr className="divider" />
-          <button type="submit" className="btn">
-            Criar Conta
-          </button>
+          <button type="submit" className="btn">Criar Conta</button>
         </form>
       </div>
     </section>

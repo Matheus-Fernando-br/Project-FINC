@@ -50,7 +50,7 @@ function Login() {
               <div className="label">Usuário: </div>
               <input
                 type="text"
-                placeholder="admin"
+                placeholder="E-mail ou CPF"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
               />
@@ -60,7 +60,7 @@ function Login() {
               <div className="label">Senha: </div>
               <input
                 type={mostrarSenha ? "text" : "password"}
-                placeholder="1234"
+                placeholder="Informe sua senha"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
