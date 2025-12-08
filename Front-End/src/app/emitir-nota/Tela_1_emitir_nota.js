@@ -1,47 +1,115 @@
 import React, { useState } from "react";
 import "./emitir-nota.css";
 import icons from "../../components/Icons";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ANIM_MS = 320; // manter em sincronia com o CSS (--anim-dur)
 
 function Tela_1_emitir_nota() {
+  const navigate = useNavigate();
+
   const [incluirFrete, setIncluirFrete] = useState("nao");
 
+  const [cliente, setCliente] = useState({
+    nomeSocial: "",
+    cpfCnpj: ""
+  });
+
   const [produtosServicos, setProdutosServicos] = useState([
-  { id: Date.now(), item: "", tipoNota: "", quantidade: "", info: "", isOpen: true }
+    { id: Date.now(), item: "", tipoNota: "", quantidade: "", valor: "", info: "", isOpen: true }
   ]);
 
+  // Adicionar produto/serviço
   const addProdutoServico = () => {
-  const id = Date.now() + Math.random();
-  const newItem = { id, item: "", tipoNota: "", quantidade: "", info: "", isOpen: false };
-  setProdutosServicos(prev => [...prev, newItem]);
-  setTimeout(() => {
-  setProdutosServicos(prev =>
-  prev.map(x => (x.id === id ? { ...x, isOpen: true } : x))
-  );
-  }, 20);
+    const id = Date.now() + Math.random();
+    const newItem = { id, item: "", tipoNota: "", quantidade: "", valor: "", info: "", isOpen: false };
+    setProdutosServicos(prev => [...prev, newItem]);
+    setTimeout(() => {
+      setProdutosServicos(prev =>
+        prev.map(x => (x.id === id ? { ...x, isOpen: true } : x))
+      );
+    }, 20);
   };
 
   const removeProdutoServico = (id) => {
-  setProdutosServicos(prev => prev.map(x => x.id === id ? { ...x, isOpen: false } : x));
-  setTimeout(() => {
-  setProdutosServicos(prev => prev.filter(x => x.id !== id));
-  }, ANIM_MS + 20);
+    setProdutosServicos(prev => prev.map(x => x.id === id ? { ...x, isOpen: false } : x));
+    setTimeout(() => {
+      setProdutosServicos(prev => prev.filter(x => x.id !== id));
+    }, ANIM_MS + 20);
   };
 
   const handleChange = (id, field, value) => {
-  setProdutosServicos(prev =>
-  prev.map(x => (x.id === id ? { ...x, [field]: value } : x))
-  );
+    setProdutosServicos(prev =>
+      prev.map(x => (x.id === id ? { ...x, [field]: value } : x))
+    );
+  };
+
+  const handleClienteChange = (field, value) => {
+    setCliente(prev => ({ ...prev, [field]: value }));
   };
 
   const temNFCe = produtosServicos.some(p => p.tipoNota === "NFC-e");
 
-  return ( 
-    <main className="content"> 
-      <section className="titulo-secao"> 
-        <h1><i className={icons.emitirNota}></i> Emitir Nota Fiscal</h1> 
+  // Calcula valor total somando valores (se informados)
+  const calcularValorTotal = () => {
+    const soma = produtosServicos.reduce((acc, p) => {
+      const v = parseFloat(String(p.valor || 0).replace(",", "."));
+      const q = parseFloat(String(p.quantidade || 1).replace(",", "."));
+      if (isNaN(v)) return acc;
+      if (isNaN(q)) return acc + v;
+      return acc + v * q;
+    }, 0);
+    return soma.toFixed(2);
+  };
+
+  // Ao avançar, salva tudo em localStorage e navega para pré-visualização
+  const handleAvancar = (e) => {
+    e.preventDefault();
+    // validações mínimas (ex.: nome e cpf)
+    if (!cliente.nomeSocial.trim()) {
+      alert("Preencha o Nome Social");
+      return;
+    }
+    if (!cliente.cpfCnpj.trim()) {
+      alert("Preencha o CPF/CNPJ");
+      return;
+    }
+
+    const payload = {
+      cliente,
+      produtosServicos,
+      incluirFrete,
+      valores: {
+        descontoIncond: document.getElementById("desc-incond")?.value || "0",
+        descontoCond: document.getElementById("desc-cond")?.value || "0",
+        valorTotal: document.getElementById("valor-total")?.value || calcularValorTotal()
+      },
+      transporte: {
+        transNome: document.getElementById("trans-nome")?.value || "",
+        transCpf: document.getElementById("trans-cpf")?.value || "",
+        placa: document.getElementById("placa")?.value || "",
+        pesoBruto: document.getElementById("peso-bruto")?.value || "",
+        pesoLiquido: document.getElementById("peso-liquido")?.value || "",
+        infoTransporte: document.getElementById("info-transporte")?.value || ""
+      },
+      meta: {
+        empresaNome: "FINC PLATAFORMA DE EMISSÃO DE NOTAS FISCAIS AUTOMATIZADA LTDA",
+        empresaCNPJ: "12.345.678/0001-90", // pode alterar
+        empresaEndereco: "R. Dezenove de Novembro, 121 - Centro, Timóteo - MG, 35180-008",
+        empresaCidadeUF: "Timóteo - MG"
+      },
+      criadoEm: new Date().toISOString()
+    };
+
+    // Salva no localStorage (simples e front-only)
+    localStorage.setItem("emitirNota_dados", JSON.stringify(payload));
+    navigate("/emitir-nota/Finalizar");
+  };
+
+  return (
+    <main className="content">
+      <section className="titulo-secao">
+        <h1><i className={icons.emitirNota}></i> Emitir Nota Fiscal</h1>
       </section>
 
       {/* Cliente */}
@@ -57,11 +125,17 @@ function Tela_1_emitir_nota() {
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="nome-social">Nome Social <span className="campo-obrigatório">*</span></label>
-            <input id="nome-social" type="text" placeholder="Selecione" />
+            <input id="nome-social" type="text" placeholder="Selecione"
+              value={cliente.nomeSocial}
+              onChange={(e) => handleClienteChange("nomeSocial", e.target.value)}
+            />
           </div>
           <div className="form-group">
             <label htmlFor="cpf-cnpj">CPF/CNPJ <span className="campo-obrigatório">*</span></label>
-            <input id="cpf-cnpj" type="text" placeholder="Selecione" />
+            <input id="cpf-cnpj" type="text" placeholder="Selecione"
+              value={cliente.cpfCnpj}
+              onChange={(e) => handleClienteChange("cpfCnpj", e.target.value)}
+            />
           </div>
         </div>
       </section>
@@ -120,9 +194,12 @@ function Tela_1_emitir_nota() {
                 />
               </div>
               <div className="form-group input-prefix">
-                <label htmlFor="valor">Valor</label>
+                <label htmlFor={`valor-${p.id}`}>Valor</label>
                 <span className="prefix">R$</span>
-                <input id="valor" type="number" placeholder="0,00" />
+                <input id={`valor-${p.id}`} type="number" placeholder="0,00"
+                  value={p.valor}
+                  onChange={(e) => handleChange(p.id, "valor", e.target.value)}
+                />
               </div>
             </div>
 
@@ -254,19 +331,17 @@ function Tela_1_emitir_nota() {
           <div className="form-group input-prefix">
             <label htmlFor="valor-total">Valor Total</label>
             <span className="prefix">R$</span>
-            <input id="valor-total" type="number" placeholder="0,00" />
+            <input id="valor-total" type="number" placeholder="0,00" defaultValue={calcularValorTotal()} />
           </div>
         </div>
       </section>
 
       <div className="form-footer-avancar">
-        <Link to="/emitir-nota/Finalizar">
+        <button onClick={handleAvancar} className="btn">
           AVANÇAR <i className="bi bi-chevron-double-right"></i><i className="bi bi-chevron-double-right"></i>
-        </Link>
+        </button>
       </div>
     </main>
-
-
   );
 }
 
