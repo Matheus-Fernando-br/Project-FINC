@@ -1,159 +1,186 @@
-import React, { useEffect, useState, useRef } from "react";
+// Front-End/src/app/emitir-nota/Tela_2_emitir_nota.jsx
+import React, { useEffect, useRef, useState } from "react";
 import icons from "../../components/Icons";
-import { Link, useNavigate } from 'react-router-dom';
-import html2pdf from "html2pdf.js"; // se usar CDN, remova esta linha
+import { Link } from 'react-router-dom';
+import html2pdf from "html2pdf.js";
+
+const STORAGE_KEY = "emitirNotaData";
+
+function onlyDigits(str = "") {
+  return (str || "").toString().replace(/\D/g, "");
+}
+
+function formatDateYYYYMMDD(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}${m}${d}`;
+}
 
 function Tela_2_emitir_nota() {
-  const navigate = useNavigate();
-  const [dados, setDados] = useState(null);
+  const [data, setData] = useState(null);
   const previewRef = useRef();
 
   useEffect(() => {
-    const raw = localStorage.getItem("emitirNota_dados");
-    if (!raw) {
-      // se não há dados, volta para etapa anterior
-      navigate("/emitir-nota/Dados");
-      return;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        setData(JSON.parse(saved));
+      } catch (e) {
+        setData(null);
+      }
     }
-    setDados(JSON.parse(raw));
-  }, [navigate]);
+  }, []);
 
-  const formatCurrency = (v) => {
-    const n = Number(String(v).replace(",", ".") || 0);
-    return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
+  const gerarPdf = () => {
+    if (!data) return alert("Nenhum dado salvo para gerar a nota.");
 
-  const sanitizeCpf = (cpf) => (cpf || "").toString().replace(/\D/g, "") || "sem-cpf";
+    const cpfRaw = onlyDigits(data.clienteCpfCnpj || "semcpf");
+    const clienteNome = (data.cliente || {}).clienteNome || "semnome";
+    const filename = `nota-fiscal-${cpfRaw || "semcpf"}-${formatDateYYYYMMDD(new Date())}.pdf`;
 
-  const formatDateForFilename = (iso) => {
-    const d = new Date(iso || Date.now());
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
-  };
-
-  const handleEmitirPdf = async () => {
-    if (!dados) return;
-    const cpfClean = sanitizeCpf(dados.cliente?.cpfCnpj);
-    const dataStr = formatDateForFilename(new Date().toISOString());
-    const filename = `nota-fiscal-${cpfClean}-${dataStr}.pdf`;
-
+    // configurações do html2pdf
     const element = previewRef.current;
-    if (!element) return;
-
-    // opções html2pdf
     const opt = {
-      margin:       [10, 10, 10, 10],
+      margin:       10,
       filename:     filename,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'] }
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // se usou CDN: window.html2pdf().set(opt).from(element).save();
     html2pdf().set(opt).from(element).save();
   };
 
-  if (!dados) return null;
+  if (!data) {
+    return (
+      <main className="content">
+        <section className='titulo-secao'>
+          <h1><i className={icons.emitirNota}></i> Emitir Nota Fiscal</h1>
+        </section>
+        <section className="form-section">
+          <div className="section-header">
+            <span className="icon"><i className={icons.relatorio}></i></span>
+            <h3>Consulta da nota</h3>
+          </div>
+          <hr className="divider" />
+          <div className="form-row">
+            <p>Nenhum dado encontrado. Volte à etapa anterior e preencha os campos.</p>
+          </div>
+        </section>
+        <div className="form-footer-voltar">
+          <Link to="/emitir-nota/Dados" className="previous-step">
+            Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
-  // construindo o markup da nota (você pode ajustar classes/estilo no CSS)
+  // total calculado já está em data.valorTotal, mas recalc aqui por segurança
+  const somaProdutos = (data.produtosServicos || []).reduce((acc, p) => {
+    const q = Number(p.quantidade) || 0;
+    const v = Number(p.valor) || 0;
+    return acc + q * v;
+  }, 0);
+  const descontos = (Number(data.descIncond) || 0) + (Number(data.descCond) || 0);
+  const total = (somaProdutos - descontos) >= 0 ? (somaProdutos - descontos).toFixed(2) : "0.00";
+
   return (
     <main className="content">
-      <section className='titulo-secao'>
+
+      <section className="titulo-secao">
         <h1><i className={icons.emitirNota}></i> Emitir Nota Fiscal</h1>
       </section>
 
       <section className="form-section">
         <div className="section-header">
           <span className="icon"><i className={icons.relatorio}></i></span>
-          <h3>Pré-visualização</h3>
+          <h3>Consulta da nota</h3>
         </div>
         <hr className="divider" />
 
-        <div className="form-row">
-          <div style={{width: "100%"}}>
-            {/* Aqui está a área que será convertida em PDF */}
-            <div id="invoice-preview" ref={previewRef} style={{background:"#fff", padding:"20px", color:"#000", width:"100%", boxSizing:"border-box"}}>
-              {/* Cabeçalho da empresa */}
-              <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12}}>
-                <div>
-                  <h2 style={{margin:0}}>{dados.meta.empresaNome}</h2>
-                  <div>CNPJ: {dados.meta.empresaCNPJ}</div>
-                  <div>{dados.meta.empresaEndereco}</div>
-                  <div>{dados.meta.empresaCidadeUF}</div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <h3 style={{margin:0}}>NOTA FISCAL (SIMULADA)</h3>
-                  <div>Data: {new Date(dados.criadoEm).toLocaleString()}</div>
-                </div>
-              </div>
+        {/* Preview area que será convertida para PDF */}
+        <div ref={previewRef} style={{ padding: 16, background: "#fff", color: "#000" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div>
+              <strong>FINC PLATAFORMA DE EMISSÃO DE NOTAS FISCAIS AUTOMATIZADA LTDA</strong><br />
+              CNPJ: 03.480.621/0001-15<br />
+              Endereço: R. Dezenove de Novembro, 121 - Centro, Timóteo - MG, 35180-008
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <strong>Tipo:</strong> {data.tipoNota || "-"}<br />
+              <strong>Data:</strong> {new Date().toLocaleDateString()}<br />
+            </div>
+          </div>
 
-              <hr />
+          <hr />
 
-              {/* Dados do cliente */}
-              <div style={{marginBottom:12}}>
-                <strong>Destinatário:</strong>
-                <div>{dados.cliente.nomeSocial}</div>
-                <div>CPF/CNPJ: {dados.cliente.cpfCnpj}</div>
-              </div>
+          {/* Dados do cliente */}
+          <div style={{marginBottom:12, marginTop:12}}>
+            <strong>Destinatário:</strong>
+            <div>Nome Social: {data.clienteNome}</div>
+            <div>CPF/CNPJ: {data.clienteCpfCnpj}</div>
+          </div>
 
-              {/* Tabela de itens */}
-              <table style={{width:"100%", borderCollapse:"collapse"}}>
-                <thead>
-                  <tr>
-                    <th style={{border: "1px solid #333", padding:6}}>Item</th>
-                    <th style={{border: "1px solid #333", padding:6}}>Tipo</th>
-                    <th style={{border: "1px solid #333", padding:6}}>Qtde</th>
-                    <th style={{border: "1px solid #333", padding:6}}>Valor unit.</th>
-                    <th style={{border: "1px solid #333", padding:6}}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dados.produtosServicos.map((p, idx) => {
-                    const v = Number(String(p.valor || 0).replace(",", ".")) || 0;
-                    const q = Number(String(p.quantidade || 0).replace(",", ".")) || 0;
-                    const total = (v * (q || 1));
-                    return (
-                      <tr key={p.id}>
-                        <td style={{border: "1px solid #333", padding:6}}>{p.item || `Item ${idx+1}`}</td>
-                        <td style={{border: "1px solid #333", padding:6}}>{p.tipoNota}</td>
-                        <td style={{border: "1px solid #333", padding:6, textAlign:"center"}}>{p.quantidade || "1"}</td>
-                        <td style={{border: "1px solid #333", padding:6, textAlign:"right"}}>R$ {formatCurrency(p.valor || 0)}</td>
-                        <td style={{border: "1px solid #333", padding:6, textAlign:"right"}}>R$ {formatCurrency(total)}</td>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ borderBottom: "1px solid #000", textAlign: "left" }}>Item</th>
+                <th style={{ borderBottom: "1px solid #000", textAlign: "right" }}>Qtd</th>
+                <th style={{ borderBottom: "1px solid #000", textAlign: "right" }}>Valor Unit.</th>
+                <th style={{ borderBottom: "1px solid #000", textAlign: "right" }}>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data.produtosServicos || []).map((p, i) => {
+                const subtotal = ((Number(p.quantidade) || 0) * (Number(p.valor) || 0)).toFixed(2);
+                return (
+                  <React.Fragment key={p.id}>
+                    <tr>
+                      <td style={{ paddingTop: 8 }}>{p.item || `Item ${i + 1}`}</td>
+                      <td style={{ paddingTop: 8, textAlign: "right" }}>{p.quantidade || 0}</td>
+                      <td style={{ paddingTop: 8, textAlign: "right" }}>{(Number(p.valor) || 0).toFixed(2)}</td>
+                      <td style={{ paddingTop: 8, textAlign: "right" }}>{subtotal}</td>
+                    </tr>
+                    {p.info && (
+                      <tr>
+                        <td colSpan="4" style={{ fontSize: 12, color: "#333", paddingBottom: 8 }}>
+                          <em>Descrição:</em> {p.info}
+                        </td>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
 
-              {/* Valores finais */}
-              <div style={{display:"flex", justifyContent:"flex-end", marginTop:12}}>
-                <div style={{width:320}}>
-                  <div style={{display:"flex", justifyContent:"space-between"}}><span>Desconto incondicionado:</span><span>R$ {formatCurrency(dados.valores.descontoIncond)}</span></div>
-                  <div style={{display:"flex", justifyContent:"space-between"}}><span>Desconto condicionado:</span><span>R$ {formatCurrency(dados.valores.descontoCond)}</span></div>
-                  <div style={{display:"flex", justifyContent:"space-between", fontWeight:"bold", marginTop:8}}><span>Valor Total:</span><span>R$ {formatCurrency(dados.valores.valorTotal)}</span></div>
-                </div>
+          <hr />
+
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 20 }}>
+            <div style={{ width: 300 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, marginTop: 5}}>
+                <span>Subtotal:</span>
+                <span>R$ {somaProdutos.toFixed(2)}</span>
               </div>
-
-              <hr style={{marginTop:16}} />
-
-              {/* Informações de transporte (se houver) */}
-              {dados.incluirFrete === "sim" && (
-                <div style={{marginTop:8}}>
-                  <strong>Transporte:</strong>
-                  <div>{dados.transporte.transNome} - {dados.transporte.transCpf}</div>
-                  <div>Placa: {dados.transporte.placa}</div>
-                  <div>Peso bruto: {dados.transporte.pesoBruto} Kg</div>
-                </div>
-              )}
-
-              <div style={{marginTop:20, fontSize:12}}>
-                <em>Nota fiscal gerada apenas para simulação. Não tem validade fiscal.</em>
+              <div style={{ display: "flex", justifyContent: "space-between" , marginBottom: 5}}>
+                <span>Desconto incondicionado:</span>
+                <span>- R$ {(Number(data.descIncond) || 0).toFixed(2)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" , marginBottom: 5}}>
+                <span>Desconto condicionado:</span>
+                <span>- R$ {(Number(data.descCond) || 0).toFixed(2)}</span>
+              </div>
+              <hr />
+              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold" , marginBottom: 5, marginTop: 7}}>
+                <span>Valor Total:</span>
+                <span>R$ {total}</span>
               </div>
             </div>
-            {/* fim preview */}
           </div>
         </div>
+
       </section>
 
       <section className="emitir">
@@ -163,7 +190,7 @@ function Tela_2_emitir_nota() {
         </div>
         <hr className="divider" />
         <div className="botao_geral">
-          <button className="btn" onClick={handleEmitirPdf}>Emitir Nota Fiscal (Baixar PDF)</button>
+          <button className="btn" onClick={gerarPdf}>Emitir Nota Fiscal</button>
         </div>
       </section>
 

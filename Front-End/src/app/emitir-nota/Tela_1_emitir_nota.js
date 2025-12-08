@@ -1,28 +1,108 @@
-import React, { useState } from "react";
+// Front-End/src/app/emitir-nota/Tela_1_emitir_nota.jsx
+import React, { useEffect, useState } from "react";
 import "./emitir-nota.css";
 import icons from "../../components/Icons";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const ANIM_MS = 320; // manter em sincronia com o CSS (--anim-dur)
+const STORAGE_KEY = "emitirNotaData";
+
+function formatCpfCnpjRaw(value) {
+  return value.replace(/\D/g, "");
+}
+
+function maskCpfCnpj(value) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length > 11) {
+    // CNPJ: 00.000.000/0000-00
+    return digits
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/(\d{3})(\d)/, "$1/$2")
+      .replace(/(\d{4})(\d{1,2})$/, "$1-$2")
+      .slice(0, 18);
+  } else {
+    // CPF: 000.000.000-00
+    return digits
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  }
+}
 
 function Tela_1_emitir_nota() {
-  const navigate = useNavigate();
-
   const [incluirFrete, setIncluirFrete] = useState("nao");
 
-  const [cliente, setCliente] = useState({
-    nomeSocial: "",
-    cpfCnpj: ""
-  });
-
   const [produtosServicos, setProdutosServicos] = useState([
-    { id: Date.now(), item: "", tipoNota: "", quantidade: "", valor: "", info: "", isOpen: true }
+    { id: Date.now(), item: "", tipoNotaItem: "", quantidade: 1, valor: 0, info: "", isOpen: true }
   ]);
 
-  // Adicionar produto/serviço
+  // -------------------------------------------------
+  // Tipo de nota (único, isolado acima dos produtos)
+  const [tipoNota, setTipoNota] = useState("");
+
+  // Cliente
+  const [clienteNome, setClienteNome] = useState("");
+  const [clienteCpfCnpj, setClienteCpfCnpj] = useState("");
+
+  // Transporte
+  const [transNome, setTransNome] = useState("");
+  const [transCpf, setTransCpf] = useState("");
+  const [placa, setPlaca] = useState("");
+  const [pesoBruto, setPesoBruto] = useState("");
+  const [pesoLiquido, setPesoLiquido] = useState("");
+  const [infoTransporte, setInfoTransporte] = useState("");
+
+  // Valores / descontos
+  const [descIncond, setDescIncond] = useState(0);
+  const [descCond, setDescCond] = useState(0);
+  const [valorTotal, setValorTotal] = useState(0);
+
+  // load saved (optional)
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const obj = JSON.parse(saved);
+        if (obj && obj.produtosServicos) {
+          setProdutosServicos(obj.produtosServicos);
+          setTipoNota(obj.tipoNota || "");
+          setClienteNome(obj.clienteNome || "");
+          setClienteCpfCnpj(obj.clienteCpfCnpj || "");
+          setIncluirFrete(obj.incluirFrete || "nao");
+          setTransNome(obj.transNome || "");
+          setTransCpf(obj.transCpf || "");
+          setPlaca(obj.placa || "");
+          setPesoBruto(obj.pesoBruto || "");
+          setPesoLiquido(obj.pesoLiquido || "");
+          setInfoTransporte(obj.infoTransporte || "");
+          setDescIncond(obj.descIncond || 0);
+          setDescCond(obj.descCond || 0);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
+  // calcular total sempre que produtos ou descontos mudarem
+  useEffect(() => {
+    const somaProdutos = produtosServicos.reduce((acc, p) => {
+      const q = Number(p.quantidade) || 0;
+      const v = Number(p.valor) || 0;
+      return acc + q * v;
+    }, 0);
+
+    const descontos = (Number(descIncond) || 0) + (Number(descCond) || 0);
+    const total = somaProdutos - descontos;
+    setValorTotal(total >= 0 ? Number(total.toFixed(2)) : 0);
+  }, [produtosServicos, descIncond, descCond]);
+
+  // Produtos manipulação (mantendo sua lógica)
   const addProdutoServico = () => {
     const id = Date.now() + Math.random();
-    const newItem = { id, item: "", tipoNota: "", quantidade: "", valor: "", info: "", isOpen: false };
+    const newItem = { id, item: "", tipoNotaItem: "", quantidade: 1, valor: 0, info: "", isOpen: false };
     setProdutosServicos(prev => [...prev, newItem]);
     setTimeout(() => {
       setProdutosServicos(prev =>
@@ -44,66 +124,33 @@ function Tela_1_emitir_nota() {
     );
   };
 
-  const handleClienteChange = (field, value) => {
-    setCliente(prev => ({ ...prev, [field]: value }));
+  // CPF/CNPJ mask handler
+  const handleCpfCnpjChange = (e) => {
+    const raw = e.target.value;
+    const masked = maskCpfCnpj(raw);
+    setClienteCpfCnpj(masked);
   };
 
-  const temNFCe = produtosServicos.some(p => p.tipoNota === "NFC-e");
-
-  // Calcula valor total somando valores (se informados)
-  const calcularValorTotal = () => {
-    const soma = produtosServicos.reduce((acc, p) => {
-      const v = parseFloat(String(p.valor || 0).replace(",", "."));
-      const q = parseFloat(String(p.quantidade || 1).replace(",", "."));
-      if (isNaN(v)) return acc;
-      if (isNaN(q)) return acc + v;
-      return acc + v * q;
-    }, 0);
-    return soma.toFixed(2);
-  };
-
-  // Ao avançar, salva tudo em localStorage e navega para pré-visualização
-  const handleAvancar = (e) => {
-    e.preventDefault();
-    // validações mínimas (ex.: nome e cpf)
-    if (!cliente.nomeSocial.trim()) {
-      alert("Preencha o Nome Social");
-      return;
-    }
-    if (!cliente.cpfCnpj.trim()) {
-      alert("Preencha o CPF/CNPJ");
-      return;
-    }
-
+  // salvar dados no localStorage e seguir para Tela2
+  const salvarEAvancar = () => {
     const payload = {
-      cliente,
-      produtosServicos,
+      tipoNota,
       incluirFrete,
-      valores: {
-        descontoIncond: document.getElementById("desc-incond")?.value || "0",
-        descontoCond: document.getElementById("desc-cond")?.value || "0",
-        valorTotal: document.getElementById("valor-total")?.value || calcularValorTotal()
-      },
-      transporte: {
-        transNome: document.getElementById("trans-nome")?.value || "",
-        transCpf: document.getElementById("trans-cpf")?.value || "",
-        placa: document.getElementById("placa")?.value || "",
-        pesoBruto: document.getElementById("peso-bruto")?.value || "",
-        pesoLiquido: document.getElementById("peso-liquido")?.value || "",
-        infoTransporte: document.getElementById("info-transporte")?.value || ""
-      },
-      meta: {
-        empresaNome: "FINC PLATAFORMA DE EMISSÃO DE NOTAS FISCAIS AUTOMATIZADA LTDA",
-        empresaCNPJ: "12.345.678/0001-90", // pode alterar
-        empresaEndereco: "R. Dezenove de Novembro, 121 - Centro, Timóteo - MG, 35180-008",
-        empresaCidadeUF: "Timóteo - MG"
-      },
-      criadoEm: new Date().toISOString()
+      produtosServicos,
+      clienteNome,
+      clienteCpfCnpj,
+      transNome,
+      transCpf,
+      placa,
+      pesoBruto,
+      pesoLiquido,
+      infoTransporte,
+      descIncond,
+      descCond,
+      valorTotal
     };
-
-    // Salva no localStorage (simples e front-only)
-    localStorage.setItem("emitirNota_dados", JSON.stringify(payload));
-    navigate("/emitir-nota/Finalizar");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    // o Link vai navegar; mas salvamos antes
   };
 
   return (
@@ -125,17 +172,38 @@ function Tela_1_emitir_nota() {
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="nome-social">Nome Social <span className="campo-obrigatório">*</span></label>
-            <input id="nome-social" type="text" placeholder="Selecione"
-              value={cliente.nomeSocial}
-              onChange={(e) => handleClienteChange("nomeSocial", e.target.value)}
-            />
+            <input id="nome-social" type="text" placeholder="Selecione" value={clienteNome} onChange={e => setClienteNome(e.target.value)} />
           </div>
           <div className="form-group">
             <label htmlFor="cpf-cnpj">CPF/CNPJ <span className="campo-obrigatório">*</span></label>
-            <input id="cpf-cnpj" type="text" placeholder="Selecione"
-              value={cliente.cpfCnpj}
-              onChange={(e) => handleClienteChange("cpfCnpj", e.target.value)}
+            <input
+              id="cpf-cnpj"
+              type="text"
+              placeholder="Selecione"
+              maxLength={18}
+              value={clienteCpfCnpj}
+              onChange={handleCpfCnpjChange}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Tipo de Nota (isolado e único) */}
+      <section className="form-section">
+        <div className="section-header">
+          <span className="icon"><i className={icons.produtos}></i></span>
+          <h3>Tipo de Nota (aplica a todos os itens)</h3>
+        </div>
+        <hr className="divider" />
+        <div className="form-row">
+          <div className="form-group">
+            <label>Que tipo de nota deseja?: <span className="campo-obrigatório">*</span></label>
+            <select value={tipoNota} onChange={(e) => setTipoNota(e.target.value)}>
+              <option value="" disabled>Selecione um tipo de Nota Fiscal</option>
+              <option value="NF-e">NF-e (Produto)</option>
+              <option value="NFC-e">NFC-e (Consumidor)</option>
+              <option value="NFS-e">NFS-e (Serviço)</option>
+            </select>
           </div>
         </div>
       </section>
@@ -168,17 +236,10 @@ function Tela_1_emitir_nota() {
             <div className="form-row">
               <div className="form-group">
                 <label>
-                  Que tipo de nota deseja?: <span className="campo-obrigatório">*</span>
+                  Tipo do item (visível apenas) 
                 </label>
-                <select
-                  value={p.tipoNota}
-                  onChange={(e) => handleChange(p.id, "tipoNota", e.target.value)}
-                >
-                  <option value="" disabled>Selecione um tipo de Nota Fiscal</option>
-                  <option value="NF-e">NF-e (Produto)</option>
-                  <option value="NFC-e">NFC-e (Consumidor)</option>
-                  <option value="NFS-e">NFS-e (Serviço)</option>
-                </select>
+                {/* mostramos tipoNota global, mas mantemos campo para compatibilidade */}
+                <input readOnly value={tipoNota} placeholder="Selecione o tipo de nota acima" />
               </div>
 
               <div className="form-group">
@@ -187,7 +248,9 @@ function Tela_1_emitir_nota() {
                 </label>
                 <input
                   id={`quantidade-${p.id}`}
-                  type="text"
+                  type="number"
+                  min="0"
+                  step="1"
                   placeholder="Digite a quantidade"
                   value={p.quantidade}
                   onChange={(e) => handleChange(p.id, "quantidade", e.target.value)}
@@ -196,7 +259,12 @@ function Tela_1_emitir_nota() {
               <div className="form-group input-prefix">
                 <label htmlFor={`valor-${p.id}`}>Valor</label>
                 <span className="prefix">R$</span>
-                <input id={`valor-${p.id}`} type="number" placeholder="0,00"
+                <input
+                  id={`valor-${p.id}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0,00"
                   value={p.valor}
                   onChange={(e) => handleChange(p.id, "valor", e.target.value)}
                 />
@@ -205,7 +273,7 @@ function Tela_1_emitir_nota() {
 
             <div className="form-row full">
               <div className="form-group">
-                <label htmlFor={`info-${p.id}`}>Informação complementar</label>
+                <label htmlFor={`info-${p.id}`}>Informação complementar (descrição)</label>
                 <input
                   id={`info-${p.id}`}
                   type="text"
@@ -231,7 +299,7 @@ function Tela_1_emitir_nota() {
       </section>
 
       {/* Transporte */}
-      <section className={`transport-section ${temNFCe ? "open" : ""}`}>
+      <section className={`transport-section ${tipoNota === "NFC-e" ? "open" : ""}`}>
         <div className="transport-inner">
           <section className="form-section">
             <div className="section-header">
@@ -272,27 +340,27 @@ function Tela_1_emitir_nota() {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="trans-nome">Nome Social</label>
-                  <input id="trans-nome" type="text" placeholder="Nome da Empresa" />
+                  <input id="trans-nome" type="text" placeholder="Nome da Empresa" value={transNome} onChange={e=>setTransNome(e.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="trans-cpf">CPF/CNPJ</label>
-                  <input id="trans-cpf" type="text" placeholder="CPF ou CNPJ da Empresa" />
+                  <input id="trans-cpf" type="text" placeholder="CPF ou CNPJ da Empresa" value={transCpf} onChange={e=>setTransCpf(e.target.value)} />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="placa">Placa do veículo</label>
-                  <input id="placa" type="text" placeholder="000-0000" />
+                  <input id="placa" type="text" placeholder="000-0000" value={placa} onChange={e=>setPlaca(e.target.value)} />
                 </div>
                 <div className="form-group input-suffix">
                   <label htmlFor="peso-bruto">Peso Bruto</label>
-                  <input id="peso-bruto" type="number" placeholder="0" />
+                  <input id="peso-bruto" type="number" placeholder="0" value={pesoBruto} onChange={e=>setPesoBruto(e.target.value)} />
                   <span className="suffix">Kg</span>
                 </div>
                 <div className="form-group input-suffix">
                   <label htmlFor="peso-liquido">Peso Líquido</label>
-                  <input id="peso-liquido" type="number" placeholder="0" />
+                  <input id="peso-liquido" type="number" placeholder="0" value={pesoLiquido} onChange={e=>setPesoLiquido(e.target.value)} />
                   <span className="suffix">Kg</span>
                 </div>
               </div>
@@ -300,7 +368,7 @@ function Tela_1_emitir_nota() {
               <div className="form-row full">
                 <div className="form-group">
                   <label htmlFor="info-transporte">Informação complementar</label>
-                  <input id="info-transporte" type="text" placeholder="Observações (opcional)" />
+                  <input id="info-transporte" type="text" placeholder="Observações (opcional)" value={infoTransporte} onChange={e=>setInfoTransporte(e.target.value)} />
                 </div>
               </div>
             </div>
@@ -319,27 +387,27 @@ function Tela_1_emitir_nota() {
           <div className="form-group input-prefix">
             <label htmlFor="desc-incond">Desconto incondicionado</label>
             <span className="prefix">R$</span>
-            <input id="desc-incond" type="number" placeholder="0,00" />
+            <input id="desc-incond" type="number" min="0" step="0.01" placeholder="0,00" value={descIncond} onChange={(e)=>setDescIncond(e.target.value)} />
           </div>
           <div className="form-group input-prefix">
             <label htmlFor="desc-cond">Desconto condicionado</label>
             <span className="prefix">R$</span>
-            <input id="desc-cond" type="number" placeholder="0,00" />
+            <input id="desc-cond" type="number" min="0" step="0.01" placeholder="0,00" value={descCond} onChange={(e)=>setDescCond(e.target.value)} />
           </div>
         </div>
         <div className="form-row">
           <div className="form-group input-prefix">
             <label htmlFor="valor-total">Valor Total</label>
             <span className="prefix">R$</span>
-            <input id="valor-total" type="number" placeholder="0,00" defaultValue={calcularValorTotal()} />
+            <input id="valor-total" type="number" placeholder="0,00" value={valorTotal} readOnly />
           </div>
         </div>
       </section>
 
       <div className="form-footer-avancar">
-        <button onClick={handleAvancar} className="btn">
+        <Link to="/emitir-nota/Finalizar" onClick={salvarEAvancar}>
           AVANÇAR <i className="bi bi-chevron-double-right"></i><i className="bi bi-chevron-double-right"></i>
-        </button>
+        </Link>
       </div>
     </main>
   );
