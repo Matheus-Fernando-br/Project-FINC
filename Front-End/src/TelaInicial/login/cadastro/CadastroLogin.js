@@ -123,7 +123,7 @@ function CadastroLogin() {
     try {
       setUsuarios((prev) => [...prev, formData]);
 
-      const response = await fetch("https://project-finc.onrender.com", {
+      const response = await fetch("https://project-finc.onrender.com/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

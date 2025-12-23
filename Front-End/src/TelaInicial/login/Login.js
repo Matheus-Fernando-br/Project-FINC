@@ -15,7 +15,7 @@ function Login() {
   e.preventDefault();
 
   try {
-    const response = await fetch("https://project-finc.onrender.com", {
+    const response = await fetch("https://project-finc.onrender.com/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

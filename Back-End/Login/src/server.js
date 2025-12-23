@@ -12,6 +12,7 @@ app.use(express.json());
 
 app.use("/auth", authRoutes);
 
-app.listen(process.env.PORT, () => {
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
   console.log("Backend rodando na porta", process.env.PORT);
 });
