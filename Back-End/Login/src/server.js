@@ -7,7 +7,14 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+import cors from "cors";
+
+app.use(cors({
+  origin: "https://finc-seven.vercel.app/",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 app.use("/auth", authRoutes);
