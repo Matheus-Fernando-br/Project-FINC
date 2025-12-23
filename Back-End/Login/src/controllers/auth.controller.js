@@ -47,12 +47,15 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { login, senha } = req.body;
+  let { login, senha } = req.body;
 
   try {
     let email = login;
 
+    // 👉 se NÃO for email, é CPF/CNPJ
     if (!login.includes("@")) {
+      login = login.replace(/\D/g, "");
+
       const { data, error } = await supabase
         .from("profiles")
         .select("id")
@@ -86,3 +89,4 @@ export const login = async (req, res) => {
     return res.status(500).json({ error: "Erro interno" });
   }
 };
+
