@@ -19,34 +19,76 @@ function MeusDados() {
                 <hr/>
 
                 <div className="form-row">
-                    <input type="text" placeholder="Nome"/>
-                    <input type="text" placeholder="E-mail"/>
-                    <input type="text" placeholder="Data de Nascimento"/>
+                    <div className="form-group">
+                        <label>Nome: </label>
+                        <input type="text" placeholder="Informe o nome"/>
+                    </div>
+                    <div className="form-group">
+                        <label>E-mail: </label>
+                        <input type="text" placeholder="Informe o e-mail"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Data de Nascimento: </label>
+                        <input type="text" placeholder="Informe a data de nascimento"/>
+                    </div>
                 </div>
                 <div className="form-row">
-                    <input type="text" placeholder="CNPJ/CPF"/>
-                    <input type="email" placeholder="CEP"/>
-
+                    <div className="form-group">
+                        <label>CNPJ/CPF: </label>
+                        <input type="text" placeholder="Informe o CNPJ/CPF"/>
+                    </div>
+                    <div className="form-group">
+                        <label>CEP: </label>
+                        <input type="email" placeholder="Informe o CEP"/>
+                    </div>
                 </div>
                 <div className="form-row">
-                    <input type="text" placeholder="Logradouro"/>
-                    <input type="text" placeholder="Número"/>
-                    <input type="text" placeholder="Complemento?"/>
+                    <div className="form-group">
+                        <label>UF: </label>
+                        <input type="text" placeholder="Informe a UF"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Município: </label>
+                        <input type="text" placeholder="Informe o município"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Bairro: </label>
+                        <input type="text" placeholder="Informe o bairro"/>
+                    </div>
                 </div>
                 <div className="form-row">
-                    <input type="text" placeholder="Bairro"/>
-                    <input type="text" placeholder="Município"/>
-                    <input type="text" placeholder="UF"/>
+                    <div className="form-group">
+                        <label>Logradouro: </label>
+                        <input type="text" placeholder="Informe o logradouro"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Número: </label>
+                        <input type="text" placeholder="Informe o número"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Complemento: </label>
+                        <input type="text" placeholder="Informe o complemento"/>
+                    </div>
                 </div>
                 <div className="form-row">
-                    <input type="text" placeholder="Telefone"/>
-                    <input type="text" placeholder="Whatssap"/>
-                    <input type="text" placeholder="Sexo"/>
+                    <div className="form-group">
+                        <label>Telefone: </label>
+                        <input type="text" placeholder="Informe o telefone"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Whatssap: </label>
+                        <input type="text" placeholder="Informe o Whatssap"/>
+                    </div>
                 </div>
                 <div className="form-row">
-                    <input type="text" placeholder="Apelido"/>
-                    <input type="text" placeholder="Categoria"/>
-                    <input type="text" placeholder="Foto"/>
+                    <div className="form-group">
+                        <label>Apelido: </label>
+                        <input type="text" placeholder="Informe o apelido"/>
+                    </div>
+                    <div className="form-group">
+                        <label>Categoria: </label>
+                        <input type="text" placeholder="Informe a categoria"/>
+                    </div>
                 </div>
             
                 <div className="botao_geral">

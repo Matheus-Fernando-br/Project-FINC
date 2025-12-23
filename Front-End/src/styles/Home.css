@@ -55,26 +55,123 @@
 }
 
 /* Atalhos */
-.home-content .atalhos-row {
+
+/* BOTÕES */
+.atalhos-actions {
+  margin-left: auto;
   display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.3rem;
 }
 
-.home-content .atalhos-row button {
-  flex: 1;
-  background: var(--cor-primaria);
-  color: var(--cor-texto-claro);
-  border: none;
-  padding: 0.6rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
+.btn-sm {
+  font-size: 0.6rem;
+  padding: 0.2rem 0.45rem;
+  justify-content: center;
+  font-weight: bold;
 }
 
-.home-content .atalhos-row button:hover {
+
+.ms-auto button {
+  align-items: center;
+  display: flex;
+}
+
+.btn-outline-secondary {
+  padding: .4rem 1rem;
+  font-size: 0.8rem;
+  background-color: #757171a4;
+  border: var(--cor-primaria) 1px solid;
+  color: white;
+}
+
+.btn-outline-secondary i {
+  margin-right: 0.3rem;
+}
+
+.btn-outline-danger {
+  border: 1px solid var(--cor-danger);
+  background: #ee3333a4;
+}
+
+.btn-outline-sucess{
+  border: 1px solid var(--cor-success);
   background: var(--cor-secundaria);
-  transform: scale(1.05);
+}
+
+.btn-success {
+  background-color: #757171a4;
+  border: var(--cor-primaria) 1px solid;
+  color: white;
+  font-size: 0.8rem;
+}
+
+/* LISTA DE ATALHOS */
+.atalhos-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: auto;
+}
+
+.atalhos-list li {
+  border-radius: 4px;
+  margin: 0.3rem;
+  cursor: pointer;
+}
+
+.atalhos-list li a {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: #fff;
+  border-radius: 10px;
+  background: var(--cor-primaria);
+  transition: all 0.2s ease-in-out;
+}
+
+.atalhos-list li a:hover {
+  background: var(--cor-secundaria);
+  transform: scale(0.98);
+}
+
+/* MODO REMOVER */
+.atalhos-list.remove-mode li a {
+  background: rgba(109, 0, 11, 0.712);
+}
+
+.atalhos-list.remove-mode li a:hover {
+  background: rgba(255, 0, 25, 0.664);
+}
+
+/* DROPDOWN */
+.atalhos-dropdown {
+  margin-top: 0.5rem;
+  border: 1px solid var(--cor-primaria);
+  border-radius: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.atalhos-dropdown button {
+  width: 100%;
+  border: none;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.65rem;
+  display: flex;
+  gap: 0.4rem;
+  text-align: left;
+  cursor: pointer;
+  background: #f1f1f1;
+  border-radius: 0;
+  color: black;
+}
+
+.atalhos-dropdown button:hover {
+  background: rgba(11, 158, 6, 0.671);
 }
 
 /* Responsivo */
@@ -87,4 +184,9 @@
   .home-content .form-section {
     box-shadow: 0 0 2px var(--cor-primaria);
   }
+
+  .atalhos-dropdown button {
+    font-size: 0.8rem;
+  }
+
 }

@@ -22,13 +22,26 @@ function Tela_1_feedback() {
         <hr className="divider" />
 
         <div className="form-row">
-          <input type="text" placeholder="Nome completo do contador" />
-          <input type="email" placeholder="E-mail profissional" />
+          <div className="form-group">
+            <label>Nome do Contador: </label>
+            <input type="text" placeholder="Informe o nome completo do contador" />
+          </div>
+
+          <div className="form-group">
+            <label>E-mail: </label>
+            <input type="email" placeholder="Informe o e-mail profissional" />
+          </div>
         </div>
 
         <div className="form-row">
-          <input type="text" placeholder="CPF / CNPJ" />
-          <input type="text" placeholder="Telefone" />
+          <div className="form-group">
+            <label>CPF / CNPJ: </label>
+            <input type="text" placeholder="Informe o CPF ou CNPJ" />
+          </div>
+          <div className="form-group">
+            <label>Telefone: </label>
+            <input type="text" placeholder="Informe o telefone do contador" />
+          </div>
         </div>
 
         <div className="botao_geral">

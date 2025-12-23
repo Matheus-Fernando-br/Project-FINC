@@ -1,14 +1,46 @@
-
 // Home.js
 import icons from "../components/Icons";
-import React from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import suggestions from "../components/app/Suggestions";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, PieChart, Pie, Cell, Legend
 } from "recharts";
-import '../styles/Home.css';
+
+import "../styles/Home.css";
 
 function Home() {
+
+  const STORAGE_KEY = "atalhos_rapidos_home";
+
+  const [editMode, setEditMode] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [removeMode, setRemoveMode] = useState(false);
+
+const [shortcuts, setShortcuts] = useState(() => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  return saved
+    ? JSON.parse(saved)
+    : [{ label: "Atalho 1", icon: "bi-lightning-charge", to: "" }];
+});
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(shortcuts));
+  }, [shortcuts]);
+
+  const addShortcut = (item) => {
+    if (shortcuts.length >= 9) return;
+    setShortcuts([...shortcuts, item]);
+    setShowSuggestions(false);
+  };
+
+  const removeShortcut = (index) => {
+    if (!removeMode) return;
+    setShortcuts(shortcuts.filter((_, i) => i !== index));
+  };
+
+
   const clientes = [
     { nome: "Cliente A", compras: 120 },
     { nome: "Cliente B", compras: 95 },
@@ -38,25 +70,94 @@ function Home() {
 
   const COLORS = ["#2ecc71", "#27ae60", "#0d6630", "#063e20"];
 
-  return (
-      <main className="home-content">
-        <section className="titulo-secao">
-          <h1><i className={icons.casa}></i> Dashboard de Indicadores</h1>
-        </section>
+   return (
+    <main className="home-content">
 
-        {/* Atalhos */}
-        <section className="form-section">
-          <div className="section-header">
-            <span className="icon"><i className="bi bi-lightning-charge-fill"></i></span>
-            <h3>Atalhos Rápidos</h3>
+      <section className="titulo-secao">
+        <h1><i className={icons.casa}></i> Dashboard de Indicadores</h1>
+      </section>
+
+      {/* ATALHOS */}
+      <section className="form-section">
+        <div className="section-header">
+          <span className="icon">
+            <i className="bi bi-lightning-charge-fill"></i>
+          </span>
+          <h3>Atalhos Rápidos</h3>
+
+          <div className="ms-auto atalhos-actions">
+            {editMode ? (
+              <>
+                <button
+                  className={`btn btn-outline-danger btn-sm ${removeMode ? "active" : ""}`}
+                  onClick={() => setRemoveMode(!removeMode)}
+                >
+                  <i className="bi bi-dash"></i> Remover atalho
+                </button>
+
+                <button
+                  className="btn btn-outline-success btn-sm"
+                  onClick={() => setShowSuggestions(!showSuggestions)}
+                >
+                  <i className="bi bi-plus"></i> Adicionar atalho
+                </button>
+
+                <button
+                  className="btn btn-success btn-sm"
+                  onClick={() => {
+                    setEditMode(false);
+                    setShowSuggestions(false);
+                    setRemoveMode(false);
+                  }}
+                >
+                  Salvar
+                </button>
+              </>
+            ) : (
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => setEditMode(true)}
+              >
+                <i class="bi bi-pencil-square"></i> Editar
+              </button>
+            )}
           </div>
-          <hr className="divider" />
-          <div className="form-row atalhos-row">
-            <button>Atalho 1</button>
-            <button>Atalho 2</button>
-            <button>Atalho 3</button>
+        </div>
+
+        <hr className="divider" />
+
+        {/* LISTA DE ATALHOS */}
+        <ul className={`atalhos-list ${removeMode ? "remove-mode" : ""}`}>
+          {shortcuts.map((shortcut, index) => (
+            <li
+              key={index}
+              onClick={() => removeShortcut(index)}
+            >
+              <Link
+                to={shortcut.to || "#"}
+                onClick={(e) => {
+                  if (removeMode || !shortcut.to) e.preventDefault();
+                }}
+              >
+                <i className={`bi ${shortcut.icon}`}></i>
+                {shortcut.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {/* DROPDOWN */}
+        {editMode && showSuggestions && (
+          <div className="atalhos-dropdown">
+            {suggestions.map((item, index) => (
+              <button key={index} onClick={() => addShortcut(item)}>
+                <i className={`bi ${item.icon}`}></i>
+                {item.label}
+              </button>
+            ))}
           </div>
-        </section>
+        )}
+      </section>
 
         {/* Estatísticas Rápidas */}
         <section className="form-section">
