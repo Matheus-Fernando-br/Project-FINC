@@ -11,20 +11,32 @@ function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   // Função de login
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (usuario.trim() === "" || senha.trim() === "") {
-      alert("Preencha todos os campos!");
+  try {
+    const response = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        login: usuario.replace(/\D/g, ""),
+        senha
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error);
       return;
     }
 
-    if (usuario === "admin" && senha === "1234") {
-      alert("Login realizado com sucesso!");
-      navigate("/app");
-    } else {
-      alert("Usuário ou senha inválidos!");
-    }
+    alert("Login realizado com sucesso!");
+    navigate("/app");
+
+  } catch (err) {
+    alert("Erro de conexão");
+  }
   };
 
   return (

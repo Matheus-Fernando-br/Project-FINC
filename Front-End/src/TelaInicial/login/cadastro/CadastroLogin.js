@@ -123,14 +123,18 @@ function CadastroLogin() {
     try {
       setUsuarios((prev) => [...prev, formData]);
 
-      const response = await fetch(
-        "https://rolf-aquarial-nontelegraphically.ngrok-free.dev/finc/criaUsuario",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("http://localhost:3001/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          senha: formData.senha,
+          socialName: formData.socialName,
+          tipoPessoa: formData.tipoPessoa,
+          cpfCnpj: formData.cpf.replace(/\D/g, ""),
+          telefone: formData.telefone
+        }),
+      });
 
       if (response.ok) {
         alert("Conta criada com sucesso!");
