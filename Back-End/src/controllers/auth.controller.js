@@ -49,7 +49,6 @@ export const login = async (req, res) => {
         .from("profiles")
         .select("id")
         .eq("cpf_cnpj", cpf)
-        .single();
 
       if (!profile) {
         return res.status(401).json({ error: "Usuário não encontrado" });

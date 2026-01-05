@@ -12,38 +12,44 @@ function Login() {
 
   // Função de login
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const response = await fetch("https://project-finc.onrender.com/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        login: usuario,
-        senha
-      }),
-    });
+    try {
+      const response = await fetch(
+        "https://project-finc.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            login: usuario.trim(),
+            senha
+          }),
+        }
+      );
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      alert(data.error);
-      return; 
+      if (!response.ok) {
+        alert(data.error || "Erro no login");
+        return;
+      }
+
+      // 🔥 VALIDA ANTES DE SALVAR
+      if (!data.session?.access_token) {
+        alert("Token não retornado pelo servidor");
+        return;
+      }
+
+      localStorage.setItem("token", data.session.access_token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      navigate("/app");
+
+    } catch (err) {
+      alert("Erro de conexão com o servidor");
     }
-
-    // salva token
-    localStorage.setItem("token", data.session.access_token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("user_name", data.nome);
-
-    alert("Login realizado com sucesso!");
-    navigate("/app");
-
-
-  } catch (err) {
-    alert("Erro de conexão");
-  }
   };
+
 
   return (
     <main>
