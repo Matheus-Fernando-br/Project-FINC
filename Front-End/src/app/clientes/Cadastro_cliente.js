@@ -75,17 +75,18 @@ function Cadastro_cliente() {
     if (!data.erro) {
       setForm((prev) => ({
         ...prev,
-        cep,
-        uf: data.uf,
-        cidade: data.localidade,
-        logradouro: data.logradouro,
-        bairro: data.bairro
+        cep: cep,
+        uf: data.uf || "",
+        cidade: data.localidade || "",
+        logradouro: data.logradouro || "",
+        bairro: data.bairro || ""
       }));
     }
-  } catch (err) {
+  } catch {
     console.error("Erro ao buscar CEP");
   }
-};
+  };
+
 
 
 
@@ -147,23 +148,32 @@ function Cadastro_cliente() {
           </div>
 
           {/* campo condicional */}
-          {/* CPF */}
-          {tipoPessoa === "PFisica" && (
-            <div className="form-group fade-in">
-              <label>
-                CPF: <span className="campo-obrigatório">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Informe o CPF do cliente"
-                maxLength="14"
-                value={form.cpf_cnpj}
-                onChange={(e) =>
-                  setForm({ ...form, cpf_cnpj: e.target.value })
-                }
-              />
-            </div>
-          )}
+         {/* CPF */}
+        {tipoPessoa === "PFisica" && (
+          <div className="form-group fade-in">
+            <label>
+              CPF: <span className="campo-obrigatório">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Informe o CPF do cliente"
+              maxLength={14}
+              value={form.cpf_cnpj}
+              onChange={(e) => {
+                let value = e.target.value.replace(/\D/g, ""); // só números
+
+                value = value
+                  .slice(0, 11)
+                  .replace(/(\d{3})(\d)/, "$1.$2")
+                  .replace(/(\d{3})(\d)/, "$1.$2")
+                  .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+                setForm({ ...form, cpf_cnpj: value });
+              }}
+            />
+          </div>
+        )}
+
 
           {/* CNPJ */}
           {tipoPessoa === "PJuridica" && (
@@ -171,17 +181,27 @@ function Cadastro_cliente() {
               <label>
                 CNPJ: <span className="campo-obrigatório">*</span>
               </label>
-               <input
-                  type="text"
-                  placeholder="Informe o CNPJ do cliente"
-                  maxLength="18"
-                  value={form.cpf_cnpj}
-                  onChange={(e) =>
-                    setForm({ ...form, cpf_cnpj: e.target.value })
-                  }
-                />
+              <input
+                type="text"
+                placeholder="Informe o CNPJ do cliente"
+                maxLength={18}
+                value={form.cpf_cnpj}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, ""); // só números
+
+                  value = value
+                    .slice(0, 14)
+                    .replace(/^(\d{2})(\d)/, "$1.$2")
+                    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+                    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+                    .replace(/(\d{4})(\d)/, "$1-$2");
+
+                  setForm({ ...form, cpf_cnpj: value });
+                }}
+              />
             </div>
           )}
+
         </div>
 
       </section>
@@ -236,7 +256,14 @@ function Cadastro_cliente() {
             <label>
               Cidade: <span className="campo-obrigatório">*</span>
             </label>
-            <input type="text" placeholder="Selecione" onChange={(e) => setForm({ ...form, cidade: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Cidade"
+              value={form.cidade}
+              onChange={(e) =>
+                setForm({ ...form, cidade: e.target.value })
+              }
+            />
           </div>
         </div>
         <div className="form-row">
@@ -244,7 +271,14 @@ function Cadastro_cliente() {
             <label>
               Logradouro: <span className="campo-obrigatório">*</span>
             </label>
-            <input type="text" placeholder="Digite o nome da rua" onChange={(e) => setForm({ ...form, logradouro: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Digite o nome da rua"
+              value={form.logradouro}
+              onChange={(e) =>
+                setForm({ ...form, logradouro: e.target.value })
+              }
+            />
           </div>
         </div>
         <div className="form-row">
@@ -252,7 +286,14 @@ function Cadastro_cliente() {
             <label>
               Bairro: <span className="campo-obrigatório">*</span>
             </label>
-            <input type="text" placeholder="Digite o nome do bairro" onChange={(e) => setForm({ ...form, bairro: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Digite o nome do bairro"
+              value={form.bairro}
+              onChange={(e) =>
+                setForm({ ...form, bairro: e.target.value })
+              }
+            />
           </div>
           <div className="form-group">
             <label>
