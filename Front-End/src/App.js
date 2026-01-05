@@ -31,6 +31,7 @@ import MenuSair from './app/sair/MenuSair';
 import Tela_2_planilha_clientes from './app/clientes/Tela_2_planilha_clientes';
 import Tela_2_planilha_produto from './app/produtos_servicos/produto/Tela_planilha_produto';
 import Tela_2_planilha_servico from './app/produtos_servicos/servico/Tela_planilha_servico';
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   useEffect(() => {
@@ -47,25 +48,25 @@ function App() {
       <Route path="/TelaInicial/Login/Cadastro" element={<LayoutTelaInicial><CadastroLogin /></LayoutTelaInicial>} />
       <Route path="/TelaInicial/Duvidas" element={<LayoutTelaInicial><Duvidas /></LayoutTelaInicial>} />
       {/*Pos login*/}
-      <Route path="/app" element={<Layout><Home /></Layout>} />
-      <Route path="/emitir-nota/Dados" element={<Layout><Tela_1_emitir_nota /></Layout>} />
-      <Route path="/emitir-nota/Finalizar" element={<Layout><Tela_2_emitir_nota /></Layout>} />
-      <Route path="/MeusDados" element={<Layout><MeusDados /></Layout>} />
-      <Route path="/clientes" element={<Layout><Tela_1_clientes /></Layout>} />
-      <Route path="/clientes/cadastro" element={<Layout><Cadastro_cliente /></Layout>} />
-      <Route path="/produtos" element={<Layout><Tela_1_produtos /></Layout>} />
-      <Route path="/produtos/cadastro" element={<Layout><Cadastro_produtos /></Layout>} />
-      <Route path="/produtos/cadastro/planilha" element={<Layout><Cadastro_produtos_planilha /></Layout>} />
-      <Route path="/produtos/cadastro/produto" element={<Layout><Tela_Cadastro_Produto /></Layout>} />
-      <Route path="/produtos/cadastro/servico" element={<Layout><Tela_Cadastro_Servico /></Layout>} />
-      <Route path="/notificacao" element={<Layout><Tela_1_notificacao /></Layout>} />
-      <Route path="/planos" element={<Layout><Tela_1_planos /></Layout>} />
-      <Route path="/pagamento" element={<Layout><Pagamento /></Layout>} />
-      <Route path="/contador" element={<Layout><Tela_1_contador /></Layout>} />
-      <Route path="/sair" element={<Layout><MenuSair /></Layout>} />
-      <Route path="/import/clientes" element={<Layout><Tela_2_planilha_clientes /></Layout>} />
-      <Route path="/import/produto" element={<Layout><Tela_2_planilha_produto /></Layout>} />
-      <Route path="/import/servico" element={<Layout><Tela_2_planilha_servico /></Layout>} />
+      <Route path="/app" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
+      <Route path="/emitir-nota/Dados" element={<ProtectedRoute><Layout><Tela_1_emitir_nota /></Layout></ProtectedRoute>} />
+      <Route path="/emitir-nota/Finalizar" element={<ProtectedRoute><Layout><Tela_2_emitir_nota /></Layout></ProtectedRoute>} />
+      <Route path="/MeusDados" element={<ProtectedRoute><Layout><MeusDados /></Layout></ProtectedRoute>} />
+      <Route path="/clientes" element={<ProtectedRoute><Layout><Tela_1_clientes /></Layout></ProtectedRoute>} />
+      <Route path="/clientes/cadastro" element={<ProtectedRoute><Layout><Cadastro_cliente /></Layout></ProtectedRoute>} />
+      <Route path="/produtos" element={<ProtectedRoute><Layout><Tela_1_produtos /></Layout></ProtectedRoute>} />
+      <Route path="/produtos/cadastro" element={<ProtectedRoute><Layout><Cadastro_produtos /></Layout></ProtectedRoute>} />
+      <Route path="/produtos/cadastro/planilha" element={<ProtectedRoute><Layout><Cadastro_produtos_planilha /></Layout></ProtectedRoute>} />
+      <Route path="/produtos/cadastro/produto" element={<ProtectedRoute><Layout><Tela_Cadastro_Produto /></Layout></ProtectedRoute>} />
+      <Route path="/produtos/cadastro/servico" element={<ProtectedRoute><Layout><Tela_Cadastro_Servico /></Layout></ProtectedRoute>} />
+      <Route path="/notificacao" element={<ProtectedRoute><Layout><Tela_1_notificacao /></Layout></ProtectedRoute>} />
+      <Route path="/planos" element={<ProtectedRoute><Layout><Tela_1_planos /></Layout></ProtectedRoute>} />
+      <Route path="/pagamento" element={<ProtectedRoute><Layout><Pagamento /></Layout></ProtectedRoute>} />
+      <Route path="/contador" element={<ProtectedRoute><Layout><Tela_1_contador /></Layout></ProtectedRoute>} />
+      <Route path="/sair" element={<ProtectedRoute><Layout><MenuSair /></Layout></ProtectedRoute>} />
+      <Route path="/import/clientes" element={<ProtectedRoute><Layout><Tela_2_planilha_clientes /></Layout></ProtectedRoute>} />
+      <Route path="/import/produto" element={<ProtectedRoute><Layout><Tela_2_planilha_produto /></Layout></ProtectedRoute>} />
+      <Route path="/import/servico" element={<ProtectedRoute><Layout><Tela_2_planilha_servico /></Layout></ProtectedRoute>} />
 
     </Routes>
   );

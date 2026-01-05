@@ -28,12 +28,13 @@ function Login() {
 
     if (!response.ok) {
       alert(data.error);
-      return;
+      return; 
     }
 
     // salva token
     localStorage.setItem("token", data.session.access_token);
     localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("user_name", data.nome);
 
     alert("Login realizado com sucesso!");
     navigate("/app");

@@ -10,45 +10,41 @@ function Tela_1_clientes() {
   const [paginaAtual, setPaginaAtual] = useState(1);
 
   const itensPorPagina = 5;
+  const [listaCompleta, setListaCompleta] = useState([]);
+
 
   /* ===============================
      BUSCAR CLIENTES DO BACK-END
   =============================== */
   useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        const token = localStorage.getItem("token"); // ajuste se usar outro nome
-
-        const response = await fetch(
-          "https://project-finc.onrender.com/clientes",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-            }
+    async function buscarClientes() {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/clientes`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
           }
-        );
-
-        if (!response.ok) {
-          throw new Error("Erro ao buscar clientes");
         }
+      );
 
-        const data = await response.json();
-
-        const clientesFormatados = data.map((cliente) => ({
-          id: cliente.id,
-          nome: cliente.nome_social,
-          categoria: cliente.tipo_pessoa === "PFisica" ? "PF" : "PJ"
-        }));
-
-        setClientes(clientesFormatados);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        console.error("Erro ao buscar clientes");
+        return;
       }
-    };
 
-    fetchClientes();
+      const data = await response.json();
+
+      const formatados = data.map(c => ({
+        nome: c.nome_social,
+        categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
+      }));
+
+      setListaCompleta(formatados);
+    }
+
+    buscarClientes();
   }, []);
+
 
   /* ===============================
      FILTROS

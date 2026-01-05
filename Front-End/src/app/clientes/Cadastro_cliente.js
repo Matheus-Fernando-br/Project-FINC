@@ -39,20 +39,55 @@ function Cadastro_cliente() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${localStorage.getItem("token")}`
       },
       body: JSON.stringify(form)
     }
   );
 
+
   const data = await response.json();
 
   if (!response.ok) {
-    alert(data.erro);
-  } else {
-    alert("Cliente cadastrado com sucesso!");
+      alert(data.erro);
+    } else {
+      alert("Cliente cadastrado com sucesso!");
+    }
   }
-}
+
+  const maskTelefone = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
+  };
+
+  const buscarCEP = async (cep) => {
+  const cepLimpo = cep.replace(/\D/g, "");
+
+  if (cepLimpo.length !== 8) return;
+
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+    const data = await res.json();
+
+    if (!data.erro) {
+      setForm((prev) => ({
+        ...prev,
+        cep,
+        uf: data.uf,
+        cidade: data.localidade,
+        logradouro: data.logradouro,
+        bairro: data.bairro
+      }));
+    }
+  } catch (err) {
+    console.error("Erro ao buscar CEP");
+  }
+};
+
+
 
   return (
     <main className="content">
@@ -164,13 +199,38 @@ function Cadastro_cliente() {
             <label>
               CEP: <span className="campo-obrigatório">*</span>
             </label>
-            <input type="text" placeholder="00-000.000" onChange={(e) => setForm({ ...form, cep: e.target.value })} />
+            <input
+              type="text"
+              placeholder="00000-000"
+              value={form.cep || ""}
+              onChange={(e) => {
+                const valor = e.target.value
+                  .replace(/\D/g, "")
+                  .replace(/^(\d{5})(\d)/, "$1-$2")
+                  .slice(0, 9);
+
+                setForm({ ...form, cep: valor });
+                buscarCEP(valor);
+              }}
+            />
           </div>
           <div className="form-group">
             <label>
               UF: <span className="campo-obrigatório">*</span>
             </label>
-            <input type="text" placeholder="Selecione" onChange={(e) => setForm({ ...form, uf: e.target.value })} />
+            <select
+              value={form.uf || ""}
+              onChange={(e) => setForm({ ...form, uf: e.target.value })}
+            >
+              <option value="">Selecione</option>
+              {[
+                "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
+                "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
+                "RS","RO","RR","SC","SP","SE","TO"
+              ].map((uf) => (
+                <option key={uf} value={uf}>{uf}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label>
@@ -228,7 +288,13 @@ function Cadastro_cliente() {
             <label>
               E-mail: <span className="campo-obrigatório">*</span>
             </label>
-            <input type="text" placeholder="Informe o e-mail do cliente" onChange={(e) => setForm({ ...form, email: e.target.value })} />
+"            <input
+              type="text"
+              placeholder="Informe o e-mail do cliente"
+              onChange={(e) =>
+                setForm({ ...form, email: e.target.value.toLowerCase() })
+              }
+            />"
           </div>
           <div className="form-group">
             <label>
@@ -236,16 +302,23 @@ function Cadastro_cliente() {
             </label>
             <input
               type="text"
-              placeholder="Informe o número de Telefone para ligações"
-              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+              placeholder="Informe o número de Telefone"
+              value={form.telefone || ""}
+              onChange={(e) =>
+                setForm({ ...form, telefone: maskTelefone(e.target.value) })
+              }
             />
+
           </div>
           <div className="form-group">
             <label>Whatssap:</label>
             <input
               type="text"
-              placeholder="Informe o número de telefone de Whatssap"
-              onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+              placeholder="Informe o número de WhatsApp"
+              value={form.whatsapp || ""}
+              onChange={(e) =>
+                setForm({ ...form, whatsapp: maskTelefone(e.target.value) })
+              }
             />
           </div>
         </div>

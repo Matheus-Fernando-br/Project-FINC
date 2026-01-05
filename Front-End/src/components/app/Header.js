@@ -65,10 +65,12 @@ function Header() {
     }
   }
 
+  const nome = localStorage.getItem("user_name") || "Usuário";
+
   return (
     <header className="header">
       <div className="msg">
-        <h2>Olá, Gabriel</h2>
+        <h2>Olá, {nome.split(" ")[0]}</h2>
       </div>
 
       <div className="search-wrapper">
