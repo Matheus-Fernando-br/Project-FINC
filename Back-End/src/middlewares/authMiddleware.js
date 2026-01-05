@@ -1,7 +1,6 @@
 import { supabase } from "../services/supabase.js";
 
-
-export async function authMiddleware(req, res, next) {
+const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -18,4 +17,6 @@ export async function authMiddleware(req, res, next) {
 
   req.user = data.user;
   next();
-}
+};
+
+export default authMiddleware;
