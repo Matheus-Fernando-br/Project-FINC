@@ -1,45 +1,66 @@
-import React, { useState } from "react";
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
 
 function Tela_1_clientes() {
-
-  const listaCompleta = [
-    { nome: "Pedreira VMIX", tipo: "Insumos", categoria: "PJ" },
-    { nome: "Marmoraria PS", tipo: "Insumos", categoria: "PJ" },
-    { nome: "ProTransportes", tipo: "Logística", categoria: "PJ" },
-    { nome: "Gabriel Torres", tipo: "Autônomo", categoria: "PF" },
-    { nome: "Construtec Brasil", tipo: "Construção", categoria: "PJ" },
-    { nome: "Alpha Motors", tipo: "Automotivo", categoria: "PJ" },
-    { nome: "MegaLimp Service", tipo: "Serviços Gerais", categoria: "PJ" },
-    { nome: "Bruna Oliveira", tipo: "Consumidor", categoria: "PF" },
-    { nome: "SoftCode TI", tipo: "Tecnologia", categoria: "PJ" },
-    { nome: "Doces da Serra", tipo: "Alimentos", categoria: "PJ" },
-    { nome: "EcoVerde", tipo: "Ambiental", categoria: "PJ" },
-    { nome: "HidroVale", tipo: "Hidráulica", categoria: "PJ" },
-    { nome: "SolarMax", tipo: "Energia", categoria: "PJ" },
-    { nome: "Prime Seguros", tipo: "Seguros", categoria: "PJ" },
-    { nome: "Felipe Andrade", tipo: "Autônomo", categoria: "PF" }
-  ];
-
+  const [clientes, setClientes] = useState([]);
   const [pesquisa, setPesquisa] = useState("");
   const [abaAtual, setAbaAtual] = useState("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
 
   const itensPorPagina = 5;
 
-  // FILTRO DE ABA
-  const filtradosPorAba = listaCompleta.filter(item =>
+  /* ===============================
+     BUSCAR CLIENTES DO BACK-END
+  =============================== */
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const token = localStorage.getItem("token"); // ajuste se usar outro nome
+
+        const response = await fetch(
+          "https://project-finc.onrender.com/clientes",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Erro ao buscar clientes");
+        }
+
+        const data = await response.json();
+
+        const clientesFormatados = data.map((cliente) => ({
+          id: cliente.id,
+          nome: cliente.nome_social,
+          categoria: cliente.tipo_pessoa === "PFisica" ? "PF" : "PJ"
+        }));
+
+        setClientes(clientesFormatados);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchClientes();
+  }, []);
+
+  /* ===============================
+     FILTROS
+  =============================== */
+  const filtradosPorAba = clientes.filter((item) =>
     abaAtual === "todos" ? true : item.categoria === abaAtual
   );
 
-  // APLICAR PESQUISA
-  const filtrados = filtradosPorAba.filter(item =>
+  const filtrados = filtradosPorAba.filter((item) =>
     item.nome.toLowerCase().includes(pesquisa.toLowerCase())
   );
 
-  // PAGINAÇÃO
   const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
 
   const itensExibidos = filtrados.slice(
@@ -47,7 +68,9 @@ function Tela_1_clientes() {
     paginaAtual * itensPorPagina
   );
 
-  // HANDLERS
+  /* ===============================
+     HANDLERS
+  =============================== */
   const handlePesquisa = (e) => {
     setPesquisa(e.target.value);
     setPaginaAtual(1);
@@ -63,56 +86,88 @@ function Tela_1_clientes() {
     setPaginaAtual(1);
   };
 
+  const excluirCliente = async (id) => {
+    if (!window.confirm("Deseja realmente excluir este cliente?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `https://project-finc.onrender.com/clientes/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir cliente");
+      }
+
+      setClientes(clientes.filter((c) => c.id !== id));
+    } catch (error) {
+      alert("Erro ao excluir cliente");
+    }
+  };
+
   return (
     <main className="content fade-in">
-
-      <section className='titulo-secao'>
-        <h1><i className={icons.clientes}></i> Meus Clientes</h1>
+      <section className="titulo-secao">
+        <h1>
+          <i className={icons.clientes}></i> Meus Clientes
+        </h1>
       </section>
 
       {/* CADASTRAR */}
       <section className="form-section fade-in">
         <div className="section-header">
-          <span className="icon"><i className={icons.clientesAdd}></i></span>
+          <span className="icon">
+            <i className={icons.clientesAdd}></i>
+          </span>
           <h3>Cadastrar um novo Cliente</h3>
         </div>
-        <hr className="divider"/>
+        <hr className="divider" />
         <div className="botao_geral">
           <Link to="/clientes/cadastro">
             <button className="btn">Cadastrar</button>
           </Link>
           <Link to="/import/clientes">
-            <button className="btn btn-importSheet">Importar de uma Planilha</button>
+            <button className="btn btn-importSheet">
+              Importar de uma Planilha
+            </button>
           </Link>
         </div>
       </section>
 
-      {/* LISTA DE CLIENTES */}
+      {/* LISTA */}
       <section className="form-section fade-in">
-
         <div className="section-header">
-          <span className="icon"><i className={icons.relatorio}></i></span>
+          <span className="icon">
+            <i className={icons.relatorio}></i>
+          </span>
           <h3>Meus Clientes</h3>
         </div>
-        <hr className="divider"/>
+        <hr className="divider" />
 
-         {/* ABAS */}
+        {/* ABAS */}
         <div className="abas-container">
-          <button 
+          <button
             className={abaAtual === "todos" ? "aba ativa" : "aba"}
             onClick={() => trocarAba("todos")}
           >
             Todos
           </button>
 
-          <button 
+          <button
             className={abaAtual === "PJ" ? "aba ativa" : "aba"}
             onClick={() => trocarAba("PJ")}
           >
             Pessoa Jurídica
           </button>
 
-          <button 
+          <button
             className={abaAtual === "PF" ? "aba ativa" : "aba"}
             onClick={() => trocarAba("PF")}
           >
@@ -128,8 +183,8 @@ function Tela_1_clientes() {
             onChange={handlePesquisa}
             placeholder="Pesquisar cliente..."
           />
-        
-        {pesquisa !== "" && (
+
+          {pesquisa !== "" && (
             <button onClick={limparPesquisa} className="btn-limpar">
               Limpar
             </button>
@@ -138,19 +193,22 @@ function Tela_1_clientes() {
 
         {/* CARDS */}
         <div className="cards animar-lista">
-          {itensExibidos.map((item, idx) => (
-            <React.Fragment key={idx}>
+          {itensExibidos.map((item) => (
+            <React.Fragment key={item.id}>
               <hr className="divider" />
 
               <div className="card-cliente animar-card">
                 <div>
                   <h4>{item.nome}</h4>
-                  <p>{item.tipo.toUpperCase()}</p>
+                  <p>{item.categoria}</p>
                 </div>
 
                 <div className="editar-acao">
-                  <i className={icons.edit}></i>
-                  <p>Editar</p>
+                  <i
+                    className={icons.edit}
+                    onClick={() => excluirCliente(item.id)}
+                  ></i>
+                  <p>Excluir</p>
                 </div>
               </div>
             </React.Fragment>
@@ -161,7 +219,7 @@ function Tela_1_clientes() {
 
         {/* PAGINAÇÃO */}
         <div className="paginacao">
-          {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(num => (
+          {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
             <button
               key={num}
               className={num === paginaAtual ? "pagina ativa" : "pagina"}
@@ -172,7 +230,6 @@ function Tela_1_clientes() {
           ))}
         </div>
 
-        {/* QUANDO NÃO ENCONTRA */}
         {filtrados.length === 0 && (
           <p className="nenhum">Nenhum item encontrado.</p>
         )}

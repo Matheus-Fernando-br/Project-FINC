@@ -31,8 +31,13 @@ function Login() {
       return;
     }
 
+    // salva token
+    localStorage.setItem("token", data.session.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
     alert("Login realizado com sucesso!");
     navigate("/app");
+
 
   } catch (err) {
     alert("Erro de conexão");
