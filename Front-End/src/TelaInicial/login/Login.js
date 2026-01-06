@@ -110,11 +110,17 @@ function Login() {
               <p>ou</p>
             </div>
 
-            <Link to="/TelaInicial/Login/Cadastro">
-              <button type="button" className="btn2">
-                Criar Conta
-              </button>
-            </Link>
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/TelaInicial/Login/Cadastro", {
+                  state: { direction: "right" }
+                })
+              }
+            >
+              Criar Conta
+            </button>
+
             </div>
           </form>
         </div>

@@ -1,0 +1,81 @@
+.termos-container {
+    position: relative;
+  margin: 0 auto;
+  padding-top: 18vh;
+  padding-bottom: 5vh;
+  padding-left: 7vw;
+  padding-right: 7vw;
+  color: white;
+  background-color: black;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  text-align: justify;
+}
+
+.termos-container .Voltar {
+    text-align: center;
+    margin-bottom: 4vh;
+}
+
+.termos-container .Fundo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.termos-container .Fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.termos-container .btn-geral {
+  padding: 3vh 15vw;
+  font-size: 2rem;
+  color: white;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  z-index: 2;
+}
+
+.termos-container button.btn-geral:hover {
+  background-color: var(--cor-primaria-escura);
+  transform: scale(0.98);
+}
+
+.termos-container h1 {
+  margin-bottom: 4vh;
+  text-align: center;
+}
+
+.termos-container h2 {
+  margin-top: 5vh;
+  margin-bottom: 2vh;
+}
+
+.termos-container p {
+  margin-bottom: 3vh;
+  line-height: 1.8;
+}
+
+.termos-container ul {
+  margin-top: 2vh;
+  margin-bottom: 4vh;
+  padding-left: 2vw;
+}
+
+.termos-container li {
+  margin-bottom: 1.5vh;
+}
+
+.termos-container .intro {
+  font-size: 1.1rem;
+}
+
+.termos-container .final {
+  font-weight: 500;
+}

@@ -157,9 +157,11 @@ function CadastroLogin() {
       </div>
 
       <div className="rodape form-footer voltar">
-        <Link to="/TelaInicial/Login">
-          Voltar para Tela de Login <i className="bi bi-chevron-double-left"></i>
-          <i className="bi bi-chevron-double-left"></i>
+        <Link
+          to="/TelaInicial/Login"
+          state={{ direction: "left" }}
+        >
+          Voltar para Tela de Login
         </Link>
       </div>
 
@@ -270,7 +272,12 @@ function CadastroLogin() {
                 checked={formData.termos}
                 onChange={handleChange}
               />
-              Aceito os Termos e Serviços
+              <Link
+                to="/TelaInicial/Termos"
+                state={{ direction: "right" }}
+              >
+                Aceito os Termos e Serviços
+              </Link>
             </label>
           </div>
 
