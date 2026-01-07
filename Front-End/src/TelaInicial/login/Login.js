@@ -40,8 +40,11 @@ function Login() {
         return;
       }
 
+      
       localStorage.setItem("token", data.session.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      //Salvar o nome social para o Header
+      localStorage.setItem("user_name", data.user.social_name);
 
       navigate("/app");
 

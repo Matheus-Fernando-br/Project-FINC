@@ -65,12 +65,14 @@ function Header() {
     }
   }
 
-  const nome = localStorage.getItem("user_name") || "Usuário";
+  const nomeCompleto = localStorage.getItem("user_name") || "Usuário";
+  const primeiroNome = nomeCompleto.split(" ")[0];
+
 
   return (
     <header className="header">
       <div className="msg">
-        <h2>Olá, {nome.split(" ")[0]}</h2>
+        <h2>Olá, {primeiroNome}</h2>
       </div>
 
       <div className="search-wrapper">
@@ -124,7 +126,7 @@ function Header() {
 
       <div className="header-right">
         <Link to="/MeusDados">
-          <span className="user-name">Gabriel Moreira Carvalho</span>
+          <span className="user-name">{nomeCompleto}</span>
         </Link>
 
         <div className="profile">

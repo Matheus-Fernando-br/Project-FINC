@@ -48,11 +48,12 @@ function Cadastro_cliente() {
 
   const data = await response.json();
 
-  if (!response.ok) {
-      alert(data.erro);
-    } else {
-      alert("Cliente cadastrado com sucesso!");
+    if (!response.ok) {
+      alert(data.error || "Erro ao cadastrar cliente");
+      return;
     }
+
+    alert("Cliente cadastrado com sucesso!");
   }
 
   const maskTelefone = (value) => {

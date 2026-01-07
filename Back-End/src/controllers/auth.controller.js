@@ -4,6 +4,28 @@ export const register = async (req, res) => {
   const { email, senha, socialName, tipoPessoa, cpfCnpj, telefone } = req.body;
 
   try {
+
+    // ✅ VALIDAR EMAIL ÚNICO
+    const { data: existingUser } = await supabase.auth.admin.listUsers();
+    const emailExists = existingUser.users.some(
+      u => u.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (emailExists) {
+      return res.status(400).json({ error: "Email já cadastrado" });
+    }
+
+    // ✅ VALIDAR CPF/CNPJ ÚNICO
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("cpf_cnpj", cpfCnpj.replace(/\D/g, ""))
+      .single();
+
+    if (existingProfile) {
+      return res.status(400).json({ error: "CPF/CNPJ já cadastrado" });
+    }
+
     // 1. cria usuário no auth
     const { data, error } = await supabase.auth.admin.createUser({
       email: email.toLowerCase(),
@@ -25,12 +47,14 @@ export const register = async (req, res) => {
       });
 
     if (profileError) {
+      await supabase.auth.admin.deleteUser(data.user.id);
       return res.status(400).json({ error: profileError.message });
     }
 
     res.status(201).json({ message: "Usuário criado com sucesso" });
 
   } catch {
+    console.error("Erro no registro:", error);
     res.status(500).json({ error: "Erro interno" });
   }
 };
@@ -45,38 +69,54 @@ export const login = async (req, res) => {
     if (!login.includes("@")) {
       const cpf = login.replace(/\D/g, "");
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id")
         .eq("cpf_cnpj", cpf)
+        .single();
 
-      if (!profile) {
+      if (profileError || !profile) {
         return res.status(401).json({ error: "Usuário não encontrado" });
       }
 
-      const { data: userData } =
+      const { data: userData, error: userError } =
         await supabase.auth.admin.getUserById(profile.id);
+
+      if (userError || !userData?.user) {
+        return res.status(401).json({ error: "Erro ao buscar usuário" });
+      }
 
       email = userData.user.email;
     }
 
-    // LOGIN FINAL
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password: senha
-      });
 
-    if (error) {
-      return res.status(401).json({ error: "Credenciais inválidas" });
-    }
+  // LOGIN FINAL
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: senha
+  });
 
-    return res.json({
-      session: data.session,
-      user: data.user
-    });
+  if (error) return res.status(401).json({ error: "Credenciais inválidas" });
 
-  } catch {
+// 🔥 BUSCAR O NOME SOCIAL NO PERFIL
+const { data: profile, error: profileError } = await supabase
+  .from("profiles")
+  .select("social_name")
+  .eq("id", data.user.id)
+  .single();
+
+  if (profileError || !profile) {
+  return res.status(500).json({ error: "Usuário não encontrado" });
+}
+
+return res.json({
+  session: data.session,
+  user: {
+    ...data.user,
+    social_name: profile.social_name || "Usuário" // Agora o frontend receberá o nome
+  }
+});
+  } catch (error) {
     res.status(500).json({ error: "Erro interno" });
   }
 };

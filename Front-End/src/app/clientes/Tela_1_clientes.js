@@ -18,32 +18,35 @@ function Tela_1_clientes() {
   =============================== */
   useEffect(() => {
     async function buscarClientes() {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/clientes`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          }
-        }
-      );
+        const token = localStorage.getItem("token");
 
-      if (!response.ok) {
-        console.error("Erro ao buscar clientes");
-        return;
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/clientes`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          console.error("Erro ao buscar clientes");
+          return;
+        }
+
+        const data = await response.json();
+
+      // Dentro do useEffect buscarClientes:
+        const formatados = data.map(c => ({
+          id: c.id, // Não esqueça do ID para deletar/editar
+          nome: c.social_name, // Use o nome vindo do banco
+          categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
+        }));
+        setClientes(formatados); // Use setClientes e não setListaCompleta para a exibição inicial
       }
 
-      const data = await response.json();
-
-      const formatados = data.map(c => ({
-        nome: c.nome_social,
-        categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
-      }));
-
-      setListaCompleta(formatados);
-    }
-
-    buscarClientes();
-  }, []);
+      buscarClientes();
+    }, []);
 
 
   /* ===============================
@@ -102,8 +105,12 @@ function Tela_1_clientes() {
         throw new Error("Erro ao excluir cliente");
       }
 
+
       setClientes(clientes.filter((c) => c.id !== id));
+      alert("Cliente excluído com sucesso!");
+      
     } catch (error) {
+      console.error("Erro ao excluir:", error);
       alert("Erro ao excluir cliente");
     }
   };

@@ -33,8 +33,4 @@ app.get("/", (req, res) => {
   res.json({ status: "API FINC ONLINE 🚀" });
 });
 
-/* ===== SERVER ===== */
-const PORT = process.env.PORT || 3333;
-app.listen(PORT, () => {
-  console.log(`🚀 API rodando na porta ${PORT}`);
-});
+export default app;
