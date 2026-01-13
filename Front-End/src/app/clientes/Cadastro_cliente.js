@@ -1,59 +1,62 @@
 import icons from "../../components/Icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import './cliente.css'
 
-
 function Cadastro_cliente() {
-
+  const navigate = useNavigate();
   const [tipoPessoa, setTipoPessoa] = useState("");
 
   const [form, setForm] = useState({
-  nome_social: "",
-  tipo_pessoa: "",
-  cpf_cnpj: "",
-  cep: "",
-  uf: "",
-  cidade: "",
-  logradouro: "",
-  bairro: "",
-  numero: "",
-  complemento: "",
-  email: "",
-  telefone: "",
-  whatsapp: ""
+    nome_social: "",
+    tipo_pessoa: "",
+    cpf_cnpj: "",
+    cep: "",
+    uf: "",
+    cidade: "",
+    logradouro: "",
+    bairro: "",
+    numero: "",
+    complemento: "",
+    email: "",
+    telefone: "",
+    whatsapp: ""
   });
 
   async function handleSubmit() {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  if (!form.nome_social || !form.tipo_pessoa || !form.cpf_cnpj) {
-    alert("Preencha os campos obrigatórios");
-    return;
-  }
-
-
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URL}/clientes`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify(form)
-    }
-  );
-
-
-  const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.error || "Erro ao cadastrar cliente");
+    if (!form.nome_social || !form.tipo_pessoa || !form.cpf_cnpj) {
+      alert("Preencha os campos obrigatórios (Nome Social, Tipo de Pessoa e CPF/CNPJ)");
       return;
     }
 
-    alert("Cliente cadastrado com sucesso!");
+    try {
+      const response = await fetch(
+        "https://project-finc.onrender.com/clientes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(form)
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || "Erro ao cadastrar cliente");
+        return;
+      }
+
+      alert("Cliente cadastrado com sucesso!");
+      navigate("/clientes");
+    } catch (error) {
+      console.error("Erro ao cadastrar cliente:", error);
+      alert("Erro de conexão ao cadastrar cliente");
+    }
   }
 
   const maskTelefone = (value) => {
@@ -65,31 +68,28 @@ function Cadastro_cliente() {
   };
 
   const buscarCEP = async (cep) => {
-  const cepLimpo = cep.replace(/\D/g, "");
+    const cepLimpo = cep.replace(/\D/g, "");
 
-  if (cepLimpo.length !== 8) return;
+    if (cepLimpo.length !== 8) return;
 
-  try {
-    const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await res.json();
 
-    if (!data.erro) {
-      setForm((prev) => ({
-        ...prev,
-        cep: cep,
-        uf: data.uf || "",
-        cidade: data.localidade || "",
-        logradouro: data.logradouro || "",
-        bairro: data.bairro || ""
-      }));
+      if (!data.erro) {
+        setForm((prev) => ({
+          ...prev,
+          cep: cep,
+          uf: data.uf || "",
+          cidade: data.localidade || "",
+          logradouro: data.logradouro || "",
+          bairro: data.bairro || ""
+        }));
+      }
+    } catch {
+      console.error("Erro ao buscar CEP");
     }
-  } catch {
-    console.error("Erro ao buscar CEP");
-  }
   };
-
-
-
 
   return (
     <main className="content">
@@ -125,6 +125,7 @@ function Cadastro_cliente() {
             <input
               type="text"
               placeholder="Digite o nome completo do cliente"
+              value={form.nome_social}
               onChange={(e) => setForm({ ...form, nome_social: e.target.value })}
             />
           </div>
@@ -148,35 +149,29 @@ function Cadastro_cliente() {
               </select>
           </div>
 
-          {/* campo condicional */}
-         {/* CPF */}
-        {tipoPessoa === "PFisica" && (
-          <div className="form-group fade-in">
-            <label>
-              CPF: <span className="campo-obrigatório">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Informe o CPF do cliente"
-              maxLength={14}
-              value={form.cpf_cnpj}
-              onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, ""); // só números
+          {tipoPessoa === "PFisica" && (
+            <div className="form-group fade-in">
+              <label>
+                CPF: <span className="campo-obrigatório">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Informe o CPF do cliente"
+                maxLength={14}
+                value={form.cpf_cnpj}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, "");
+                  value = value
+                    .slice(0, 11)
+                    .replace(/(\d{3})(\d)/, "$1.$2")
+                    .replace(/(\d{3})(\d)/, "$1.$2")
+                    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                  setForm({ ...form, cpf_cnpj: value });
+                }}
+              />
+            </div>
+          )}
 
-                value = value
-                  .slice(0, 11)
-                  .replace(/(\d{3})(\d)/, "$1.$2")
-                  .replace(/(\d{3})(\d)/, "$1.$2")
-                  .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-
-                setForm({ ...form, cpf_cnpj: value });
-              }}
-            />
-          </div>
-        )}
-
-
-          {/* CNPJ */}
           {tipoPessoa === "PJuridica" && (
             <div className="form-group fade-in">
               <label>
@@ -188,24 +183,21 @@ function Cadastro_cliente() {
                 maxLength={18}
                 value={form.cpf_cnpj}
                 onChange={(e) => {
-                  let value = e.target.value.replace(/\D/g, ""); // só números
-
+                  let value = e.target.value.replace(/\D/g, "");
                   value = value
                     .slice(0, 14)
                     .replace(/^(\d{2})(\d)/, "$1.$2")
                     .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
                     .replace(/\.(\d{3})(\d)/, ".$1/$2")
                     .replace(/(\d{4})(\d)/, "$1-$2");
-
                   setForm({ ...form, cpf_cnpj: value });
                 }}
               />
             </div>
           )}
-
         </div>
-
       </section>
+
       <section className="form-section">
         <div className="section-header">
           <span className="icon">
@@ -229,9 +221,8 @@ function Cadastro_cliente() {
                   .replace(/\D/g, "")
                   .replace(/^(\d{5})(\d)/, "$1-$2")
                   .slice(0, 9);
-
                 setForm({ ...form, cep: valor });
-                buscarCEP(valor);
+                if (valor.length === 9) buscarCEP(valor);
               }}
             />
           </div>
@@ -261,9 +252,7 @@ function Cadastro_cliente() {
               type="text"
               placeholder="Cidade"
               value={form.cidade}
-              onChange={(e) =>
-                setForm({ ...form, cidade: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, cidade: e.target.value })}
             />
           </div>
         </div>
@@ -276,9 +265,7 @@ function Cadastro_cliente() {
               type="text"
               placeholder="Digite o nome da rua"
               value={form.logradouro}
-              onChange={(e) =>
-                setForm({ ...form, logradouro: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, logradouro: e.target.value })}
             />
           </div>
         </div>
@@ -291,9 +278,7 @@ function Cadastro_cliente() {
               type="text"
               placeholder="Digite o nome do bairro"
               value={form.bairro}
-              onChange={(e) =>
-                setForm({ ...form, bairro: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, bairro: e.target.value })}
             />
           </div>
           <div className="form-group">
@@ -302,7 +287,8 @@ function Cadastro_cliente() {
             </label>
             <input
               type="text"
-              placeholder="Informe o número referente ao endereço"
+              placeholder="Informe o número"
+              value={form.numero}
               onChange={(e) => setForm({ ...form, numero: e.target.value })}
             />
           </div>
@@ -310,13 +296,15 @@ function Cadastro_cliente() {
             <label>Complemento:</label>
             <input
               type="text"
-              placeholder="Informe o complemento referente ao endereço"
+              placeholder="Informe o complemento"
+              value={form.complemento}
               onChange={(e) => setForm({ ...form, complemento: e.target.value })}
             />
           </div>
         </div>
       </section>
-      <section className="section-form">
+
+      <section className="form-section">
         <div className="section-header">
           <span className="icon">
             <i className={icons.feedbackTel}></i>
@@ -330,13 +318,12 @@ function Cadastro_cliente() {
             <label>
               E-mail: <span className="campo-obrigatório">*</span>
             </label>
-"            <input
-              type="text"
+            <input
+              type="email"
               placeholder="Informe o e-mail do cliente"
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value.toLowerCase() })
-              }
-            />"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value.toLowerCase() })}
+            />
           </div>
           <div className="form-group">
             <label>
@@ -346,21 +333,16 @@ function Cadastro_cliente() {
               type="text"
               placeholder="Informe o número de Telefone"
               value={form.telefone || ""}
-              onChange={(e) =>
-                setForm({ ...form, telefone: maskTelefone(e.target.value) })
-              }
+              onChange={(e) => setForm({ ...form, telefone: maskTelefone(e.target.value) })}
             />
-
           </div>
           <div className="form-group">
-            <label>Whatssap:</label>
+            <label>WhatsApp:</label>
             <input
               type="text"
               placeholder="Informe o número de WhatsApp"
               value={form.whatsapp || ""}
-              onChange={(e) =>
-                setForm({ ...form, whatsapp: maskTelefone(e.target.value) })
-              }
+              onChange={(e) => setForm({ ...form, whatsapp: maskTelefone(e.target.value) })}
             />
           </div>
         </div>
@@ -369,7 +351,6 @@ function Cadastro_cliente() {
         <button className="btn" onClick={handleSubmit}>
           Cadastrar
         </button>
-
       </div>
     </main>
   );

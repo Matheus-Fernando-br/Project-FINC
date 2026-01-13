@@ -5,8 +5,6 @@ import "../../styles/Cadastro.css";
 function CadastroLogin() {
   const navigate = useNavigate();
 
-  const [usuarios, setUsuarios] = useState([]);
-
   const [formData, setFormData] = useState({
     socialName: "",
     tipoPessoa: "",
@@ -41,8 +39,13 @@ function CadastroLogin() {
       return false;
     }
 
-    if (cpf.length < 11) {
-      alert("CPF/CNPJ inválido. Verifique e tente novamente.");
+    const cpfLimpo = cpf.replace(/\D/g, "");
+    if (tipoPessoa === "FISICA" && cpfLimpo.length !== 11) {
+      alert("CPF inválido. Verifique e tente novamente.");
+      return false;
+    }
+    if (tipoPessoa === "JURIDICA" && cpfLimpo.length !== 14) {
+      alert("CNPJ inválido. Verifique e tente novamente.");
       return false;
     }
     
@@ -57,10 +60,9 @@ function CadastroLogin() {
     : "CPF/CNPJ";
     
     const formatarDocumento = (valor, tipoPessoa) => {
-      valor = valor.replace(/\D/g, ""); // remove tudo que não for número
+      valor = valor.replace(/\D/g, "");
       
       if (tipoPessoa === "FISICA") {
-      // CPF → 000.000.000-00
       return valor
         .replace(/(\d{3})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d)/, "$1.$2")
@@ -69,7 +71,6 @@ function CadastroLogin() {
     }
     
     if (tipoPessoa === "JURIDICA") {
-      // CNPJ → 00.000.000/0000-00
       return valor
         .replace(/(\d{2})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d)/, "$1.$2")
@@ -82,12 +83,12 @@ function CadastroLogin() {
   };
 
   const formatarTelefone = (valor) => {
-    valor = valor.replace(/\D/g, ""); // remove tudo que não for número
+    valor = valor.replace(/\D/g, "");
 
     return valor
-      .replace(/^(\d{2})(\d)/, "($1) $2")      // (31) 9...
-      .replace(/(\d{5})(\d)/, "$1-$2")         // (31) 98676-3...
-      .slice(0, 15);                           // limita no tamanho do telefone
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
     };
 
     const handleChange = (e) => {
@@ -95,7 +96,6 @@ function CadastroLogin() {
   
       let novoValor = type === "checkbox" ? checked : value;
   
-      // Bloqueia CPF/CNPJ se o tipo não foi escolhido
       if (id === "cpf") {
         if (!formData.tipoPessoa) {
           alert("Selecione o Tipo de Pessoa antes de digitar o CPF/CNPJ.");
@@ -104,7 +104,6 @@ function CadastroLogin() {
         novoValor = formatarDocumento(novoValor, formData.tipoPessoa);
       }
   
-      //TELEFONE
       if (id === "telefone") {
         novoValor = formatarTelefone(novoValor);
       }
@@ -121,8 +120,6 @@ function CadastroLogin() {
     if (!validarFormulario()) return;
 
     try {
-      setUsuarios((prev) => [...prev, formData]);
-
       const response = await fetch("https://project-finc.onrender.com/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -136,19 +133,19 @@ function CadastroLogin() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         alert("Conta criada com sucesso!");
         navigate("/TelaInicial/Login");
       } else {
-        alert("Erro ao criar conta no servidor.");
+        alert(data.error || "Erro ao criar conta no servidor.");
       }
     } catch (error) {
       console.error("Erro de conexão:", error);
       alert("Falha de conexão com o servidor.");
     }
   };
-
-
 
   return (
     <section className="CadastroLogin">
@@ -170,8 +167,6 @@ function CadastroLogin() {
           <h1>CRIE SUA CONTA</h1>
 
           <section className="formulario">
-
-            {/* Nome */}
             <div className="input-box full">
               <div className="label">Nome Social:</div>
               <input
@@ -184,7 +179,6 @@ function CadastroLogin() {
               <i className="bi bi-person-badge"></i>
             </div>
 
-            {/* Tipo pessoa + CPF */}
             <div className="input-box">
               <div className="label">Tipo de Pessoa</div>
               <select
@@ -210,7 +204,6 @@ function CadastroLogin() {
               <i className="bi bi-person"></i>
             </div>
 
-            {/* Email + Telefone */}
             <div className="input-box">
               <div className="label">E-mail:</div>
               <input
@@ -235,7 +228,6 @@ function CadastroLogin() {
               <i className="bi bi-telephone"></i>
             </div>
 
-            {/* Senha */}
             <div className="input-box full">
               <div className="label">Senha:</div>
               <input
@@ -245,10 +237,9 @@ function CadastroLogin() {
                 onChange={handleChange}
                 placeholder="Digite sua senha"
               />
-              <i class="bi bi-lock-fill"></i>
+              <i className="bi bi-lock-fill"></i>
             </div>
 
-            {/* Repita a senha */}
           <div className="input-box full">
             <div className="label">Repita sua senha:</div>
             <input
@@ -258,10 +249,8 @@ function CadastroLogin() {
               onChange={handleChange}
               placeholder="Repita a senha digitada anteriormente"
             />
-            <i class="bi bi-lock-fill"></i>
+            <i className="bi bi-lock-fill"></i>
           </div>
-
-
           </section>
 
           <div className="acept">

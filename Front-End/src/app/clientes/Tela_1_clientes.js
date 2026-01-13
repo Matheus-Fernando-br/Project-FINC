@@ -10,48 +10,42 @@ function Tela_1_clientes() {
   const [paginaAtual, setPaginaAtual] = useState(1);
 
   const itensPorPagina = 5;
-  const [listaCompleta, setListaCompleta] = useState([]);
 
-
-  /* ===============================
-     BUSCAR CLIENTES DO BACK-END
-  =============================== */
   useEffect(() => {
     async function buscarClientes() {
         const token = localStorage.getItem("token");
 
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/clientes`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
+        try {
+          const response = await fetch(
+            "https://project-finc.onrender.com/clientes",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
             }
+          );
+
+          if (!response.ok) {
+            console.error("Erro ao buscar clientes");
+            return;
           }
-        );
 
-        if (!response.ok) {
-          console.error("Erro ao buscar clientes");
-          return;
+          const data = await response.json();
+
+          const formatados = data.map(c => ({
+            id: c.id,
+            nome: c.social_name,
+            categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
+          }));
+          setClientes(formatados);
+        } catch (error) {
+          console.error("Erro de conexão ao buscar clientes:", error);
         }
-
-        const data = await response.json();
-
-      // Dentro do useEffect buscarClientes:
-        const formatados = data.map(c => ({
-          id: c.id, // Não esqueça do ID para deletar/editar
-          nome: c.social_name, // Use o nome vindo do banco
-          categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
-        }));
-        setClientes(formatados); // Use setClientes e não setListaCompleta para a exibição inicial
       }
 
       buscarClientes();
     }, []);
 
-
-  /* ===============================
-     FILTROS
-  =============================== */
   const filtradosPorAba = clientes.filter((item) =>
     abaAtual === "todos" ? true : item.categoria === abaAtual
   );
@@ -67,9 +61,6 @@ function Tela_1_clientes() {
     paginaAtual * itensPorPagina
   );
 
-  /* ===============================
-     HANDLERS
-  =============================== */
   const handlePesquisa = (e) => {
     setPesquisa(e.target.value);
     setPaginaAtual(1);
@@ -102,16 +93,16 @@ function Tela_1_clientes() {
       );
 
       if (!response.ok) {
-        throw new Error("Erro ao excluir cliente");
+        const data = await response.json();
+        throw new Error(data.error || "Erro ao excluir cliente");
       }
-
 
       setClientes(clientes.filter((c) => c.id !== id));
       alert("Cliente excluído com sucesso!");
       
     } catch (error) {
       console.error("Erro ao excluir:", error);
-      alert("Erro ao excluir cliente");
+      alert(error.message || "Erro ao excluir cliente");
     }
   };
 
@@ -123,7 +114,6 @@ function Tela_1_clientes() {
         </h1>
       </section>
 
-      {/* CADASTRAR */}
       <section className="form-section fade-in">
         <div className="section-header">
           <span className="icon">
@@ -144,7 +134,6 @@ function Tela_1_clientes() {
         </div>
       </section>
 
-      {/* LISTA */}
       <section className="form-section fade-in">
         <div className="section-header">
           <span className="icon">
@@ -154,7 +143,6 @@ function Tela_1_clientes() {
         </div>
         <hr className="divider" />
 
-        {/* ABAS */}
         <div className="abas-container">
           <button
             className={abaAtual === "todos" ? "aba ativa" : "aba"}
@@ -178,7 +166,6 @@ function Tela_1_clientes() {
           </button>
         </div>
 
-        {/* PESQUISA */}
         <div className="form-row">
           <input
             type="text"
@@ -194,7 +181,6 @@ function Tela_1_clientes() {
           )}
         </div>
 
-        {/* CARDS */}
         <div className="cards animar-lista">
           {itensExibidos.map((item) => (
             <React.Fragment key={item.id}>
@@ -208,7 +194,8 @@ function Tela_1_clientes() {
 
                 <div className="editar-acao">
                   <i
-                    className={icons.edit}
+                    className="bi bi-trash"
+                    style={{ cursor: 'pointer', color: 'red', fontSize: '1.2rem' }}
                     onClick={() => excluirCliente(item.id)}
                   ></i>
                   <p>Excluir</p>
@@ -220,7 +207,6 @@ function Tela_1_clientes() {
           <hr className="divider" />
         </div>
 
-        {/* PAGINAÇÃO */}
         <div className="paginacao">
           {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
             <button

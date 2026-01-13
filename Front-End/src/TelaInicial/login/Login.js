@@ -5,12 +5,10 @@ import "../styles/Login.css";
 function Login() {
   const navigate = useNavigate();
 
-  // Estados controlados
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  // Função de login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -34,25 +32,22 @@ function Login() {
         return;
       }
 
-      // 🔥 VALIDA ANTES DE SALVAR
       if (!data.session?.access_token) {
         alert("Token não retornado pelo servidor");
         return;
       }
 
-      
       localStorage.setItem("token", data.session.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      //Salvar o nome social para o Header
       localStorage.setItem("user_name", data.user.social_name);
 
       navigate("/app");
 
     } catch (err) {
+      console.error("Erro no login:", err);
       alert("Erro de conexão com o servidor");
     }
   };
-
 
   return (
     <main>

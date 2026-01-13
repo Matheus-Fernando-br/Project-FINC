@@ -4,7 +4,6 @@ export const register = async (req, res) => {
   const { email, senha, socialName, tipoPessoa, cpfCnpj, telefone } = req.body;
 
   try {
-
     // ✅ VALIDAR EMAIL ÚNICO
     const { data: existingUser } = await supabase.auth.admin.listUsers();
     const emailExists = existingUser.users.some(
@@ -42,7 +41,7 @@ export const register = async (req, res) => {
         id: data.user.id,
         social_name: socialName,
         tipo_pessoa: tipoPessoa,
-        cpf_cnpj: cpfCnpj,
+        cpf_cnpj: cpfCnpj.replace(/\D/g, ""),
         telefone
       });
 
@@ -53,9 +52,9 @@ export const register = async (req, res) => {
 
     res.status(201).json({ message: "Usuário criado com sucesso" });
 
-  } catch {
+  } catch (error) {
     console.error("Erro no registro:", error);
-    res.status(500).json({ error: "Erro interno" });
+    res.status(500).json({ error: "Erro interno no servidor" });
   }
 };
 
@@ -89,34 +88,34 @@ export const login = async (req, res) => {
       email = userData.user.email;
     }
 
+    // LOGIN FINAL
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password: senha
+    });
 
-  // LOGIN FINAL
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password: senha
-  });
+    if (error) return res.status(401).json({ error: "Credenciais inválidas" });
 
-  if (error) return res.status(401).json({ error: "Credenciais inválidas" });
+    // 🔥 BUSCAR O NOME SOCIAL NO PERFIL
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("social_name")
+      .eq("id", data.user.id)
+      .single();
 
-// 🔥 BUSCAR O NOME SOCIAL NO PERFIL
-const { data: profile, error: profileError } = await supabase
-  .from("profiles")
-  .select("social_name")
-  .eq("id", data.user.id)
-  .single();
+    if (profileError || !profile) {
+      return res.status(500).json({ error: "Perfil do usuário não encontrado" });
+    }
 
-  if (profileError || !profile) {
-  return res.status(500).json({ error: "Usuário não encontrado" });
-}
-
-return res.json({
-  session: data.session,
-  user: {
-    ...data.user,
-    social_name: profile.social_name || "Usuário" // Agora o frontend receberá o nome
-  }
-});
+    return res.json({
+      session: data.session,
+      user: {
+        ...data.user,
+        social_name: profile.social_name || "Usuário"
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: "Erro interno" });
+    console.error("Erro no login:", error);
+    res.status(500).json({ error: "Erro interno no servidor" });
   }
 };

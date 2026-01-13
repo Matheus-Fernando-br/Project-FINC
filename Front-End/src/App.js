@@ -23,6 +23,7 @@ import Tela_2_emitir_nota from "./app/emitir-nota/Tela_2_emitir_nota";
 import MeusDados from "./app/meusDados/MeusDados";
 import Tela_1_clientes from "./app/clientes/Tela_1_clientes";
 import Cadastro_cliente from "./app/clientes/Cadastro_cliente";
+import Editar_cliente from "./app/clientes/Editar_cliente";
 import Tela_1_produtos from "./app/produtos_servicos/Tela_1";
 import Cadastro_produtos from "./app/produtos_servicos/Tela_2_escolha";
 import Cadastro_produtos_planilha from "./app/produtos_servicos/Tela_3_escolha_planilha";
@@ -88,6 +89,7 @@ export default function App() {
         <Route path="/MeusDados" element={<ProtectedRoute><Layout><MeusDados /></Layout></ProtectedRoute>} />
         <Route path="/clientes" element={<ProtectedRoute><Layout><Tela_1_clientes /></Layout></ProtectedRoute>} />
         <Route path="/clientes/cadastro" element={<ProtectedRoute><Layout><Cadastro_cliente /></Layout></ProtectedRoute>} />
+        <Route path="/clientes/editar/:id" element={<ProtectedRoute><Layout><Editar_cliente /></Layout></ProtectedRoute>} />
         <Route path="/produtos" element={<ProtectedRoute><Layout><Tela_1_produtos /></Layout></ProtectedRoute>} />
         <Route path="/produtos/cadastro" element={<ProtectedRoute><Layout><Cadastro_produtos /></Layout></ProtectedRoute>} />
         <Route path="/produtos/cadastro/planilha" element={<ProtectedRoute><Layout><Cadastro_produtos_planilha /></Layout></ProtectedRoute>} />

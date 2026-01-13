@@ -1,9 +1,27 @@
 import { Link } from 'react-router-dom';
 import icons from "../../components/Icons";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './MeusDados.css'
 
 function MeusDados() {
+    const [userData, setUserData] = useState({
+        social_name: "",
+        email: "",
+        cpf_cnpj: "",
+        telefone: "",
+        tipo_pessoa: ""
+    });
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setUserData({
+            social_name: user.social_name || "Usuário",
+            email: user.email || "",
+            cpf_cnpj: user.cpf_cnpj || "",
+            telefone: user.telefone || "",
+            tipo_pessoa: user.tipo_pessoa || ""
+        });
+    }, []);
 
     return (
         <main className="content MeusDados">
@@ -11,8 +29,8 @@ function MeusDados() {
                 <h1><i className={icons.clientePerson}></i> Meu Perfil</h1>
             </section>            
             <div className="perfil">
-                <i class="bi bi-person-circle"></i> {/*foto da pessoa aqui*/}
-                <h2>Gabriel Moreira Carvalho</h2>
+                <i className="bi bi-person-circle"></i>
+                <h2>{userData.social_name}</h2>
             </div>
 
              <section className="form-section">
@@ -21,82 +39,34 @@ function MeusDados() {
                 <div className="form-row">
                     <div className="form-group">
                         <label>Nome: </label>
-                        <input type="text" placeholder="Informe o nome"/>
+                        <input type="text" value={userData.social_name} readOnly />
                     </div>
                     <div className="form-group">
                         <label>E-mail: </label>
-                        <input type="text" placeholder="Informe o e-mail"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Data de Nascimento: </label>
-                        <input type="text" placeholder="Informe a data de nascimento"/>
+                        <input type="text" value={userData.email} readOnly />
                     </div>
                 </div>
                 <div className="form-row">
                     <div className="form-group">
                         <label>CNPJ/CPF: </label>
-                        <input type="text" placeholder="Informe o CNPJ/CPF"/>
+                        <input type="text" value={userData.cpf_cnpj} readOnly />
                     </div>
-                    <div className="form-group">
-                        <label>CEP: </label>
-                        <input type="email" placeholder="Informe o CEP"/>
-                    </div>
-                </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>UF: </label>
-                        <input type="text" placeholder="Informe a UF"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Município: </label>
-                        <input type="text" placeholder="Informe o município"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Bairro: </label>
-                        <input type="text" placeholder="Informe o bairro"/>
-                    </div>
-                </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Logradouro: </label>
-                        <input type="text" placeholder="Informe o logradouro"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Número: </label>
-                        <input type="text" placeholder="Informe o número"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Complemento: </label>
-                        <input type="text" placeholder="Informe o complemento"/>
-                    </div>
-                </div>
-                <div className="form-row">
                     <div className="form-group">
                         <label>Telefone: </label>
-                        <input type="text" placeholder="Informe o telefone"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Whatssap: </label>
-                        <input type="text" placeholder="Informe o Whatssap"/>
+                        <input type="text" value={userData.telefone} readOnly />
                     </div>
                 </div>
                 <div className="form-row">
                     <div className="form-group">
-                        <label>Apelido: </label>
-                        <input type="text" placeholder="Informe o apelido"/>
-                    </div>
-                    <div className="form-group">
-                        <label>Categoria: </label>
-                        <input type="text" placeholder="Informe a categoria"/>
+                        <label>Tipo de Pessoa: </label>
+                        <input type="text" value={userData.tipo_pessoa} readOnly />
                     </div>
                 </div>
             
                 <div className="botao_geral">
-                    <button type="submit" className="btn-atualizar">Editar</button>
+                    <button type="button" className="btn-atualizar" onClick={() => alert("Funcionalidade de edição em desenvolvimento")}>Editar</button>
                 </div>
             </section>
-               
-            
         </main> 
     );
 }
