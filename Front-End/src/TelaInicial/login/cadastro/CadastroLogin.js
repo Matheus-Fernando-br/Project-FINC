@@ -6,7 +6,7 @@ function CadastroLogin() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    socialName: "",
+    nome_social: "",
     tipoPessoa: "",
     cpf: "",
     email: "",
@@ -17,9 +17,9 @@ function CadastroLogin() {
   });
 
   const validarFormulario = () => {
-    const { socialName, tipoPessoa, cpf, email, telefone, senha, repitaSenha , termos } = formData;
+    const { nome_social, tipoPessoa, cpf, email, telefone, senha, repitaSenha , termos } = formData;
 
-    if (!socialName || !tipoPessoa || !cpf || !email || !telefone || !senha || !repitaSenha) {
+    if (!nome_social || !tipoPessoa || !cpf || !email || !telefone || !senha || !repitaSenha) {
       alert("Preencha todos os campos!");
       return false;
     }
@@ -126,7 +126,7 @@ function CadastroLogin() {
         body: JSON.stringify({
           email: formData.email,
           senha: formData.senha,
-          socialName: formData.socialName,
+          nome_social: formData.nome_social,
           tipoPessoa: formData.tipoPessoa,
           cpfCnpj: formData.cpf.replace(/\D/g, ""),
           telefone: formData.telefone
@@ -171,8 +171,8 @@ function CadastroLogin() {
               <div className="label">Nome Social:</div>
               <input
                 type="text"
-                id="socialName"
-                value={formData.socialName}
+                id="nome_social"
+                value={formData.nome_social}
                 onChange={handleChange}
                 placeholder="Nome Social"
               />

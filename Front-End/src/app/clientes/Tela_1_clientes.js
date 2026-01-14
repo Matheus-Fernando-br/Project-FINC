@@ -34,7 +34,7 @@ function Tela_1_clientes() {
 
           const formatados = data.map(c => ({
             id: c.id,
-            nome: c.social_name,
+            nome: c.nome_social ?? "",
             categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
           }));
           setClientes(formatados);
@@ -189,7 +189,6 @@ function Tela_1_clientes() {
               <div className="card-cliente animar-card">
                 <div>
                   <h4>{item.nome}</h4>
-                  <p>{item.categoria}</p>
                 </div>
 
                 <div className="editar-acao">

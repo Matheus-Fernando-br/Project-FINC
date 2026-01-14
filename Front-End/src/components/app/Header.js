@@ -65,7 +65,7 @@ function Header() {
     }
   }
 
-  const nomeCompleto = localStorage.getItem("user_name") || "Usuário";
+  const nomeCompleto = localStorage.getItem("nome_social") || "Usuário";
   const primeiroNome = nomeCompleto.split(" ")[0];
 
 
