@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
+
 
 function Tela_1_clientes() {
   const [clientes, setClientes] = useState([]);
@@ -106,6 +107,12 @@ function Tela_1_clientes() {
     }
   };
 
+  const editarCliente = (id) => {
+    navigate(`/clientes/editar/${id}`);
+  };
+
+  const navigate = useNavigate();
+
   return (
     <main className="content fade-in">
       <section className="titulo-secao">
@@ -192,12 +199,14 @@ function Tela_1_clientes() {
                 </div>
 
                 <div className="editar-acao">
-                  <i
-                    className="bi bi-trash"
-                    style={{ cursor: 'pointer', color: 'red', fontSize: '1.2rem' }}
-                    onClick={() => excluirCliente(item.id)}
-                  ></i>
-                  <p>Excluir</p>
+                  <div className="editar-cliente-item" onClick={() => editarCliente(item.id)}>
+                    <i className={icons.edit}></i>
+                    <p>Editar</p>
+                  </div>
+                    <div className="excluir-cliente-item" onClick={() => excluirCliente(item.id)}>
+                      <i className="bi bi-trash"></i>
+                      <p>Excluir</p>
+                    </div>
                 </div>
               </div>
             </React.Fragment>
