@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
 import icons from "../../components/Icons";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import './MeusDados.css'
 
 function MeusDados() {

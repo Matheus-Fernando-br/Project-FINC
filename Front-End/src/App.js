@@ -20,7 +20,7 @@ import Layout from "./components/app/Layout";
 import Home from "./app/Home";
 import Tela_1_emitir_nota from "./app/emitir-nota/tela1EmitirNota";
 import Tela_2_emitir_nota from "./app/emitir-nota/tela2EmitirNota";
-import MeusDados from "./app/meusDados/meusDados";
+import MeusDados from "./app/meusDados/MeusDados";
 import Tela_1_clientes from "./app/clientes/tela1Clientes";
 import Cadastro_cliente from "./app/clientes/cadastroCliente";
 import Editar_cliente from "./app/clientes/editarCliente";

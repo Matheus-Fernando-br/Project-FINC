@@ -9,13 +9,15 @@ export async function getClientes(req, res) {
       .from("clientes")
       .select("*")
       .eq("user_id", userId)
-      .order("social_name", { ascending: true });
+      .order("nome", { ascending: true });
 
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
 
     return res.json(data);
-
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Erro interno" });
   }
 }
@@ -31,30 +33,25 @@ export async function getClienteById(req, res) {
       .select("*")
       .eq("id", id)
       .eq("user_id", userId)
-      .single(); // 🔥 EVITA ARRAY
+      .single();
 
-    if (error) {
+    if (error || !data) {
       return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
     return res.json(data);
-
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Erro interno" });
   }
 }
 
+/* CRIAR */
 export async function createCliente(req, res) {
   try {
     const userId = req.user.id;
 
-    const {
-      nome,
-      email,
-      telefone,
-      cpf_cnpj,
-      endereco
-    } = req.body;
+    const { nome, email, telefone, cpf_cnpj, endereco } = req.body;
 
     if (!nome) {
       return res.status(400).json({ error: "Nome é obrigatório" });
@@ -62,16 +59,14 @@ export async function createCliente(req, res) {
 
     const { data, error } = await supabase
       .from("clientes")
-      .insert([
-        {
-          user_id: userId,
-          nome,
-          email,
-          telefone,
-          cpf_cnpj,
-          endereco
-        }
-      ])
+      .insert({
+        user_id: userId,
+        nome,
+        email,
+        telefone,
+        cpf_cnpj,
+        endereco
+      })
       .select()
       .single();
 
@@ -83,13 +78,11 @@ export async function createCliente(req, res) {
       message: "Cliente criado com sucesso",
       cliente: data
     });
-
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Erro interno do servidor" });
+    return res.status(500).json({ error: "Erro interno" });
   }
 }
-
 
 /* ATUALIZAR */
 export async function updateCliente(req, res) {
@@ -97,9 +90,17 @@ export async function updateCliente(req, res) {
     const { id } = req.params;
     const userId = req.user.id;
 
+    const { nome, email, telefone, cpf_cnpj, endereco } = req.body;
+
     const { error } = await supabase
       .from("clientes")
-      .update(req.body)
+      .update({
+        nome,
+        email,
+        telefone,
+        cpf_cnpj,
+        endereco
+      })
       .eq("id", id)
       .eq("user_id", userId);
 
@@ -108,8 +109,8 @@ export async function updateCliente(req, res) {
     }
 
     return res.json({ message: "Cliente atualizado com sucesso" });
-
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Erro interno" });
   }
 }
@@ -131,8 +132,8 @@ export async function deleteCliente(req, res) {
     }
 
     return res.json({ message: "Cliente deletado com sucesso" });
-
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Erro interno" });
   }
 }
