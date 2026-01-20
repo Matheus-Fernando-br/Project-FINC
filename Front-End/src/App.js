@@ -33,7 +33,7 @@ import Tela_1_notificacao from "./app/notificacao/tela1Notificacao";
 import Tela_1_planos from "./app/planos/tela1Planos";
 import Pagamento from "./app/pagamento/tela1Pagamento";
 import Tela_1_contador from "./app/contador/tela1Contador";
-import MenuSair from "./app/sair/menuSair";
+import MenuSair from "./app/sair/MenuSair";
 import Tela_2_planilha_clientes from "./app/clientes/tela2PlanilhaClientes";
 import Tela_2_planilha_produto from "./app/produtos_servicos/produto/telaPlanilhaProduto";
 import Tela_2_planilha_servico from "./app/produtos_servicos/servico/telaPlanilhaServico";
