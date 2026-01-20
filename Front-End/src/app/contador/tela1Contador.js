@@ -1,4 +1,4 @@
-import icons from "../..//components/Icons";
+import icons from "../../components/Icons";
 import './contador.css'
 import { useState } from 'react';
 

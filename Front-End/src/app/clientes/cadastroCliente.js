@@ -1,6 +1,6 @@
 import icons from "../../components/Icons";
 import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import { useState } from "react";
 import './cliente.css'
 
 function Cadastro_cliente() {

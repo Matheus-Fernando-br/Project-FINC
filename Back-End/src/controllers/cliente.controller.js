@@ -44,6 +44,53 @@ export async function getClienteById(req, res) {
   }
 }
 
+export async function createCliente(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const {
+      nome,
+      email,
+      telefone,
+      cpf_cnpj,
+      endereco
+    } = req.body;
+
+    if (!nome) {
+      return res.status(400).json({ error: "Nome é obrigatório" });
+    }
+
+    const { data, error } = await supabase
+      .from("clientes")
+      .insert([
+        {
+          user_id: userId,
+          nome,
+          email,
+          telefone,
+          cpf_cnpj,
+          endereco
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(201).json({
+      message: "Cliente criado com sucesso",
+      cliente: data
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+}
+
+
 /* ATUALIZAR */
 export async function updateCliente(req, res) {
   try {
