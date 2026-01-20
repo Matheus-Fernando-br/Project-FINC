@@ -1,6 +1,6 @@
 import { supabase } from "../services/supabase.js";
 
-// Listar apenas clientes do usuário logado
+/* LISTAR */
 export async function getClientes(req, res) {
   try {
     const userId = req.user.id;
@@ -12,50 +12,62 @@ export async function getClientes(req, res) {
       .order("social_name", { ascending: true });
 
     if (error) return res.status(400).json({ error: error.message });
+
     return res.json(data);
-  }
-  catch (error) {
-    console.error("Erro ao buscar clientes:", error);
+
+  } catch (err) {
     return res.status(500).json({ error: "Erro interno" });
   }
 }
 
-// Criar cliente vinculado ao usuário
-export async function createCliente(req, res) {
+/* BUSCAR POR ID */
+export async function getClienteById(req, res) {
   try {
-    const { nome_social, email, cpf_cnpj, telefone, tipo_pessoa, cep, uf, cidade, logradouro, bairro, numero, complemento, whatsapp } = req.body;
+    const { id } = req.params;
     const userId = req.user.id;
 
     const { data, error } = await supabase
       .from("clientes")
-      .insert({
-        social_name: nome_social,
-        email,
-        cpf_cnpj: cpf_cnpj.replace(/\D/g, ""),
-        telefone,
-        tipo_pessoa,
-        cep,
-        uf,
-        cidade,
-        logradouro,
-        bairro,
-        numero,
-        complemento,
-        whatsapp,
-        user_id: userId
-      })
-      .select()
-      .single();
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single(); // 🔥 EVITA ARRAY
 
-    if (error) return res.status(400).json({ error: error.message });
-    return res.status(201).json(data);
-  } catch(error) {
-    console.error("Erro ao criar cliente:", error);
+    if (error) {
+      return res.status(404).json({ error: "Cliente não encontrado" });
+    }
+
+    return res.json(data);
+
+  } catch (err) {
     return res.status(500).json({ error: "Erro interno" });
   }
 }
 
-// Excluir cliente
+/* ATUALIZAR */
+export async function updateCliente(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const { error } = await supabase
+      .from("clientes")
+      .update(req.body)
+      .eq("id", id)
+      .eq("user_id", userId);
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.json({ message: "Cliente atualizado com sucesso" });
+
+  } catch (err) {
+    return res.status(500).json({ error: "Erro interno" });
+  }
+}
+
+/* DELETAR */
 export async function deleteCliente(req, res) {
   try {
     const { id } = req.params;
@@ -67,45 +79,13 @@ export async function deleteCliente(req, res) {
       .eq("id", id)
       .eq("user_id", userId);
 
-    if (error) return res.status(400).json({ error: error.message });
-    return res.json({ message: "Cliente excluído com sucesso" });
-  } catch (error) {
-    console.error("Erro ao excluir cliente:", error);
-    return res.status(500).json({ error: "Erro interno" });
-  }
-}
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
 
-// Atualizar cliente
-export async function updateCliente(req, res) {
-  try {
-    const { id } = req.params;
-    const { nome_social, email, cpf_cnpj, telefone, tipo_pessoa, cep, uf, cidade, logradouro, bairro, numero, complemento, whatsapp } = req.body;
-    const userId = req.user.id;
+    return res.json({ message: "Cliente deletado com sucesso" });
 
-    const { error } = await supabase
-      .from("clientes")
-      .update({ 
-        social_name: nome_social, 
-        email, 
-        cpf_cnpj: cpf_cnpj.replace(/\D/g, ""), 
-        telefone,
-        tipo_pessoa,
-        cep,
-        uf,
-        cidade,
-        logradouro,
-        bairro,
-        numero,
-        complemento,
-        whatsapp
-      })
-      .eq("id", id)
-      .eq("user_id", userId);
-
-    if (error) return res.status(400).json({ error: error.message });
-    return res.json({ message: "Cliente atualizado com sucesso" });
-  } catch (error) {
-    console.error("Erro ao atualizar cliente:", error);
+  } catch (err) {
     return res.status(500).json({ error: "Erro interno" });
   }
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
+import axios from "axios"; // Para fazer requisições HTTP
 
 
 function Tela_1_clientes() {
@@ -9,6 +10,8 @@ function Tela_1_clientes() {
   const [pesquisa, setPesquisa] = useState("");
   const [abaAtual, setAbaAtual] = useState("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [clienteEditando, setClienteEditando] = useState(null); // Estado para o cliente que está sendo editado
+  const navigate = useNavigate();
 
   const itensPorPagina = 5;
 
@@ -46,6 +49,16 @@ function Tela_1_clientes() {
 
       buscarClientes();
     }, []);
+
+  const handleEdit = async (id) => {
+    const response = await axios.get(`https://project-finc.onrender.com/clientes/${id}`);
+    setClienteEditando(response.data); // Carregar dados do cliente para edição
+  };
+
+  const handleSave = async () => {
+    await axios.put(`https://project-finc.onrender.com/clientes/${clienteEditando.id}`, clienteEditando);
+    navigate("/clientes"); // Redirecionar após salvar
+  };
 
   const filtradosPorAba = clientes.filter((item) =>
     abaAtual === "todos" ? true : item.categoria === abaAtual
@@ -110,8 +123,6 @@ function Tela_1_clientes() {
   const editarCliente = (id) => {
     navigate(`/clientes/editar/${id}`);
   };
-
-  const navigate = useNavigate();
 
   return (
     <main className="content fade-in">

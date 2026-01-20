@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./styles/TelaInicial.css"; // importa o CSS
+import "../styles/telaInicial.css";
 
 function HomeTelaInicial() {
   useEffect(() => {

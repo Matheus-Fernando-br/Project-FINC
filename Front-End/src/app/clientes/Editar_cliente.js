@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
+import axios from "axios";
 
 function Editar_cliente() {
   const { id } = useParams();
@@ -10,52 +11,21 @@ function Editar_cliente() {
   const [tipoPessoa, setTipoPessoa] = useState("");
   const [form, setForm] = useState({});
   const [formOriginal, setFormOriginal] = useState({});
-
+  
   useEffect(() => {
-    async function buscarCliente() {
-      const token = localStorage.getItem("token");
-  
+    const fetchCliente = async () => {
       try {
-        const response = await fetch(
-          `https://project-finc.onrender.com/clientes/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-            }
-          }
-        );
-  
-        if (!response.ok) {
-          const erro = await response.text();
-          console.error("Erro da API:", erro);
-          throw new Error("Falha na requisição");
-        }
-  
-        const data = await response.json();
-  
-        console.log("RETORNO DA API:", data);
-  
-        // 🔥 CORREÇÃO PRINCIPAL
-        const cliente = Array.isArray(data) ? data[0] : data;
-  
-        if (!cliente || !cliente.id) {
-          throw new Error("Cliente não encontrado");
-        }
-  
-        setForm(cliente);
-        setFormOriginal(cliente);
-        setTipoPessoa(cliente.tipo_pessoa);
-  
+        const response = await axios.get(`/api/clientes/${id}`);
+        setForm(response.data);
+        setFormOriginal(response.data);
       } catch (error) {
         console.error("Erro ao carregar cliente:", error);
-        alert("Erro ao carregar cliente. Veja o console.");
+        alert("Erro ao carregar cliente. Tente novamente mais tarde."); // Mensagem de erro
       }
-    }
-  
-    buscarCliente();
+    };
+
+    fetchCliente();
   }, [id]);
-  
 
   const maskTelefone = (value) =>
     value
@@ -90,7 +60,6 @@ function Editar_cliente() {
 
       alert("Cliente atualizado com sucesso!");
       navigate("/clientes");
-
     } catch {
       alert("Erro ao salvar alterações");
     }

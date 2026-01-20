@@ -8,7 +8,8 @@ import {
   LineChart, Line, CartesianGrid, PieChart, Pie, Cell, Legend
 } from "recharts";
 
-import "../styles/Home.css";
+import "../styles/app.css";
+import "../styles/global.css"
 
 function Home() {
 

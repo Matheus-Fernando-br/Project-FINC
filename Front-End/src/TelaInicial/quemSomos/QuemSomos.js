@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
-import "../styles/QuemSomos.css";
+import "../../styles/telaInicial.css";
 
 function QuemSomos() {
 

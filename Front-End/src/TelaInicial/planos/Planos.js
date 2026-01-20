@@ -1,7 +1,7 @@
 // src/pages/Planos.js
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "../styles/Planos.css";
+import "../../styles/telaInicial.css";
 import PlanoBasico from "../../components/planos/planoBasico";
 import PlanoPremium from "../../components/planos/planoPremium";
 import PlanoBlack from "../../components/planos/planoBlack";
