@@ -12,20 +12,45 @@ function Editar_cliente() {
   const [form, setForm] = useState({});
   const [formOriginal, setFormOriginal] = useState({});
   
-  useEffect(() => {
-    const fetchCliente = async () => {
-      try {
-        const response = await axios.get(`/api/clientes/${id}`);
-        setForm(response.data);
-        setFormOriginal(response.data);
-      } catch (error) {
-        console.error("Erro ao carregar cliente:", error);
-        alert("Erro ao carregar cliente. Tente novamente mais tarde."); // Mensagem de erro
-      }
-    };
+useEffect(() => {
+  const fetchCliente = async () => {
+    try {
+      const response = await axios.get(`/api/clientes/${id}`);
+      const cliente = response.data;
 
-    fetchCliente();
-  }, [id]);
+      setForm({
+        ...cliente,
+        cep: cliente.endereco?.cep || "",
+        uf: cliente.endereco?.uf || "",
+        cidade: cliente.endereco?.cidade || "",
+        logradouro: cliente.endereco?.logradouro || "",
+        bairro: cliente.endereco?.bairro || "",
+        numero: cliente.endereco?.numero || "",
+        complemento: cliente.endereco?.complemento || ""
+      });
+
+      setFormOriginal({
+        ...cliente,
+        cep: cliente.endereco?.cep || "",
+        uf: cliente.endereco?.uf || "",
+        cidade: cliente.endereco?.cidade || "",
+        logradouro: cliente.endereco?.logradouro || "",
+        bairro: cliente.endereco?.bairro || "",
+        numero: cliente.endereco?.numero || "",
+        complemento: cliente.endereco?.complemento || ""
+      });
+
+      setTipoPessoa(cliente.tipo_pessoa);
+
+    } catch (error) {
+      console.error("Erro ao carregar cliente:", error);
+      alert("Erro ao carregar cliente.");
+    }
+  };
+
+  fetchCliente();
+}, [id]);
+
 
   const maskTelefone = (value) =>
     value

@@ -26,8 +26,8 @@ function Cadastro_cliente() {
   async function handleSubmit() {
     const token = localStorage.getItem("token");
 
-    if (!form.nome_social || !form.tipo_pessoa || !form.cpf_cnpj) {
-      alert("Preencha os campos obrigatórios (Nome Social, Tipo de Pessoa e CPF/CNPJ)");
+    if (!form.nome_social || !form.tipo_pessoa || !form.cpf_cnpj || !form.cep || !form.numero || !form.email || !form.telefone) {
+      alert("Preencha os campos obrigatórios");
       return;
     }
 

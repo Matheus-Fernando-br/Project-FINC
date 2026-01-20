@@ -51,22 +51,50 @@ export async function createCliente(req, res) {
   try {
     const userId = req.user.id;
 
-    const { nome, email, telefone, cpf_cnpj, endereco } = req.body;
+    const {
+      nome_social,
+      tipo_pessoa,
+      cpf_cnpj,
+      cep,
+      uf,
+      cidade,
+      logradouro,
+      bairro,
+      numero,
+      complemento,
+      email,
+      telefone,
+      whatsapp
+    } = req.body;
 
-    if (!nome) {
-      return res.status(400).json({ error: "Nome é obrigatório" });
+    if (!nome_social || !tipo_pessoa || !cpf_cnpj) {
+      return res.status(400).json({
+        error: "Campos obrigatórios não preenchidos"
+      });
     }
 
     const { data, error } = await supabase
       .from("clientes")
-      .insert({
-        user_id: userId,
-        nome,
-        email,
-        telefone,
-        cpf_cnpj,
-        endereco
-      })
+      .insert([
+        {
+          user_id: userId,
+          nome_social,
+          tipo_pessoa,
+          cpf_cnpj,
+          email,
+          telefone,
+          whatsapp,
+          endereco: {
+            cep,
+            uf,
+            cidade,
+            logradouro,
+            bairro,
+            numero,
+            complemento
+          }
+        }
+      ])
       .select()
       .single();
 
@@ -74,15 +102,14 @@ export async function createCliente(req, res) {
       return res.status(400).json({ error: error.message });
     }
 
-    return res.status(201).json({
-      message: "Cliente criado com sucesso",
-      cliente: data
-    });
+    return res.status(201).json(data);
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Erro interno" });
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
 }
+
 
 /* ATUALIZAR */
 export async function updateCliente(req, res) {
@@ -90,16 +117,46 @@ export async function updateCliente(req, res) {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const { nome, email, telefone, cpf_cnpj, endereco } = req.body;
+    const {
+      nome_social,
+      tipo_pessoa,
+      cpf_cnpj,
+      cep,
+      uf,
+      cidade,
+      logradouro,
+      bairro,
+      numero,
+      complemento,
+      email,
+      telefone,
+      whatsapp
+    } = req.body;
+
+    if (!nome_social || !tipo_pessoa || !cpf_cnpj) {
+      return res.status(400).json({
+        error: "Campos obrigatórios não preenchidos"
+      });
+    }
 
     const { error } = await supabase
       .from("clientes")
       .update({
-        nome,
+        nome_social,
+        tipo_pessoa,
+        cpf_cnpj,
         email,
         telefone,
-        cpf_cnpj,
-        endereco
+        whatsapp,
+        endereco: {
+          cep,
+          uf,
+          cidade,
+          logradouro,
+          bairro,
+          numero,
+          complemento
+        }
       })
       .eq("id", id)
       .eq("user_id", userId);
@@ -111,9 +168,10 @@ export async function updateCliente(req, res) {
     return res.json({ message: "Cliente atualizado com sucesso" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Erro interno" });
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
 }
+
 
 /* DELETAR */
 export async function deleteCliente(req, res) {
