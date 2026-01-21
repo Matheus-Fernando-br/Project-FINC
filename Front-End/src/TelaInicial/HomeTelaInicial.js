@@ -112,9 +112,7 @@ function HomeTelaInicial() {
           <div className="plano fade-in delay-4">
             <p>planos a partir de</p>
             <Link to="/TelaInicial/Planos">
-             <a href="#">
                <h2>R$ 19,90</h2>
-             </a>
             </Link>
           </div>
 
@@ -161,7 +159,7 @@ function HomeTelaInicial() {
             Com o sistema FINC você automatiza tarefas, como emissão de notas fiscais, controle fiscal, gestão financeira e dashboards inteligentes, conectando todas as informações ao seu e-commerce ou loja física.
           </p>
           <Link to="/TelaInicial/Login">
-          <a className="botao-destaque scroll-fade delay-2" href="#">
+          <a className="botao-destaque scroll-fade delay-2" href="">
             Comece agora
           </a>
           </Link>

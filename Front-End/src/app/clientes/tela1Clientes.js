@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
-import axios from "axios"; // Para fazer requisições HTTP
-
 
 function Tela_1_clientes() {
   const [clientes, setClientes] = useState([]);

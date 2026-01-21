@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import AnimatedRoutes from "./components/AnimatedRoutes";
 
@@ -49,297 +48,305 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <>
+    <Routes location={location} key={location.pathname}>
       {/* 🔥 PRÉ-LOGIN COM ANIMAÇÃO */}
-      <AnimatedRoutes>
-        <Routes location={location} key={location.pathname}>
-          <Route
-            path="/"
-            element={
-              <LayoutTelaInicial>
-                <HomeTelaInicial />
-              </LayoutTelaInicial>
-            }
-          />
+      <Route
+        path="/"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <HomeTelaInicial />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
-          <Route
-            path="/TelaInicial/Planos"
-            element={
-              <LayoutTelaInicial>
-                <Planos />
-              </LayoutTelaInicial>
-            }
-          />
+      <Route
+        path="/TelaInicial/Planos"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <Planos />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
-          <Route
-            path="/TelaInicial/QuemSomos"
-            element={
-              <LayoutTelaInicial>
-                <QuemSomos />
-              </LayoutTelaInicial>
-            }
-          />
+      <Route
+        path="/TelaInicial/QuemSomos"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <QuemSomos />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
-          <Route
-            path="/TelaInicial/Duvidas"
-            element={
-              <LayoutTelaInicial>
-                <Duvidas />
-              </LayoutTelaInicial>
-            }
-          />
+      <Route
+        path="/TelaInicial/Duvidas"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <Duvidas />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
-          <Route
-            path="/TelaInicial/Login"
-            element={
-              <LayoutTelaInicial>
-                <Login />
-              </LayoutTelaInicial>
-            }
-          />
+      <Route
+        path="/TelaInicial/Login"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <Login />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
-          <Route
-            path="/TelaInicial/Login/Cadastro"
-            element={
-              <LayoutTelaInicial>
-                <CadastroLogin />
-              </LayoutTelaInicial>
-            }
-          />
+      <Route
+        path="/TelaInicial/Login/Cadastro"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <CadastroLogin />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
-          <Route
-            path="/TelaInicial/Termos"
-            element={
-              <LayoutTelaInicial>
-                <Termos />
-              </LayoutTelaInicial>
-            }
-          />
-        </Routes>
-      </AnimatedRoutes>
+      <Route
+        path="/TelaInicial/Termos"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <Termos />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
 
       {/* ✅ PÓS-LOGIN SEM ANIMAÇÃO */}
-      <Routes>
-        <Route
-          path="/app"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Home />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Home />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/emitir-nota/Dados"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela1EmitirNota />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/emitir-nota/Dados"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1EmitirNota />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/emitir-nota/Finalizar"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela2EmitirNota />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/emitir-nota/Finalizar"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela2EmitirNota />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/MeusDados"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <MeusDados />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/MeusDados"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MeusDados />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/clientes"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela1Clientes />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/clientes"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1Clientes />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/clientes/cadastro"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <CadastroCliente />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/clientes/cadastro"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CadastroCliente />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/clientes/editar/:id"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <EditarCliente />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/clientes/editar/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <EditarCliente />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/produtos"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela1Produtos />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/produtos"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1Produtos />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/produtos/cadastro"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <CadastroProdutos />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/produtos/cadastro"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CadastroProdutos />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/produtos/cadastro/planilha"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <CadastroProdutosPlanilha />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/produtos/cadastro/planilha"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CadastroProdutosPlanilha />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/produtos/cadastro/produto"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <TelaCadastroProduto />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/produtos/cadastro/produto"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <TelaCadastroProduto />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/produtos/cadastro/servico"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <TelaCadastroServico />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/produtos/cadastro/servico"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <TelaCadastroServico />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/notificacao"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela1Notificacao />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/notificacao"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1Notificacao />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/planos"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela1Planos />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/planos"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1Planos />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/pagamento"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Pagamento />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/pagamento"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Pagamento />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/contador"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela1Contador />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/contador"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1Contador />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/sair"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <MenuSair />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/sair"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MenuSair />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/import/clientes"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela2PlanilhaClientes />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/import/clientes"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela2PlanilhaClientes />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/import/produto"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela2PlanilhaProduto />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/import/produto"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela2PlanilhaProduto />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/import/servico"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Tela2PlanilhaServico />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </>
+      <Route
+        path="/import/servico"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela2PlanilhaServico />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
