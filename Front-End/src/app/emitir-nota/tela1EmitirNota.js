@@ -4,13 +4,12 @@ import "./emitir-nota.css";
 import icons from "../../components/Icons";
 import { Link } from "react-router-dom";
 
-const ANIM_MS = 320; // manter em sincronia com o CSS (--anim-dur)
+const ANIM_MS = 320;
 const STORAGE_KEY = "emitirNotaData";
 
 function maskCpfCnpj(value) {
   const digits = value.replace(/\D/g, "");
   if (digits.length > 11) {
-    // CNPJ: 00.000.000/0000-00
     return digits
       .replace(/^(\d{2})(\d)/, "$1.$2")
       .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
@@ -18,7 +17,6 @@ function maskCpfCnpj(value) {
       .replace(/(\d{4})(\d{1,2})$/, "$1-$2")
       .slice(0, 18);
   } else {
-    // CPF: 000.000.000-00
     return digits
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d)/, "$1.$2")
@@ -31,25 +29,30 @@ function Tela_1_emitir_nota() {
   const [incluirFrete, setIncluirFrete] = useState("nao");
 
   const [produtosServicos, setProdutosServicos] = useState([
-    { id: Date.now(), item: "", tipoNotaItem: "", quantidade: 1, valor: 0, info: "", isOpen: true }
+    {
+      id: Date.now(),
+      item: "",
+      tipoNotaItem: "",
+      categoriaItem: "", 
+      quantidade: 1,
+      valor: 0,
+      info: "",
+      isOpen: true
+    }
+
   ]);
 
-  // -------------------------------------------------
-  // Tipo de nota (único, isolado acima dos produtos)
   const [tipoNota, setTipoNota] = useState("");
 
-  // Cliente
   const [clienteNome, setClienteNome] = useState("");
   const [clienteCpfCnpj, setClienteCpfCnpj] = useState("");
-  const [clienteCompleto, setClienteCompleto] = useState("null");
+  const [clienteCompleto, setClienteCompleto] = useState(null);
 
-  //Listas do banco
   const [listaClientes, setListaClientes] = useState([]);
   const [listaItens, setListaItens] = useState([]);
   const [showDropdownCli, setShowDropdownCli] = useState(false);
   const [showDropdownItem, setShowDropdownItem] = useState({});
 
-  // Transporte
   const [transNome, setTransNome] = useState("");
   const [transCpf, setTransCpf] = useState("");
   const [placa, setPlaca] = useState("");
@@ -57,14 +60,48 @@ function Tela_1_emitir_nota() {
   const [pesoLiquido, setPesoLiquido] = useState("");
   const [infoTransporte, setInfoTransporte] = useState("");
 
-  // Valores / descontos
   const [descIncond, setDescIncond] = useState(0);
   const [descCond, setDescCond] = useState(0);
   const [valorTotal, setValorTotal] = useState(0);
 
-  const token = localStorage.getItem("token")
+  /* =======================
+     AJUSTE PRINCIPAL AQUI
+     ======================= */
+ useEffect(() => {
+  async function carregarClientes() {
+    const token = localStorage.getItem("token");
 
-  // load saved (optional)
+    try {
+      const response = await fetch("https://project-finc.onrender.com/clientes", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error("Erro ao buscar clientes");
+        return;
+      }
+
+      const data = await response.json();
+
+      const formatados = data.map(c => ({
+        id: c.id,
+        nome: c.nome_social || "Nome não informado",
+        cpf_cnpj: c.cpf_cnpj,
+        categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
+      }));
+
+      setListaClientes(formatados);
+    } catch (error) {
+      console.error("Erro ao buscar clientes:", error);
+    }
+  }
+
+  carregarClientes();
+}, []);
+
+
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -85,13 +122,10 @@ function Tela_1_emitir_nota() {
           setDescIncond(obj.descIncond || 0);
           setDescCond(obj.descCond || 0);
         }
-      } catch (e) {
-        // ignore
-      }
+      } catch {}
     }
   }, []);
 
-  // calcular total sempre que produtos ou descontos mudarem
   useEffect(() => {
     const somaProdutos = produtosServicos.reduce((acc, p) => {
       const q = Number(p.quantidade) || 0;
@@ -104,10 +138,19 @@ function Tela_1_emitir_nota() {
     setValorTotal(total >= 0 ? Number(total.toFixed(2)) : 0);
   }, [produtosServicos, descIncond, descCond]);
 
-  // Produtos manipulação (mantendo sua lógica)
   const addProdutoServico = () => {
     const id = Date.now() + Math.random();
-    const newItem = { id, item: "", tipoNotaItem: "", quantidade: 1, valor: 0, info: "", isOpen: false };
+    const newItem = {
+      id,
+      item: "",
+      tipoNotaItem: "",
+      categoriaItem: "",
+      quantidade: 1,
+      valor: 0,
+      info: "",
+      isOpen: false
+    };
+
     setProdutosServicos(prev => [...prev, newItem]);
     setTimeout(() => {
       setProdutosServicos(prev =>
@@ -129,14 +172,29 @@ function Tela_1_emitir_nota() {
     );
   };
 
-  // CPF/CNPJ mask handler
-  const handleCpfCnpjChange = (e) => {
-    const raw = e.target.value;
-    const masked = maskCpfCnpj(raw);
-    setClienteCpfCnpj(masked);
-  };
+  const handleSelectNome = (e) => {
+  const nome = e.target.value;
+  setClienteNome(nome);
 
-  // salvar dados no localStorage e seguir para Tela2
+  const cliente = listaClientes.find(c => c.nome === nome);
+  if (cliente) {
+    setClienteCpfCnpj(cliente.cpf_cnpj);
+    setClienteCompleto(cliente);
+  }
+};
+
+const handleSelectCpfCnpj = (e) => {
+  const cpf = e.target.value;
+  setClienteCpfCnpj(cpf);
+
+  const cliente = listaClientes.find(c => c.cpf_cnpj === cpf);
+  if (cliente) {
+    setClienteNome(cliente.nome);
+    setClienteCompleto(cliente);
+  }
+};
+
+
   const salvarEAvancar = () => {
     const payload = {
       tipoNota,
@@ -144,6 +202,7 @@ function Tela_1_emitir_nota() {
       produtosServicos,
       clienteNome,
       clienteCpfCnpj,
+      clienteCompleto,
       transNome,
       transCpf,
       placa,
@@ -155,8 +214,55 @@ function Tela_1_emitir_nota() {
       valorTotal
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    // o Link vai navegar; mas salvamos antes
   };
+
+useEffect(() => {
+  async function carregarItens() {
+    const token = localStorage.getItem("token");
+    const headers = { Authorization: `Bearer ${token}` };
+
+    try {
+      const [resProd, resServ] = await Promise.all([
+        fetch("https://project-finc.onrender.com/produtos", { headers }),
+        fetch("https://project-finc.onrender.com/servicos", { headers })
+      ]);
+
+      const produtosData = await resProd.json();
+      const servicosData = await resServ.json();
+
+      const produtos = produtosData.map(p => ({
+        ...p,
+        tipo: "produto",
+        nomeExibicao: p.nome,
+        preco: Number(p.preco_unitario),
+        categoria: p.categoria // 👈 IMPORTANTE
+      }));
+
+      const servicos = servicosData.map(s => ({
+        ...s,
+        tipo: "servico",
+        nomeExibicao: s.nome,
+        preco: Number(s.preco),
+        categoria: s.categoria // 👈 IMPORTANTE
+      }));
+
+
+      setListaItens([...produtos, ...servicos]);
+    } catch (err) {
+      console.error("Erro ao carregar produtos/serviços:", err);
+    }
+  }
+
+  carregarItens();
+}, []);
+
+
+const itensDisponiveis = listaItens.filter(item => {
+  if (tipoNota === "NFS-e") return item.tipo === "servico";
+  if (tipoNota === "NF-e" || tipoNota === "NFC-e") return item.tipo === "produto";
+  return false;
+});
+
 
   return (
     <main className="content">
@@ -177,18 +283,36 @@ function Tela_1_emitir_nota() {
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="nome-social">Nome Social <span className="campo-obrigatório">*</span></label>
-            <input id="nome-social" type="text" placeholder="Selecione" value={clienteNome} onChange={e => setClienteNome(e.target.value)} />
+              <select
+                id="nome-social"
+                value={clienteNome}
+                onChange={handleSelectNome}
+              >
+                <option value="">Selecione</option>
+                {listaClientes.map(cli => (
+                  <option key={cli.id} value={cli.nome}>
+                    {cli.nome}
+                  </option>
+                ))}
+              </select>
+
           </div>
           <div className="form-group">
             <label htmlFor="cpf-cnpj">CPF/CNPJ <span className="campo-obrigatório">*</span></label>
-            <input
+            <select
               id="cpf-cnpj"
-              type="text"
-              placeholder="Selecione"
-              maxLength={18}
               value={clienteCpfCnpj}
-              onChange={handleCpfCnpjChange}
-            />
+              onChange={handleSelectCpfCnpj}
+            >
+              <option value="">Selecione</option>
+              {listaClientes.map(cli => (
+                <option key={cli.id} value={cli.cpf_cnpj}>
+                  {cli.cpf_cnpj}
+                </option>
+              ))}
+            </select>
+
+
           </div>
         </div>
       </section>
@@ -228,23 +352,63 @@ function Tela_1_emitir_nota() {
                 <label htmlFor={`item-${p.id}`}>
                   Selecione o produto/serviço: <span className="campo-obrigatório">*</span>
                 </label>
-                <input
+                <select
                   id={`item-${p.id}`}
-                  type="text"
-                  placeholder="Selecione"
                   value={p.item}
-                  onChange={(e) => handleChange(p.id, "item", e.target.value)}
-                />
+                  disabled={!tipoNota}
+                  onChange={(e) => {
+                    const itemSelecionado = itensDisponiveis.find(
+                      i => String(i.id) === e.target.value
+                    );
+
+                    if (!itemSelecionado) return;
+
+                    setProdutosServicos(prev =>
+                      prev.map(x =>
+                        x.id === p.id
+                          ? {
+                              ...x,
+                              item: itemSelecionado.id,
+                              valor: itemSelecionado.preco,
+                              categoriaItem: itemSelecionado.categoria // 👈 CATEGORIA REAL
+
+
+                            }
+                          : x
+                      )
+                    );
+                  }}
+
+                >
+                  <option value="">
+                    {!tipoNota
+                      ? "Selecione o tipo de nota primeiro"
+                      : tipoNota === "NFS-e"
+                        ? "Selecione um serviço"
+                        : "Selecione um produto"}
+                  </option>
+
+                  {itensDisponiveis.map(item => (
+                    <option key={`${item.tipo}-${item.id}`} value={item.id}>
+                      {item.nomeExibicao}
+                    </option>
+                  ))}
+                </select>
+
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label>
-                  Tipo do item (visível apenas) 
+                  Categoria 
                 </label>
-                {/* mostramos tipoNota global, mas mantemos campo para compatibilidade */}
-                <input readOnly value={tipoNota} placeholder="Selecione o tipo de nota acima" />
+                <input
+                  readOnly
+                  value={p.categoriaItem}
+                  placeholder="Categoria do item"
+                />
+
               </div>
 
               <div className="form-group">
@@ -258,7 +422,18 @@ function Tela_1_emitir_nota() {
                   step="1"
                   placeholder="Digite a quantidade"
                   value={p.quantidade}
-                  onChange={(e) => handleChange(p.id, "quantidade", e.target.value)}
+                  onChange={(e) => {
+                    const qtd = Number(e.target.value) || 0;
+
+                    setProdutosServicos(prev =>
+                      prev.map(x =>
+                        x.id === p.id
+                          ? { ...x, quantidade: qtd }
+                          : x
+                      )
+                    );
+                  }}
+
                 />
               </div>
               <div className="form-group input-prefix">
@@ -269,10 +444,10 @@ function Tela_1_emitir_nota() {
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder="0,00"
                   value={p.valor}
-                  onChange={(e) => handleChange(p.id, "valor", e.target.value)}
+                  disabled
                 />
+
               </div>
             </div>
 

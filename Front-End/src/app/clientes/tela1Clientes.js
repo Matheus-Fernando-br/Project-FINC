@@ -14,7 +14,7 @@ function Tela_1_clientes() {
 
   useEffect(() => {
     async function buscarClientes() {
-        const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
         try {
           const response = await fetch(
