@@ -119,7 +119,7 @@ const [shortcuts, setShortcuts] = useState(() => {
                 className="btn btn-outline-secondary btn-sm"
                 onClick={() => setEditMode(true)}
               >
-                <i class="bi bi-pencil-square"></i> Editar
+                <i className="bi bi-pencil-square"></i> Editar
               </button>
             )}
           </div>

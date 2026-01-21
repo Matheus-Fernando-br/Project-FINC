@@ -229,8 +229,20 @@ body {
   100% { transform: scale(1); }
 }
 
+.btn-vermelho, .btn-verde {
+  transition: all .3s ease-in-out;
+}
 
+.btn-vermelho:hover {
+  background-color: #610f0f;
+  transform: scale(0.98);
+}
 
+.btn-verde:hover {
+    background-color: #085005;
+  transform: scale(0.98);
+  cursor: pointer;
+}
 
 /* ================= SIDEBAR ================= */
 .sidebar {

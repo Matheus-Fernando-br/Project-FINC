@@ -99,12 +99,17 @@ function Tela_1_produtos() {
             <div key={`${item.tipo}-${item.id}`} className="card-cliente animar-card">
               <div onClick={() => navigate(`/${item.tipo}s/editar/${item.id}`)} style={{cursor:'pointer'}}>
                 <h4>{item.nome || item.name}</h4>
-                <p className="badge-tipo">{item.tipo.toUpperCase()}</p>
                 <small>SKU: {item.sku || 'N/A'}</small>
               </div>
-              <div className="acoes-card">
-                <button onClick={() => navigate(`/${item.tipo}s/editar/${item.id}`)} className="btn-icon"><i className={icons.edit}></i></button>
-                <button onClick={() => excluirItem(item.id, item.tipo)} className="btn-icon btn-delete"><i className="bi bi-trash"></i></button>
+              <div className="editar-acao">
+                <div className="editar-cliente-item" onClick={() => navigate(`/${item.tipo}s/editar/${item.id}`)}>
+                  <i className={icons.edit}></i>
+                  <p>Editar</p>
+                </div>
+                <div className="excluir-cliente-item" onClick={() => excluirItem(item.id, item.tipo)}>
+                  <i className="bi bi-trash"></i>
+                  <p>Excluir</p>
+                </div>
               </div>
             </div>
           ))}
