@@ -1,145 +1,58 @@
+import React, { useState } from "react";
 import icons from "../../../components/Icons";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from "axios";
 
 function Tela_Cadastro_Produto() {
+    const navigate = useNavigate();
+    const [form, setForm] = useState({
+        nome: "", fabricante: "", categoria: "", tipo_nota: "",
+        descricao: "", sku: "", unidade_medida: "", preco_unitario: "",
+        ncm: "", cfop: "", icms: "", ipi: "", pis_cofins: "", aliquotas: "", origem: ""
+    });
+
+    const handleSubmit = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.post("https://project-finc.onrender.com/produtos", form, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert("Produto cadastrado!");
+            navigate("/produtos");
+        } catch (err) { alert("Erro ao cadastrar produto"); }
+    };
+
     return (
         <main className="content">
-            {/* Título */}
-            <section className='titulo-secao'>
-                <h1><i className={icons.produtosAdd}></i> Cadastro de um novo Produto</h1>
-            </section>
-
-            {/* Botão Voltar */}
-            <div className="form-footer voltar">
-                <Link to="/produtos/cadastro" className="previous-step">
-                    Voltar <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
-                </Link>
-            </div>
-
-            {/* Seção 1 - Informações Básicas */}
+            <section className='titulo-secao'><h1><i className={icons.produtosAdd}></i> Cadastro de Produto</h1></section>
+            <div className="form-footer voltar"><Link to="/produtos" className="previous-step">Voltar</Link></div>
             <section className="form-section">
-                <p className="frase-campo-asterisco">
-                    Os campos que contêm um asterisco (<span className="campo-obrigatório">*</span>) são de preenchimento obrigatório.
-                </p>
-                <div className="section-header">
-                    <span className="icon"><i className={icons.produtos}></i></span>
-                    <h3>Informações Básicas</h3>
-                </div>
-                <hr className="divider" />
-
                 <div className="form-row">
-                    <div className="form-group">
-                        <label>Nome: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o nome do produto" />
-                    </div>
-                    <div className="form-group">
-                        <label>Marca/Fabricante:</label>
-                        <input type="text" placeholder="Digite a marca ou fabricante" />
-                    </div>
+                    <div className="form-group"><label>Nome *</label><input type="text" value={form.nome} onChange={e => setForm({...form, nome: e.target.value})} /></div>
+                    <div className="form-group"><label>Fabricante</label><input type="text" value={form.fabricante} onChange={e => setForm({...form, fabricante: e.target.value})} /></div>
                 </div>
-
                 <div className='form-row'>
-                    <div className="form-group">
-                        <label>Categoria: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite a categoria" />
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            Que tipo de nota deseja para esse produto?:
-                            <span className="campo-obrigatório"> *</span>
-                        </label>
-                        <select defaultValue="">
-                            <option value="" disabled>Selecione o Tipo</option>
-                            <option value="nfe">NF-e (Produto)</option>
-                            <option value="nfce">NFC-e (Consumidor)</option>
+                    <div className="form-group"><label>Categoria *</label><input type="text" value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} /></div>
+                    <div className="form-group"><label>Tipo Nota *</label>
+                        <select value={form.tipo_nota} onChange={e => setForm({...form, tipo_nota: e.target.value})}>
+                            <option value="">Selecione</option>
+                            <option value="nfe">NF-e</option>
+                            <option value="nfce">NFC-e</option>
                         </select>
                     </div>
                 </div>
-
                 <div className="form-row">
-                    <div className="form-group">
-                        <label>Descrição:</label>
-                        <input type="text" placeholder="Digite a descrição do produto" />
-                    </div>
+                   <div className="form-group"><label>SKU *</label><input type="text" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} /></div>
+                   <div className="form-group"><label>Unidade *</label><input type="text" value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})} /></div>
+                   <div className="form-group"><label>Preço *</label><input type="number" value={form.preco_unitario} onChange={e => setForm({...form, preco_unitario: e.target.value})} /></div>
+                </div>
+                <div className="form-row">
+                   <div className="form-group"><label>NCM *</label><input type="text" value={form.ncm} onChange={e => setForm({...form, ncm: e.target.value})} /></div>
+                   <div className="form-group"><label>CFOP *</label><input type="text" value={form.cfop} onChange={e => setForm({...form, cfop: e.target.value})} /></div>
                 </div>
             </section>
-
-            {/* Seção 2 - Identificação */}
-            <section className="form-section">
-                <div className="section-header">
-                    <span className="icon"><i className={icons.produtoIdentidade}></i></span>
-                    <h3>Identificação</h3>
-                </div>
-                <hr className="divider" />
-
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Código interno / SKU: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o código ou SKU" />
-                    </div>
-                    <div className="form-group">
-                        <label>Unidade de Medida: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Ex: UN, KG, CX" />
-                    </div>
-                    <div className="form-group">
-                        <label>Preço Unitário: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o valor unitário" />
-                    </div>
-                </div>
-            </section>
-
-            {/* Seção 3 - Tributação */}
-            <section className="form-section">
-                <div className="section-header">
-                    <span className="icon"><i className={icons.moeda}></i></span>
-                    <h3>Tributação</h3>
-                </div>
-                <hr className="divider" />
-
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>NCM: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o código NCM" />
-                    </div>
-                    <div className="form-group">
-                        <label>CFOP: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o código CFOP" />
-                    </div>
-                </div>
-
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>CST/CSOSN ICMS: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o código ICMS" />
-                    </div>
-                    <div className="form-group">
-                        <label>CST IPI:</label>
-                        <input type="text" placeholder="Digite o código IPI" />
-                    </div>
-                    <div className="form-group">
-                        <label>E-CST PIS/COFINS: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="Digite o código PIS/COFINS" />
-                    </div>
-                </div>
-
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Alíquotas de Impostos: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="ICMS, IPI, PIS, COFINS" />
-                    </div>
-                    <div className="form-group">
-                        <label>Origem do Produto: <span className="campo-obrigatório">*</span></label>
-                        <input type="text" placeholder="0 = Nacional, 1 = Estrangeira" />
-                    </div>
-                </div>
-            </section>
-
-            {/* Botão Final */}
-            <div className="botao_geral">
-                <button className="btn">Cadastrar</button>
-            </div>
+            <div className="botao_geral"><button className="btn" onClick={handleSubmit}>Cadastrar</button></div>
         </main>
     );
 }
-
 export default Tela_Cadastro_Produto;

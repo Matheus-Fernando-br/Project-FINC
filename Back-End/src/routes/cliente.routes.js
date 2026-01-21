@@ -3,7 +3,8 @@ import { getClientes,
   getClienteById,
   createCliente,
   deleteCliente,
-  updateCliente } from "../controllers/cliente.controller.js";
+  updateCliente,
+  importClientes } from "../controllers/cliente.controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = Router();
@@ -15,7 +16,6 @@ router.get("/:id", getClienteById);
 router.post("/", createCliente);
 router.delete("/:id", deleteCliente);
 router.put("/:id", updateCliente);
-
-
+router.put("/", importClientes);
 
 export default router;

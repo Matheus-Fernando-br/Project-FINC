@@ -191,3 +191,36 @@
       return res.status(500).json({ error: "Erro interno" });
     }
   }
+
+  /* IMPORTAÇÃO EM MASSA (BULK) */
+  export async function importClientes(req, res) {
+    try {
+      const userId = req.user.id;
+      const clientesParaImportar = req.body; // Espera um Array []
+
+      if (!Array.isArray(clientesParaImportar) || clientesParaImportar.length === 0) {
+        return res.status(400).json({ error: "Nenhum dado fornecido para importação" });
+      }
+
+      // Adiciona o user_id em todos os registros antes de salvar
+      const dadosCompletos = clientesParaImportar.map(cliente => ({
+        ...cliente,
+        user_id: userId
+      }));
+
+      const { data, error } = await supabase
+        .from("clientes")
+        .insert(dadosCompletos)
+        .select();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res.status(201).json({ message: "Importação concluída com sucesso!", count: data.length });
+
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Erro interno no servidor ao importar" });
+    }
+  }

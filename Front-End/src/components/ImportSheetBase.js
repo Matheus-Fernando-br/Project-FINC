@@ -4,10 +4,14 @@ import { useState } from "react";
 import { Link } from 'react-router-dom';
 import * as XLSX from "xlsx";
 import '..//styles/global.css';
+import axios from "axios"; // Garanta que o axios esteja instalado
+import { useNavigate } from "react-router-dom";
 
 function ImportSheetBase({ type }) {
 
     const [previewData, setPreviewData] = useState([]);
+    const [isImporting, setIsImporting] = useState(false); // Para mostrar carregamento
+    const navigate = useNavigate();
     const [error, setError] = useState("");
 
     function normalizeHeader(text) {
@@ -145,6 +149,72 @@ function ImportSheetBase({ type }) {
         reader.readAsArrayBuffer(file);
     };
 
+    const handleImport = async () => {
+        if (previewData.length === 0) return;
+        setIsImporting(true);
+        const token = localStorage.getItem("token");
+
+        try {
+            let dadosMapeados = [];
+
+            if (normalizedType === "clientes") {
+                dadosMapeados = previewData.map(item => ({
+                    nome_social: item.nome,
+                    tipo_pessoa: item.tipopessoa === "PF" ? "PFisica" : "PJuridica",
+                    cpf_cnpj: item.cpf_cnpj, email: item.email, telefone: item.telefone,
+                    whatsapp: item.whatsapp, cep: item.cep, uf: item.uf, cidade: item.cidade,
+                    logradouro: item.rua, numero: item.numero, complemento: item.complemento
+                }));
+            } 
+            else if (normalizedType === "produtos") {
+                dadosMapeados = previewData.map(item => ({
+                    nome: item.name,
+                    fabricante: item.manufacturer,
+                    categoria: item.category,
+                    descricao: item.description,
+                    sku: item.sku,
+                    unidade_medida: item.unittype, // Ajustado para bater com o DB
+                    preco_unitario: parseFloat(item.unitprice.toString().replace(',', '.')) || 0,
+                    ncm: item.ncm,
+                    cfop: item.cfop,
+                    icms: item.icms,
+                    pis_cofins: item.cofins, // Ajustado
+                    origem: item.productorigin.split(' ')[0], // Pega apenas o "0" de "0 - Nacional"
+                }));
+            } 
+            else if (normalizedType === "servicos") {
+                dadosMapeados = previewData.map(item => ({
+                    nome: item.name,
+                    categoria: item.category,
+                    descricao_detalhada: item.description, // Ajustado
+                    codigo_interno: item.sku, // Ajustado
+                    unidade_medida: item.unittype, // Ajustado
+                    preco: parseFloat(item.unitprice.toString().replace(',', '.')) || 0,
+                    cnae: item.cnae,
+                    quantidade: parseInt(item.amount) || 1,
+                    municipio: item.municipality,
+                    codigo_servico: item.servicecod,
+                    aliquota_iss: item.iss, // Ajustado
+                    cst_pis_cofins: item.cofins, // Ajustado
+                    regime_especial: item.specialtaxregime
+                }));
+            }
+
+            // Usando PUT conforme seu router definiu para a rota de importação
+            await axios.put(`https://project-finc.onrender.com/${normalizedType}`, dadosMapeados, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert("Importação concluída com sucesso!");
+            navigate(`/${normalizedType}`);
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao importar dados. Verifique o console.");
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
     return (
         <Layout>
             <main className="content import-sheet">
@@ -225,12 +295,20 @@ function ImportSheetBase({ type }) {
                     )}
 
                     <section className="botoes">
-                        <button className="btn-vermelho">
+                        <button 
+                            className="btn-vermelho" 
+                            onClick={() => setPreviewData([])}
+                            disabled={isImporting}
+                        >
                             Cancelar
                         </button>
                         <div className="botao_geral">
-                            <button className="btn">
-                                Salvar novos {type}
+                            <button 
+                                className="btn" 
+                                onClick={handleImport} 
+                                disabled={previewData.length === 0 || isImporting}
+                            >
+                                {isImporting ? "Importando..." : `Salvar novos ${type}`}
                             </button>
                         </div>
                     </section>
