@@ -112,5 +112,31 @@
   user-select: none;
 }
 
-/* Se necessário adapte alturas máximas (max-height) para seu conteúdo real */
+.dropdown-sugestoes {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
 
+.dropdown-sugestoes li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #333;
+}
+
+.dropdown-sugestoes li:hover {
+  background-color: #f0f7ff;
+}

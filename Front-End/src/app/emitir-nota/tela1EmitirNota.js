@@ -41,6 +41,13 @@ function Tela_1_emitir_nota() {
   // Cliente
   const [clienteNome, setClienteNome] = useState("");
   const [clienteCpfCnpj, setClienteCpfCnpj] = useState("");
+  const [clienteCompleto, setClienteCompleto] = useState("null");
+
+  //Listas do banco
+  const [listaClientes, setListaClientes] = useState([]);
+  const [listaItens, setListaItens] = useState([]);
+  const [showDropdownCli, setShowDropdownCli] = useState(false);
+  const [showDropdownItem, setShowDropdownItem] = useState({});
 
   // Transporte
   const [transNome, setTransNome] = useState("");
@@ -54,6 +61,8 @@ function Tela_1_emitir_nota() {
   const [descIncond, setDescIncond] = useState(0);
   const [descCond, setDescCond] = useState(0);
   const [valorTotal, setValorTotal] = useState(0);
+
+  const token = localStorage.getItem("token")
 
   // load saved (optional)
   useEffect(() => {

@@ -25,7 +25,7 @@ function Tela_1_produtos() {
       ]);
 
       const produtos = resProd.data.map(p => ({ ...p, tipo: "produto" }));
-      const servicos = resServ.data.map(s => ({ ...s, tipo: "serviço" }));
+      const servicos = resServ.data.map(s => ({ ...s, tipo: "servico" }));
 
       setItens([...produtos, ...servicos]);
     } catch (error) {
@@ -83,7 +83,7 @@ function Tela_1_produtos() {
 
       <section className="form-section">
         <div className="abas-container">
-          {["todos", "produto", "serviço"].map(aba => (
+          {["todos", "produto", "servico"].map(aba => (
             <button key={aba} className={abaAtual === aba ? "aba ativa" : "aba"} onClick={() => {setAbaAtual(aba); setPaginaAtual(1);}}>
               {aba.charAt(0).toUpperCase() + aba.slice(1)}s
             </button>

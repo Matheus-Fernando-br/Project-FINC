@@ -28,10 +28,43 @@ function ImportSheetBase({ type }) {
     const normalizedType = normalizeHeader(type);
 
     const expectedColumns = {
-        clientes: ["nome", "tipopessoa", "cpf_cnpj", "email", "telefone", "whatsapp", "cep", "uf", "cidade", "rua", "bairro", "numero", "complemento"],
-        produtos: ["name", "manufacturer", "category", "description", "sku", "unittype", "unitprice", "ncm", "cfop", "icms", "cofins", "productorigin"],
-        servicos: ["name", "category", "description", "sku", "unittype", "amount", "unitprice", "cnae", "servicecod", "iss", "cofins", "specialtaxregime", "municipality"]
+    clientes: [
+        "nome","tipopessoa","cpf_cnpj","email","telefone","whatsapp",
+        "cep","uf","cidade","rua","bairro","numero","complemento"
+    ],
+
+    produtos: [
+        "nome",
+        "fabricante",
+        "categoria",
+        "descricao",
+        "sku",
+        "unidade_de_medida",
+        "preco_unitario",
+        "ncm",
+        "cfop",
+        "icms",
+        "cofins",
+        "origem_do_produto"
+    ],
+
+    servicos: [
+        "nome",
+        "categoria",
+        "descricao",
+        "sku",
+        "unidade_de_medida",
+        "item_lista",
+        "preco_unitario",
+        "cnae",
+        "codigo_de_servico",
+        "iss",
+        "cofins",
+        "taxa_de_regime_especial",
+        "municipio"
+    ]
     };
+
 
     const downloadModel = () => {
         const fileMap = {
@@ -127,38 +160,46 @@ function ImportSheetBase({ type }) {
                 }));
             } 
             else if (normalizedType === "produtos") {
-                dadosMapeados = previewData.map(item => ({
-                    nome: item.name || "",
-                    fabricante: item.manufacturer || "",
-                    categoria: item.category || "",
-                    descricao: item.description || "",
-                    sku: item.sku || "",
-                    unidade_medida: item.unittype || "Unidade",
-                    preco_unitario: item.unitprice ? parseFloat(item.unitprice.toString().replace(',', '.')) : 0,
-                    ncm: item.ncm || "",
-                    cfop: item.cfop || "",
-                    icms: item.icms || "",
-                    pis_cofins: item.cofins || "",
-                    origem: item.productorigin ? item.productorigin.toString().split(' ')[0] : "0"
-                }));
-            } 
-            else if (normalizedType === "servicos") {
-                dadosMapeados = previewData.map(item => ({
-                    nome: item.name || "",
-                    categoria: item.category || "",
-                    descricao_detalhada: item.description || "",
-                    codigo_interno: item.sku || "",
-                    unidade_medida: item.unittype || "Unidade",
-                    preco: item.unitprice ? parseFloat(item.unitprice.toString().replace(',', '.')) : 0,
-                    cnae: item.cnae || "",
-                    quantidade: parseInt(item.amount || item.Amount) || 1,
-                    municipio: item.municipality || "",
-                    codigo_servico: item.servicecod || "",
-                    aliquota_iss: item.iss || "",
-                    cst_pis_cofins: item.cofins || "",
-                    regime_especial: item.specialtaxregime || "Nenhum"
-                }));
+            dadosMapeados = previewData.map(item => ({
+                nome: item.nome || "",
+                fabricante: item.fabricante || "",
+                categoria: item.categoria || "",
+                descricao: item.descricao || "",
+                sku: item.sku || "",
+                unidade_medida: item.unidade_de_medida || "Unidade",
+                preco_unitario: item.preco_unitario
+                ? parseFloat(item.preco_unitario.toString().replace(",", "."))
+                : 0,
+                ncm: item.ncm || "",
+                cfop: item.cfop || "",
+                icms: item.icms || "",
+                pis_cofins: item.cofins || "",
+                origem: item.origem_do_produto
+                ? item.origem_do_produto.toString().split(" ")[0]
+                : "0"
+            }));
             }
+
+            else if (normalizedType === "servicos") {
+            dadosMapeados = previewData.map(item => ({
+                nome: item.nome || "",
+                categoria: item.categoria || "",
+                codigo_interno: item.sku || "",
+                descricao_detalhada: item.descricao || "",
+                preco: item.preco_unitario
+                ? parseFloat(item.preco_unitario.toString().replace(",", "."))
+                : 0,
+                unidade_medida: item.unidade_de_medida || "Unidade",
+                cnae: item.cnae || "",
+                codigo_servico: item.codigo_de_servico || "",
+                item_lista: item.item_lista || "",
+                aliquota_iss: item.iss || "",
+                cst_pis_cofins: item.cofins || "",
+                regime_especial: item.taxa_de_regime_especial || "",
+                municipio: item.municipio || ""
+            }));
+            }
+
 
             await axios.put(`https://project-finc.onrender.com/${normalizedType}`, dadosMapeados, {
                 headers: { 
