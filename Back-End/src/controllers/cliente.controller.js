@@ -84,15 +84,13 @@ export async function createCliente(req, res) {
           email,
           telefone,
           whatsapp,
-          endereco: {
-            cep,
-            uf,
-            cidade,
-            logradouro,
-            bairro,
-            numero,
-            complemento
-          }
+          cep,
+          uf,
+          cidade,
+          logradouro,
+          bairro,
+          numero,
+          complemento
         }
       ])
       .select()
@@ -148,15 +146,13 @@ export async function updateCliente(req, res) {
         email,
         telefone,
         whatsapp,
-        endereco: {
-          cep,
-          uf,
-          cidade,
-          logradouro,
-          bairro,
-          numero,
-          complemento
-        }
+        cep,
+        uf,
+        cidade,
+        logradouro,
+        bairro,
+        numero,
+        complemento
       })
       .eq("id", id)
       .eq("user_id", userId);
