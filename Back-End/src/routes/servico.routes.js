@@ -4,7 +4,7 @@ import { getServicos,
   createServico,
   deleteServico,
   updateServico,
-  importServico } from "./servico.controller.js";
+  importServico } from "../controllers/servico.controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = Router();
