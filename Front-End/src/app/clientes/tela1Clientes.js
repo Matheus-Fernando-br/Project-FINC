@@ -10,7 +10,6 @@ function Tela_1_clientes() {
   const [pesquisa, setPesquisa] = useState("");
   const [abaAtual, setAbaAtual] = useState("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [clienteEditando, setClienteEditando] = useState(null); // Estado para o cliente que está sendo editado
   const navigate = useNavigate();
 
   const itensPorPagina = 5;
@@ -38,7 +37,7 @@ function Tela_1_clientes() {
 
           const formatados = data.map(c => ({
             id: c.id,
-            nome: c.nome_social ?? "",
+            nome: c.nome_social || "Nome não informado",
             categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
           }));
           setClientes(formatados);
@@ -50,15 +49,6 @@ function Tela_1_clientes() {
       buscarClientes();
     }, []);
 
-  const handleEdit = async (id) => {
-    const response = await axios.get(`https://project-finc.onrender.com/clientes/${id}`);
-    setClienteEditando(response.data); // Carregar dados do cliente para edição
-  };
-
-  const handleSave = async () => {
-    await axios.put(`https://project-finc.onrender.com/clientes/${clienteEditando.id}`, clienteEditando);
-    navigate("/clientes"); // Redirecionar após salvar
-  };
 
   const filtradosPorAba = clientes.filter((item) =>
     abaAtual === "todos" ? true : item.categoria === abaAtual

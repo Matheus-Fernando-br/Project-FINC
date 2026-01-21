@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import icons from "../components/Icons";
 import "../styles/telaInicial.css";
 
@@ -33,7 +33,6 @@ function LayoutTelaInicial({ children }) {
 const [active, setActive] = useState(false);
 const sidebarRef = useRef(null);
 
-const openMenu = () => setActive(true);
 const closeMenu = () => setActive(false);
 
 useEffect(() => {

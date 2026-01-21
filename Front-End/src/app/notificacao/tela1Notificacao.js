@@ -1,6 +1,5 @@
 import icons from "../../components/Icons";
 import './notificacao.css'
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 function Tela_1_notificacao() {

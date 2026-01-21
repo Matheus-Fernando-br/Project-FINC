@@ -1,6 +1,5 @@
 import icons from "../../components/Icons";
 import './contador.css'
-import { useState } from 'react';
 
 function Tela_1_feedback() {
 

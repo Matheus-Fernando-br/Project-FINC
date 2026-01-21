@@ -12,44 +12,39 @@ function Editar_cliente() {
   const [form, setForm] = useState({});
   const [formOriginal, setFormOriginal] = useState({});
   
-useEffect(() => {
-  const fetchCliente = async () => {
-    try {
-      const response = await axios.get(`/api/clientes/${id}`);
-      const cliente = response.data;
+  useEffect(() => {
+    const fetchCliente = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`https://project-finc.onrender.com/clientes/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const cliente = response.data;
 
-      setForm({
-        ...cliente,
-        cep: cliente.endereco?.cep || "",
-        uf: cliente.endereco?.uf || "",
-        cidade: cliente.endereco?.cidade || "",
-        logradouro: cliente.endereco?.logradouro || "",
-        bairro: cliente.endereco?.bairro || "",
-        numero: cliente.endereco?.numero || "",
-        complemento: cliente.endereco?.complemento || ""
-      });
+        // O banco retorna campos planos, não dentro de um objeto 'endereco'
+        const dadosMapeados = {
+          ...cliente,
+          cep: cliente.cep || "",
+          uf: cliente.uf || "",
+          cidade: cliente.cidade || "",
+          logradouro: cliente.logradouro || "",
+          bairro: cliente.bairro || "",
+          numero: cliente.numero || "",
+          complemento: cliente.complemento || ""
+        };
 
-      setFormOriginal({
-        ...cliente,
-        cep: cliente.endereco?.cep || "",
-        uf: cliente.endereco?.uf || "",
-        cidade: cliente.endereco?.cidade || "",
-        logradouro: cliente.endereco?.logradouro || "",
-        bairro: cliente.endereco?.bairro || "",
-        numero: cliente.endereco?.numero || "",
-        complemento: cliente.endereco?.complemento || ""
-      });
+        setForm(dadosMapeados);
+        setFormOriginal(dadosMapeados);
+        setTipoPessoa(cliente.tipo_pessoa);
 
-      setTipoPessoa(cliente.tipo_pessoa);
-
-    } catch (error) {
-      console.error("Erro ao carregar cliente:", error);
-      alert("Erro ao carregar cliente.");
-    }
-  };
-
-  fetchCliente();
-}, [id]);
+      } catch (error) {
+        console.error("Erro ao carregar:", error);
+        alert("Erro ao carregar dados do cliente.");
+      }
+    };
+    fetchCliente();
+  }, [id]);
 
 
   const maskTelefone = (value) =>

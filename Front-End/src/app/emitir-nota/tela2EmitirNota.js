@@ -36,7 +36,6 @@ function Tela_2_emitir_nota() {
     if (!data) return alert("Nenhum dado salvo para gerar a nota.");
 
     const cpfRaw = onlyDigits(data.clienteCpfCnpj || "semcpf");
-    const clienteNome = (data.cliente || {}).clienteNome || "semnome";
     const filename = `nota-fiscal-${cpfRaw || "semcpf"}-${formatDateYYYYMMDD(new Date())}.pdf`;
 
     // configurações do html2pdf

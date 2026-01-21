@@ -1,6 +1,4 @@
-import { Link } from "react-router-dom";
 import icons from "../../components/Icons";
-import React from "react";
 import "./Pagamento.css";
 
 function Pagamento() {

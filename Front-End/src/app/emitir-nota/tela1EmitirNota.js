@@ -7,10 +7,6 @@ import { Link } from "react-router-dom";
 const ANIM_MS = 320; // manter em sincronia com o CSS (--anim-dur)
 const STORAGE_KEY = "emitirNotaData";
 
-function formatCpfCnpjRaw(value) {
-  return value.replace(/\D/g, "");
-}
-
 function maskCpfCnpj(value) {
   const digits = value.replace(/\D/g, "");
   if (digits.length > 11) {
