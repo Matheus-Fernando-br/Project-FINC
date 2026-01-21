@@ -34,6 +34,9 @@ import CadastroProdutosPlanilha from "./app/produtos_servicos/tela3EscolhaPlanil
 import TelaCadastroProduto from "./app/produtos_servicos/produto/telaCadastroProduto";
 import TelaCadastroServico from "./app/produtos_servicos/servico/telaCadastroServico";
 
+import EditarProduto from "./app/produtos_servicos/produto/editarProduto";
+import EditarServico from "./app/produtos_servicos/servico/editarServico";
+
 import Tela1Notificacao from "./app/notificacao/tela1Notificacao";
 import Tela1Planos from "./app/planos/tela1Planos";
 import Pagamento from "./app/pagamento/tela1Pagamento";
@@ -200,6 +203,28 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <EditarCliente />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/servicos/editar/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <EditarServico />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/produtos/editar/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <EditarProduto />
             </Layout>
           </ProtectedRoute>
         }

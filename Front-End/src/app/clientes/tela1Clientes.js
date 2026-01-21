@@ -47,15 +47,17 @@ function Tela_1_clientes() {
       buscarClientes();
     }, []);
 
-
+  // FILTRO DE ABA
   const filtradosPorAba = clientes.filter((item) =>
     abaAtual === "todos" ? true : item.categoria === abaAtual
   );
 
+  // APLICAR PESQUISA
   const filtrados = filtradosPorAba.filter((item) =>
     item.nome.toLowerCase().includes(pesquisa.toLowerCase())
   );
 
+  // PAGINAÇÃO
   const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
 
   const itensExibidos = filtrados.slice(
@@ -63,6 +65,7 @@ function Tela_1_clientes() {
     paginaAtual * itensPorPagina
   );
 
+  // HANDLERS
   const handlePesquisa = (e) => {
     setPesquisa(e.target.value);
     setPaginaAtual(1);

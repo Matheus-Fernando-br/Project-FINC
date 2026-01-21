@@ -1,191 +1,124 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./produtos.css";
+import axios from "axios";
 
 function Tela_1_produtos() {
-  
-const listaCompleta = [
-  { nome: "Limpeza Predial", categoria: "serviço", tipo: "Predial" },
-  { nome: "Pregos 10mm", categoria: "produto", tipo: "Construção" },
-  { nome: "Instalação de Ar-Condicionado", categoria: "serviço", tipo: "Climatização" },
-  { nome: "Cabo de Rede CAT6", categoria: "produto", tipo: "Rede" },
-  { nome: "Consultoria Financeira", categoria: "serviço", tipo: "Financeira" },
-  { nome: "Serviço de Jardinagem", categoria: "serviço", tipo: "Jardinagem" },
-  { nome: "Manutenção de Impressora", categoria: "serviço", tipo: "Informática" },
-  { nome: "Serviço de Solda", categoria: "serviço", tipo: "Soldagem" },
-  { nome: "Mangueira PVC 30m", categoria: "produto", tipo: "Hidráulica" },
-  { nome: "Limpeza de Piscina", categoria: "serviço", tipo: "Piscinas" },
-  { nome: "Suporte Técnico TI", categoria: "serviço", tipo: "TI" },
-  { nome: "Cadeira Escritório Pro", categoria: "produto", tipo: "Mobília" },
-  { nome: "Consultoria Contábil", categoria: "serviço", tipo: "Contábil" },
-  { nome: "Câmera de Segurança HD", categoria: "produto", tipo: "Segurança" },
-  { nome: "Monitor 27''", categoria: "produto", tipo: "Eletrônicos" },
-];
-
+  const [itens, setItens] = useState([]); // Lista unificada
   const [pesquisa, setPesquisa] = useState("");
   const [abaAtual, setAbaAtual] = useState("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const navigate = useNavigate();
 
   const itensPorPagina = 5;
 
-  // FILTRO DE ABA
-  const filtradosPorAba = listaCompleta.filter(item =>
-    abaAtual === "todos" ? true : item.categoria === abaAtual
-  );
+  const buscarDados = async () => {
+    const token = localStorage.getItem("token");
+    const headers = { Authorization: `Bearer ${token}` };
 
-  // APLICAR PESQUISA
-  const filtrados = filtradosPorAba.filter(item =>
-    item.nome.toLowerCase().includes(pesquisa.toLowerCase())
-  );
+    try {
+      // Busca simultânea de Produtos e Serviços
+      const [resProd, resServ] = await Promise.all([
+        axios.get("https://project-finc.onrender.com/produtos", { headers }),
+        axios.get("https://project-finc.onrender.com/servicos", { headers })
+      ]);
+
+      const produtos = resProd.data.map(p => ({ ...p, tipo: "produto" }));
+      const servicos = resServ.data.map(s => ({ ...s, tipo: "serviço" }));
+
+      setItens([...produtos, ...servicos]);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    }
+  };
+
+  useEffect(() => {
+    buscarDados();
+  }, []);
+
+  // FILTROS
+  const filtrados = itens.filter(item => {
+    const correspondeAba = abaAtual === "todos" || item.tipo === abaAtual;
+    const correspondePesquisa = (item.nome || item.name || "").toLowerCase().includes(pesquisa.toLowerCase());
+    return correspondeAba && correspondePesquisa;
+  });
 
   // PAGINAÇÃO
   const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
+  const itensExibidos = filtrados.slice((paginaAtual - 1) * itensPorPagina, paginaAtual * itensPorPagina);
 
-  const itensExibidos = filtrados.slice(
-    (paginaAtual - 1) * itensPorPagina,
-    paginaAtual * itensPorPagina
-  );
-
-  // HANDLERS
-  const handlePesquisa = (e) => {
-    setPesquisa(e.target.value);
-    setPaginaAtual(1);
-  };
-
-  const limparPesquisa = () => {
-    setPesquisa("");
-    setPaginaAtual(1);
-  };
-
-  const trocarAba = (novaAba) => {
-    setAbaAtual(novaAba);
-    setPaginaAtual(1);
+  const excluirItem = async (id, tipo) => {
+    if (!window.confirm(`Deseja excluir este ${tipo}?`)) return;
+    try {
+      const token = localStorage.getItem("token");
+      const rota = tipo === "produto" ? "produtos" : "servicos";
+      await axios.delete(`https://project-finc.onrender.com/${rota}/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Excluído com sucesso!");
+      buscarDados();
+    } catch (error) {
+      alert("Erro ao excluir item.");
+    }
   };
 
   return (
     <main className="content">
-
-      {/* TÍTULO */}
       <section className='titulo-secao'>
-        <h1>
-          <i className={icons.produtos}></i> Meus Produtos/Serviços
-        </h1>
+        <h1><i className={icons.produtos}></i> Meus Produtos/Serviços</h1>
       </section>
 
-      {/* CADASTRAR */}
       <section className="form-section">
         <div className="section-header">
           <span className="icon"><i className={icons.produtosAdd}></i></span>
           <h3>Cadastrar novo</h3>
         </div>
-
         <hr className="divider" />
-
         <div className="botao_geral">
-          <Link to="/produtos/cadastro">
-            <button className="btn">Cadastrar</button>
-          </Link>
-          <Link to="/produtos/cadastro/planilha">
-            <button className="btn">Importar de uma Planilha</button>
-          </Link>
+          <Link to="/produtos/cadastro"><button className="btn">Cadastrar</button></Link>
+          <Link to="/produtos/cadastro/planilha"><button className="btn">Importar Planilha</button></Link>
         </div>
       </section>
 
-      {/* LISTA */}
       <section className="form-section">
-
-        {/* CABEÇALHO */}
-        <div className="section-header">
-          <span className="icon"><i className={icons.relatorio}></i></span>
-          <h3>Meus Produtos/Serviços</h3>
-        </div>
-
-        <hr className="divider" />
-
-        {/* ABAS */}
         <div className="abas-container">
-          <button 
-            className={abaAtual === "todos" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("todos")}
-          >
-            Todos
-          </button>
-
-          <button 
-            className={abaAtual === "produto" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("produto")}
-          >
-            Produtos
-          </button>
-
-          <button 
-            className={abaAtual === "serviço" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("serviço")}
-          >
-            Serviços
-          </button>
+          {["todos", "produto", "serviço"].map(aba => (
+            <button key={aba} className={abaAtual === aba ? "aba ativa" : "aba"} onClick={() => {setAbaAtual(aba); setPaginaAtual(1);}}>
+              {aba.charAt(0).toUpperCase() + aba.slice(1)}s
+            </button>
+          ))}
         </div>
 
-        {/* PESQUISA */}
         <div className="form-row">
-          <input
-            type="text"
-            value={pesquisa}
-            onChange={handlePesquisa}
-            placeholder="Pesquisar produto ou serviço"
-          />
-
-          {pesquisa !== "" && (
-            <button onClick={limparPesquisa} className="btn-limpar">
-              Limpar
-            </button>
-          )}
+          <input type="text" value={pesquisa} onChange={(e) => setPesquisa(e.target.value)} placeholder="Pesquisar por nome..." />
         </div>
 
-        {/* CARDS */}
         <div className="cards animar-lista">
-          {itensExibidos.map((item, idx) => (
-            <React.Fragment key={idx}>
-              <hr className="divider" />
-
-              <div className="card-cliente animar-card">
-                <div>
-                  <h4>{item.nome}</h4>
-                  <p>{item.tipo.toUpperCase()}</p>
-                </div>
-
-                <div className="editar-acao">
-                  <i className={icons.edit}></i>
-                  <p>Editar</p>
-                </div>
+          {itensExibidos.map((item) => (
+            <div key={`${item.tipo}-${item.id}`} className="card-cliente animar-card">
+              <div onClick={() => navigate(`/${item.tipo}s/editar/${item.id}`)} style={{cursor:'pointer'}}>
+                <h4>{item.nome || item.name}</h4>
+                <p className="badge-tipo">{item.tipo.toUpperCase()}</p>
+                <small>SKU: {item.sku || 'N/A'}</small>
               </div>
-            </React.Fragment>
-          ))}
-
-          <hr className="divider" />
-        </div>
-
-        {/* PAGINAÇÃO */}
-        <div className="paginacao">
-          {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(num => (
-            <button
-              key={num}
-              className={num === paginaAtual ? "pagina ativa" : "pagina"}
-              onClick={() => setPaginaAtual(num)}
-            >
-              {num}
-            </button>
+              <div className="acoes-card">
+                <button onClick={() => navigate(`/${item.tipo}s/editar/${item.id}`)} className="btn-icon"><i className={icons.edit}></i></button>
+                <button onClick={() => excluirItem(item.id, item.tipo)} className="btn-icon btn-delete"><i className="bi bi-trash"></i></button>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* QUANDO NÃO ENCONTRA */}
-        {filtrados.length === 0 && (
-          <p className="nenhum">Nenhum item encontrado.</p>
+        {totalPaginas > 1 && (
+          <div className="paginacao">
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(num => (
+              <button key={num} className={num === paginaAtual ? "pagina ativa" : "pagina"} onClick={() => setPaginaAtual(num)}>{num}</button>
+            ))}
+          </div>
         )}
       </section>
     </main>
   );
 }
-
 export default Tela_1_produtos;
