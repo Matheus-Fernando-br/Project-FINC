@@ -159,9 +159,9 @@ function HomeTelaInicial() {
             Com o sistema FINC você automatiza tarefas, como emissão de notas fiscais, controle fiscal, gestão financeira e dashboards inteligentes, conectando todas as informações ao seu e-commerce ou loja física.
           </p>
           <Link to="/TelaInicial/Login">
-          <a className="botao-destaque scroll-fade delay-2" href="">
+          <p className="botao-destaque scroll-fade delay-2">
             Comece agora
-          </a>
+          </p>
           </Link>
         </div>
       </section>

@@ -1351,13 +1351,15 @@
   margin-right: 5px;
 }
 
-.Login .wrapper .remember-forgot a {
+.Login .wrapper .remember-forgot p {
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
-.Login .wrapper .remember-forgot a:hover {
+.Login .wrapper .remember-forgot p:hover {
   text-decoration: underline;
+  color: #0c54c0;
+  cursor: pointer;
   transform: scale(0.98);
 }
 

@@ -96,7 +96,7 @@ function Login() {
               <label>
                 <input type="checkbox" /> Lembrar-me
               </label>
-              <a href="">Esqueceu a senha?</a>
+              <p>Esqueceu a senha?</p>
             </div>
 
             <div className="Interação">
