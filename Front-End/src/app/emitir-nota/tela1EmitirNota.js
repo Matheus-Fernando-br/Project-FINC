@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const ANIM_MS = 320;
 const STORAGE_KEY = "emitirNotaData";
 
-function maskCpfCnpj(value) {
+/*function maskCpfCnpj(value) {
   const digits = value.replace(/\D/g, "");
   if (digits.length > 11) {
     return digits
@@ -23,7 +23,7 @@ function maskCpfCnpj(value) {
       .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
       .slice(0, 14);
   }
-}
+}*/
 
 function Tela_1_emitir_nota() {
   const [incluirFrete, setIncluirFrete] = useState("nao");
@@ -50,8 +50,6 @@ function Tela_1_emitir_nota() {
 
   const [listaClientes, setListaClientes] = useState([]);
   const [listaItens, setListaItens] = useState([]);
-  const [showDropdownCli, setShowDropdownCli] = useState(false);
-  const [showDropdownItem, setShowDropdownItem] = useState({});
 
   const [transNome, setTransNome] = useState("");
   const [transCpf, setTransCpf] = useState("");
@@ -87,10 +85,20 @@ function Tela_1_emitir_nota() {
 
       const formatados = data.map(c => ({
         id: c.id,
-        nome: c.nome_social || "Nome não informado",
+        nome_social: c.nome_social || "Nome não informado",
         cpf_cnpj: c.cpf_cnpj,
-        categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
+        categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF",
+        email: c.email,
+        telefone: c.telefone,
+        cep: c.cep,
+        uf: c.uf,
+        cidade: c.cidade,
+        logradouro: c.logradouro,
+        bairro: c.bairro,
+        numero: c.numero,
+        complemento: c.complemento
       }));
+
 
       setListaClientes(formatados);
     } catch (error) {
@@ -138,6 +146,66 @@ function Tela_1_emitir_nota() {
     setValorTotal(total >= 0 ? Number(total.toFixed(2)) : 0);
   }, [produtosServicos, descIncond, descCond]);
 
+  const [calculoImpostos, setCalculoImpostos] = useState({
+  baseICMS: 0,
+  valorICMS: 0,
+  baseISS: 0,
+  valorISS: 0,
+  valorProdutos: 0,
+  valorServicos: 0,
+  valorIPI: 0,
+  totalNota: 0
+});
+
+useEffect(() => {
+  let baseICMS = 0;
+  let valorICMS = 0;
+  let baseISS = 0;
+  let valorISS = 0;
+  let valorProdutos = 0;
+  let valorServicos = 0;
+
+  produtosServicos.forEach(item => {
+    const qtd = Number(item.quantidade) || 0;
+    const valor = Number(item.valor) || 0;
+    const totalItem = qtd * valor;
+
+    if (item.tipo === "produto") {
+      valorProdutos += totalItem;
+      baseICMS += totalItem;
+      valorICMS += totalItem * (Number(item.icms) / 100);
+    }
+
+    if (item.tipo === "servico") {
+      valorServicos += totalItem;
+      baseISS += totalItem;
+      valorISS += totalItem * (Number(item.aliquota_iss) / 100);
+    }
+  });
+
+  const descontos =
+    (Number(descIncond) || 0) + (Number(descCond) || 0);
+
+  const totalNota =
+    valorProdutos +
+    valorServicos +
+    valorICMS +
+    valorISS -
+    descontos;
+
+  setCalculoImpostos({
+    baseICMS: baseICMS.toFixed(2),
+    valorICMS: valorICMS.toFixed(2),
+    baseISS: baseISS.toFixed(2),
+    valorISS: valorISS.toFixed(2),
+    valorProdutos: valorProdutos.toFixed(2),
+    valorServicos: valorServicos.toFixed(2),
+    valorIPI: "0.00", // futuro
+    totalNota: totalNota.toFixed(2)
+  });
+}, [produtosServicos, descIncond, descCond]);
+
+
   const addProdutoServico = () => {
     const id = Date.now() + Math.random();
     const newItem = {
@@ -176,12 +244,13 @@ function Tela_1_emitir_nota() {
   const nome = e.target.value;
   setClienteNome(nome);
 
-  const cliente = listaClientes.find(c => c.nome === nome);
+  const cliente = listaClientes.find(c => c.nome_social === nome);
   if (cliente) {
     setClienteCpfCnpj(cliente.cpf_cnpj);
     setClienteCompleto(cliente);
   }
 };
+
 
 const handleSelectCpfCnpj = (e) => {
   const cpf = e.target.value;
@@ -290,9 +359,10 @@ const itensDisponiveis = listaItens.filter(item => {
               >
                 <option value="">Selecione</option>
                 {listaClientes.map(cli => (
-                  <option key={cli.id} value={cli.nome}>
-                    {cli.nome}
+                  <option key={cli.id} value={cli.nome_social}>
+                    {cli.nome_social}
                   </option>
+
                 ))}
               </select>
 
@@ -303,6 +373,7 @@ const itensDisponiveis = listaItens.filter(item => {
               id="cpf-cnpj"
               value={clienteCpfCnpj}
               onChange={handleSelectCpfCnpj}
+              disabled
             >
               <option value="">Selecione</option>
               {listaClientes.map(cli => (
@@ -369,8 +440,16 @@ const itensDisponiveis = listaItens.filter(item => {
                           ? {
                               ...x,
                               item: itemSelecionado.id,
+                              nome: itemSelecionado.nomeExibicao,
                               valor: itemSelecionado.preco,
-                              categoriaItem: itemSelecionado.categoria // 👈 CATEGORIA REAL
+                              categoriaItem: itemSelecionado.categoria,
+
+                              // 👇 DADOS FISCAIS
+                              icms: itemSelecionado.icms || 0,
+                              pis_cofins: itemSelecionado.pis_cofins || 0,
+                              aliquota_iss: itemSelecionado.aliquota_iss || 0,
+                              tipo: itemSelecionado.tipo // produto | servico
+
 
 
                             }
