@@ -146,7 +146,7 @@ function Tela_1_emitir_nota() {
     setValorTotal(total >= 0 ? Number(total.toFixed(2)) : 0);
   }, [produtosServicos, descIncond, descCond]);
 
-  const [calculoImpostos, setCalculoImpostos] = useState({
+  const [setCalculoImpostos] = useState({
   baseICMS: 0,
   valorICMS: 0,
   baseISS: 0,

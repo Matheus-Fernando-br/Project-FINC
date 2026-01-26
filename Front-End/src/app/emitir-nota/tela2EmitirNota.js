@@ -487,67 +487,91 @@ function Tela_2_emitir_nota() {
           </div>
 
 
+          <div style={{ padding: "6px 0", fontSize: 9 }}>
+            <strong>DADOS DOS PRODUTOS/SERVIÇOS</strong>
 
-          {/* PRODUTOS */}
-          <table width="100%" style={{ borderCollapse: "collapse", marginTop: 6 }}>
-            <thead>
-              <tr>
-                {["Descrição", "Categoria", "Qtd", "Vlr Unit", "Subtotal"].map(h => (
-                  <th key={h} style={{
-                    border: "1px solid #000",
-                    padding: 4,
-                    textAlign: "left"
-                  }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.produtosServicos.map((p, i) => {
-                const subtotal = (p.quantidade * p.valor).toFixed(2);
-                return (
-                  <tr key={i}>
-                    <td style={{ border: "1px solid #000", padding: 4 }}>{p.nome}</td>
-                    <td style={{ border: "1px solid #000", padding: 4 }}>{p.categoriaItem}</td>
-                    <td style={{ border: "1px solid #000", padding: 4, textAlign: "right" }}>{p.quantidade}</td>
-                    <td style={{ border: "1px solid #000", padding: 4, textAlign: "right" }}>R$ {p.valor.toFixed(2)}</td>
-                    <td style={{ border: "1px solid #000", padding: 4, textAlign: "right" }}>R$ {subtotal}</td>
+            <div style={{marginTop: 4 }}>
+
+
+              {/* PRODUTOS */}
+              <table width="100%" style={{ borderCollapse: "collapse", marginTop: 6 }}>
+                <thead>
+                  <tr>
+                    {["Descrição", "Categoria", "Qtd", "Vlr Unit", "Subtotal"].map(h => (
+                      <th key={h} style={{
+                        border: "1px solid #000",
+                        padding: 4,
+                        textAlign: "left"
+                      }}>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {data.produtosServicos.map((p, i) => {
+                    const subtotal = (p.quantidade * p.valor).toFixed(2);
+                    return (
+                      <tr key={i}>
+                        <td style={{ border: "1px solid #000", padding: 4 }}>{p.nome}</td>
+                        <td style={{ border: "1px solid #000", padding: 4 }}>{p.categoriaItem}</td>
+                        <td style={{ border: "1px solid #000", padding: 4, textAlign: "right" }}>{p.quantidade}</td>
+                        <td style={{ border: "1px solid #000", padding: 4, textAlign: "right" }}>R$ {p.valor.toFixed(2)}</td>
+                        <td style={{ border: "1px solid #000", padding: 4, textAlign: "right" }}>R$ {subtotal}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
 
-          {/* TOTAIS */}
-          <div style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: 8
-          }}>
-            <div style={{ width: 250 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Subtotal</span>
-                <span>R$ {somaProdutos.toFixed(2)}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Descontos</span>
-                <span>R$ {(Number(data.descIncond) + Number(data.descCond)).toFixed(2)}</span>
-              </div>
+              {/* TOTAIS */}
               <div style={{
                 display: "flex",
-                justifyContent: "space-between",
-                fontWeight: "bold",
-                borderTop: "1px solid #000",
-                marginTop: 4,
-                paddingTop: 4
+                justifyContent: "flex-end",
+                marginTop: 6
               }}>
-                <span>Valor Total</span>
-                <span>R$ {total}</span>
+                <div style={{ width: 250 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>Subtotal</span>
+                    <span>R$ {somaProdutos.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>Descontos</span>
+                    <span>R$ {(Number(data.descIncond) + Number(data.descCond)).toFixed(2)}</span>
+                  </div>
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontWeight: "bold",
+                    borderTop: "1px solid #000",
+                    marginTop: 4,
+                    paddingTop: 4
+                  }}>
+                    <span>Valor Total</span>
+                    <span>R$ {total}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
+          <div style={{ padding: "6px 0", fontSize: 9 }}>
+            <strong>DADOS ADICIONAIS</strong>
+
+            <div style={{ border: "1px solid #000", marginTop: 4 }}>
+
+              {/* LINHA 1 */}
+              <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
+                <div style={{ width: "30%", padding: "3px 4px" }}>
+                  <p style={{ fontSize: 8, marginBottom: 60 }}>INFORMAÇÕES COMPLEMENTARES</p>
+                  {/*<p style={{ fontSize: 12 }}>
+                    {dados.adicionais}
+                  </p>*/}
+                </div>
+              </div>
+
+            </div>
+          </div>
 
         </div>
 
