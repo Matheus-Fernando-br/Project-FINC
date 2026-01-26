@@ -146,64 +146,65 @@ function Tela_1_emitir_nota() {
     setValorTotal(total >= 0 ? Number(total.toFixed(2)) : 0);
   }, [produtosServicos, descIncond, descCond]);
 
-  const [setCalculoImpostos] = useState({
-  baseICMS: 0,
-  valorICMS: 0,
-  baseISS: 0,
-  valorISS: 0,
-  valorProdutos: 0,
-  valorServicos: 0,
-  valorIPI: 0,
-  totalNota: 0
-});
+    const [, setCalculoImpostos] = useState({
+      baseICMS: 0,
+      valorICMS: 0,
+      baseISS: 0,
+      valorISS: 0,
+      valorProdutos: 0,
+      valorServicos: 0,
+      valorIPI: 0,
+      totalNota: 0
+    });
 
-useEffect(() => {
-  let baseICMS = 0;
-  let valorICMS = 0;
-  let baseISS = 0;
-  let valorISS = 0;
-  let valorProdutos = 0;
-  let valorServicos = 0;
 
-  produtosServicos.forEach(item => {
-    const qtd = Number(item.quantidade) || 0;
-    const valor = Number(item.valor) || 0;
-    const totalItem = qtd * valor;
+    useEffect(() => {
+      let baseICMS = 0;
+      let valorICMS = 0;
+      let baseISS = 0;
+      let valorISS = 0;
+      let valorProdutos = 0;
+      let valorServicos = 0;
 
-    if (item.tipo === "produto") {
-      valorProdutos += totalItem;
-      baseICMS += totalItem;
-      valorICMS += totalItem * (Number(item.icms) / 100);
-    }
+      produtosServicos.forEach(item => {
+        const qtd = Number(item.quantidade) || 0;
+        const valor = Number(item.valor) || 0;
+        const totalItem = qtd * valor;
 
-    if (item.tipo === "servico") {
-      valorServicos += totalItem;
-      baseISS += totalItem;
-      valorISS += totalItem * (Number(item.aliquota_iss) / 100);
-    }
-  });
+        if (item.tipo === "produto") {
+          valorProdutos += totalItem;
+          baseICMS += totalItem;
+          valorICMS += totalItem * (Number(item.icms) / 100);
+        }
 
-  const descontos =
-    (Number(descIncond) || 0) + (Number(descCond) || 0);
+        if (item.tipo === "servico") {
+          valorServicos += totalItem;
+          baseISS += totalItem;
+          valorISS += totalItem * (Number(item.aliquota_iss) / 100);
+        }
+      });
 
-  const totalNota =
-    valorProdutos +
-    valorServicos +
-    valorICMS +
-    valorISS -
-    descontos;
+      const descontos =
+        (Number(descIncond) || 0) + (Number(descCond) || 0);
 
-  setCalculoImpostos({
-    baseICMS: baseICMS.toFixed(2),
-    valorICMS: valorICMS.toFixed(2),
-    baseISS: baseISS.toFixed(2),
-    valorISS: valorISS.toFixed(2),
-    valorProdutos: valorProdutos.toFixed(2),
-    valorServicos: valorServicos.toFixed(2),
-    valorIPI: "0.00", // futuro
-    totalNota: totalNota.toFixed(2)
-  });
-}, [produtosServicos, descIncond, descCond]);
+      const totalNota =
+        valorProdutos +
+        valorServicos +
+        valorICMS +
+        valorISS -
+        descontos;
+
+      setCalculoImpostos({
+        baseICMS: baseICMS.toFixed(2),
+        valorICMS: valorICMS.toFixed(2),
+        baseISS: baseISS.toFixed(2),
+        valorISS: valorISS.toFixed(2),
+        valorProdutos: valorProdutos.toFixed(2),
+        valorServicos: valorServicos.toFixed(2),
+        valorIPI: "0.00",
+        totalNota: totalNota.toFixed(2)
+      });
+    }, [produtosServicos, descIncond, descCond]);
 
 
   const addProdutoServico = () => {
