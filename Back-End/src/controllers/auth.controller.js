@@ -1,7 +1,7 @@
 import { supabase } from "../services/supabase.js";
 
 export const register = async (req, res) => {
-  const { email, senha, socialName, tipoPessoa, cpfCnpj, telefone } = req.body;
+  const { email, senha, nome_social, tipoPessoa, cpfCnpj, telefone } = req.body;
 
   try {
     // ✅ VALIDAR EMAIL ÚNICO
@@ -39,7 +39,7 @@ export const register = async (req, res) => {
       .from("profiles")
       .insert({
         id: data.user.id,
-        social_name: socialName,
+        social_name: nome_social,
         tipo_pessoa: tipoPessoa,
         cpf_cnpj: cpfCnpj.replace(/\D/g, ""),
         telefone

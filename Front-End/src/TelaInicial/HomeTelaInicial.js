@@ -97,14 +97,14 @@ function HomeTelaInicial() {
 
         <div className="hero-textos" id="secao-hero-texto">
           <div className="frase-um fade-in delay-1">
-            <p1>
+            <div className="p1">
               <h2>Simplifique</h2><br />
               <span>Emissão automática de notas fiscais</span> e boletos.<br />
-            </p1>
-            <p2>
+            </div>
+            <p className="p2">
               Soluções integradas com bancos e plataformas<br />
               de e-commerce por um preço justo.
-            </p2>
+            </p>
           </div>
 
           <hr className="linha fade-in delay-3" />
@@ -199,15 +199,16 @@ function HomeTelaInicial() {
           </div>
           <hr className="linha" />
           <div className="lado-direito scroll-fade delay-1">
-            <p>
-              <span>A <span class="bold">finc</span> surgiu com o intuito de ser</span><br />
-              <span>uma plataforma <span class="bold">acessível</span>, que</span><br />
-              <span>integra emissão de notas fiscais,</span><br />
-              <span>geração de boletos, controle</span><br />
-              <span>financeiro de pequenos e médios</span><br />
-              <span>negócios.</span><br /><br />
+           <div className="texto-sobre">
+              <p>A <span className="bold">finc</span> surgiu com o intuito de ser</p>
+              <p>uma plataforma <span className="bold">acessível</span>, que</p>
+              <p>integra emissão de notas fiscais,</p>
+              <p>geração de boletos, controle</p>
+              <p>financeiro de pequenos e médios</p>
+              <p>negócios.</p>
+
               <h2>Modernizando o empreendedorismo nacional.</h2>
-            </p>
+            </div>
 
           </div>
         </div>
