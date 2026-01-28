@@ -4,6 +4,8 @@ import "../../../styles/telaInicial.css";
 
 function CadastroLogin() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   const [formData, setFormData] = useState({
     nome_social: "",
@@ -20,32 +22,39 @@ function CadastroLogin() {
     const { nome_social, tipoPessoa, cpf, email, telefone, senha, repitaSenha , termos } = formData;
 
     if (!nome_social || !tipoPessoa || !cpf || !email || !telefone || !senha || !repitaSenha) {
-      alert("Preencha todos os campos!");
+      setFeedback("Preencha todos os campos!");
+
       return false;
     }
 
     if (!termos) {
-      alert("Você precisa aceitar os Termos e Serviços.");
+      setFeedback("Você precisa aceitar os Termos e Serviços.");
       return false;
     }
+
+    if (!email.includes("@")) {
+      setFeedback("Informe um e-mail válido.");
+      return false;
+    }
+
     
     if (senha !== repitaSenha) {
-      alert("As senhas não coincidem! Verifique e tente novamente.");
+      setFeedback("As senhas não coincidem! Verifique e tente novamente.");
       return false;
     }
 
     if (senha.length < 8) {
-      alert("A senha deve ter pelo menos 8 caracteres.");
+      setFeedback("A senha deve ter pelo menos 8 caracteres.");
       return false;
     }
 
     const cpfLimpo = cpf.replace(/\D/g, "");
     if (tipoPessoa === "FISICA" && cpfLimpo.length !== 11) {
-      alert("CPF inválido. Verifique e tente novamente.");
+      setFeedback("CPF inválido. Verifique e tente novamente.");
       return false;
     }
     if (tipoPessoa === "JURIDICA" && cpfLimpo.length !== 14) {
-      alert("CNPJ inválido. Verifique e tente novamente.");
+      setFeedback("CNPJ inválido. Verifique e tente novamente.");
       return false;
     }
     
@@ -92,15 +101,18 @@ function CadastroLogin() {
     };
 
     const handleChange = (e) => {
+      setFeedback("");
+
       const { id, value, type, checked } = e.target;
   
       let novoValor = type === "checkbox" ? checked : value;
   
       if (id === "cpf") {
         if (!formData.tipoPessoa) {
-          alert("Selecione o Tipo de Pessoa antes de digitar o CPF/CNPJ.");
+          setFeedback("Selecione o Tipo de Pessoa antes de digitar o CPF/CNPJ.");
           return;
         }
+
         novoValor = formatarDocumento(novoValor, formData.tipoPessoa);
       }
   
@@ -114,36 +126,51 @@ function CadastroLogin() {
       }));
     };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setFeedback("");
+
     if (!validarFormulario()) return;
 
+    setLoading(true);
+    setFeedback("Cadastrando usuário...");
+
     try {
-      const response = await fetch("https://project-finc.onrender.com/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          senha: formData.senha,
-          nome_social: formData.nome_social,
-          tipoPessoa: formData.tipoPessoa,
-          cpfCnpj: formData.cpf.replace(/\D/g, ""),
-          telefone: formData.telefone
-        }),
-      });
+      const response = await fetch(
+        "https://project-finc.onrender.com/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            senha: formData.senha,
+            nome_social: formData.nome_social,
+            tipoPessoa: formData.tipoPessoa,
+            cpfCnpj: formData.cpf.replace(/\D/g, ""),
+            telefone: formData.telefone,
+          }),
+        }
+      );
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert("Conta criada com sucesso!");
-        navigate("/TelaInicial/Login");
-      } else {
-        alert(data.error || "Erro ao criar conta no servidor.");
+      if (!response.ok) {
+        setFeedback(data.error || "Erro ao criar conta.");
+        return;
       }
+
+      setFeedback("Conta criada com sucesso! Redirecionando...");
+      setTimeout(() => {
+        navigate("/TelaInicial/Login");
+      }, 1500);
+
     } catch (error) {
       console.error("Erro de conexão:", error);
-      alert("Falha de conexão com o servidor.");
+      setFeedback("Falha de conexão com o servidor.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -175,6 +202,7 @@ function CadastroLogin() {
                 value={formData.nome_social}
                 onChange={handleChange}
                 placeholder="Nome Social"
+                disabled={loading}
               />
               <i className="bi bi-person-badge"></i>
             </div>
@@ -185,6 +213,7 @@ function CadastroLogin() {
                 id="tipoPessoa"
                 value={formData.tipoPessoa}
                 onChange={handleChange}
+                disabled={loading}
               >
                 <option value="">Selecione...</option>
                 <option value="FISICA">Pessoa Física</option>
@@ -200,6 +229,7 @@ function CadastroLogin() {
                 value={formData.cpf}
                 onChange={handleChange}
                 placeholder="Digite apenas números"
+                disabled={loading}
               />
               <i className="bi bi-person"></i>
             </div>
@@ -212,6 +242,7 @@ function CadastroLogin() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="E-mail"
+                disabled={loading}
               />
               <i className="bi bi-envelope"></i>
             </div>
@@ -224,6 +255,7 @@ function CadastroLogin() {
                 value={formData.telefone}
                 onChange={handleChange}
                 placeholder="Número de telefone"
+                disabled={loading}
               />
               <i className="bi bi-telephone"></i>
             </div>
@@ -236,6 +268,7 @@ function CadastroLogin() {
                 value={formData.senha}
                 onChange={handleChange}
                 placeholder="Digite sua senha"
+                disabled={loading}
               />
               <i className="bi bi-lock-fill"></i>
             </div>
@@ -248,6 +281,7 @@ function CadastroLogin() {
               value={formData.repitaSenha}
               onChange={handleChange}
               placeholder="Repita a senha digitada anteriormente"
+              disabled={loading}
             />
             <i className="bi bi-lock-fill"></i>
           </div>
@@ -260,18 +294,36 @@ function CadastroLogin() {
                 id="termos"
                 checked={formData.termos}
                 onChange={handleChange}
+                disabled={loading}
               />
-              <Link
-                to="/TelaInicial/Termos"
-                state={{ direction: "right" }}
-              >
-                Aceito os Termos e Serviços
-              </Link>
+              Aceito os
             </label>
+
+            <Link
+              to="/TelaInicial/Termos"
+              state={{ direction: "right" }}
+            >
+              Termos e Serviços
+            </Link>
           </div>
 
           <hr className="divider" />
-          <button type="submit" className="btn">Criar Conta</button>
+
+          {feedback && (
+          <p style={{ textAlign: "center", marginTop: "10px" }}>
+            {feedback}
+          </p>
+          )}
+
+          <button
+            type="submit"
+            className="btn"
+            disabled={loading}
+          >
+            {loading && <span className="spinner"></span>}
+
+            {loading ? "Cadastrando..." : "Criar Conta"}
+          </button>
         </form>
       </div>
     </section>
