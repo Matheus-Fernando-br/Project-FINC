@@ -1616,6 +1616,7 @@
   justify-content: space-between;
   font-size: 0.9rem;
   margin-top: 1rem;
+  max-width: 45%;
 }
 
 .CadastroLogin .wrapper .acept label input {
@@ -1626,6 +1627,12 @@
 .CadastroLogin .wrapper .remember-forgot a:hover {
   text-decoration: underline;
   transform: scale(0.98);
+}
+
+@media (max-width: 600px) {
+  .CadastroLogin .wrapper .acept {
+    max-width: 80%;
+  }
 }
 
 /* ==============================

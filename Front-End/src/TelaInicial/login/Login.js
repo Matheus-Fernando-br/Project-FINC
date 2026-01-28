@@ -9,8 +9,20 @@ function Login() {
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFeedback("");
+
+    if (!usuario || !senha) {
+      setFeedback("Informe usuário e senha.");
+      return;
+    }
+
+    setLoading(true);
+    setFeedback("Entrando...");
 
     try {
       const response = await fetch(
@@ -28,12 +40,12 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || "Erro no login");
+        setFeedback(data.error || "Erro no login");
         return;
       }
 
       if (!data.session?.access_token) {
-        alert("Token não retornado pelo servidor");
+        setFeedback("Token não retornado pelo servidor");
         return;
       }
 
@@ -45,9 +57,12 @@ function Login() {
 
     } catch (err) {
       console.error("Erro no login:", err);
-      alert("Erro de conexão com o servidor");
+      setFeedback("Erro de conexão com o servidor");
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <main>
@@ -75,6 +90,7 @@ function Login() {
                 placeholder="E-mail ou CPF"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
+                disabled={loading}
               />
             </div>
 
@@ -85,6 +101,7 @@ function Login() {
                 placeholder="Informe sua senha"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
+                disabled={loading}
               />
               <i
                 className={`bi ${mostrarSenha ? "bi-eye-slash" : "bi-eye"}`}
@@ -99,10 +116,14 @@ function Login() {
               <p>Esqueceu a senha?</p>
             </div>
 
+
             <div className="Interação">
-            <button type="submit" className="btn">
-              Entrar
+            <button type="submit" className="btn" disabled={loading}>
+              {loading && <span className="spinner"></span>}
+              {loading ? "" : "Entrar"}
             </button>
+
+            {feedback && <p className="feedback">{feedback}</p>}
 
             <div className="divider">
               <p>ou</p>

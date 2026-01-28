@@ -322,7 +322,7 @@ function CadastroLogin() {
           >
             {loading && <span className="spinner"></span>}
 
-            {loading ? "Cadastrando..." : "Criar Conta"}
+            {loading ? "" : "Criar Conta"}
           </button>
         </form>
       </div>
