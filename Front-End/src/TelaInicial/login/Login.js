@@ -17,7 +17,7 @@ function Login() {
     setFeedback("");
 
     if (!usuario || !senha) {
-      setFeedback("Informe usuário e senha.");
+      setFeedback("Informe usuário e senha!");
       return;
     }
 

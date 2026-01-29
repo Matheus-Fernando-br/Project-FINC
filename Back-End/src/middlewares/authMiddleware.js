@@ -8,7 +8,13 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: "Token não informado" });
     }
 
-    const token = authHeader.replace("Bearer ", "");
+   const token = authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token) {
+      return res.status(401).json({ error: "Token mal formatado" });
+    }
 
     const { data, error } = await supabase.auth.getUser(token);
 

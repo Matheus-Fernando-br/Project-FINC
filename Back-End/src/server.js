@@ -33,7 +33,7 @@ app.use("/auth", authRoutes);
 app.use("/clientes", clienteRoutes);
 app.use("/produtos", produtoRoutes); // Registrando produtos
 app.use("/servicos", servicoRoutes); // Registrando serviços
-app.use("/api", profileRoutes);
+app.use("/api/profile", profileRoutes);
 
 /* ===== ROTA TESTE ===== */
 app.get("/", (req, res) => {
