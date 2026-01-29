@@ -65,9 +65,9 @@ function Header() {
     }
   }
 
-  const nomeCompleto = localStorage.getItem("nome_social") || "Usuário";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const nomeCompleto = user.social_name || "Usuário";
   const primeiroNome = nomeCompleto.split(" ")[0];
-
 
   return (
     <header className="header">

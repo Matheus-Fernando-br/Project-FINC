@@ -49,11 +49,13 @@ function Login() {
         return;
       }
 
+      localStorage.removeItem("user"); // 👈 ADICIONE
       localStorage.setItem("token", data.session.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("user_name", data.user.social_name);
 
       navigate("/app");
+
 
     } catch (err) {
       console.error("Erro no login:", err);

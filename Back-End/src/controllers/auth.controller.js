@@ -99,7 +99,7 @@ export const login = async (req, res) => {
     // 🔥 BUSCAR O NOME SOCIAL NO PERFIL
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("social_name")
+      .select("social_name, cpf_cnpj, telefone, tipo_pessoa")
       .eq("id", data.user.id)
       .single();
 
@@ -111,8 +111,11 @@ export const login = async (req, res) => {
       session: data.session,
       user: {
         ...data.user,
-        social_name: profile.social_name || "Usuário"
-      }
+        social_name: profile.social_name || "Usuário",
+        cpf_cnpj: profile.cpf_cnpj,
+        telefone: profile.telefone,
+        tipo_pessoa: profile.tipo_pessoa
+    }
     });
   } catch (error) {
     console.error("Erro no login:", error);
