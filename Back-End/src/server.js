@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes.js";
 import clienteRoutes from "./routes/cliente.routes.js";
 import produtoRoutes from "./routes/produto.routes.js"; // Nova rota
 import servicoRoutes from "./routes/servico.routes.js"; // Nova rota
+import profileRoutes from "./routes/profile.routes.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/auth", authRoutes);
 app.use("/clientes", clienteRoutes);
 app.use("/produtos", produtoRoutes); // Registrando produtos
 app.use("/servicos", servicoRoutes); // Registrando serviços
+app.use("/api", profileRoutes);
 
 /* ===== ROTA TESTE ===== */
 app.get("/", (req, res) => {
