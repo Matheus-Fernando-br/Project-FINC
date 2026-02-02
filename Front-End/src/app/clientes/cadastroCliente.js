@@ -7,6 +7,9 @@ function Cadastro_cliente() {
   const navigate = useNavigate();
   const [tipoPessoa, setTipoPessoa] = useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
   const [form, setForm] = useState({
     nome_social: "",
     tipo_pessoa: "",
@@ -24,12 +27,16 @@ function Cadastro_cliente() {
   });
 
   async function handleSubmit() {
+    setFeedback("");
     const token = localStorage.getItem("token");
 
     if (!form.nome_social || !form.tipo_pessoa || !form.cpf_cnpj || !form.cep || !form.numero || !form.email || !form.telefone) {
-      alert("Preencha os campos obrigatórios");
+      setFeedback("Preencha os campos obrigatórios");
       return;
     }
+
+    setLoading(true);
+    setFeedback("Cadastrando cliente...");
 
     try {
       const response = await fetch(
@@ -47,15 +54,17 @@ function Cadastro_cliente() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || "Erro ao cadastrar cliente");
+        setFeedback(data.error || "Erro ao cadastrar cliente");
         return;
       }
 
-      alert("Cliente cadastrado com sucesso!");
-      navigate("/clientes");
+      setFeedback("Cliente cadastrado com sucesso!");
+      setTimeout(() => {
+        navigate("/clientes");
+      }, 2000);
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
-      alert("Erro de conexão ao cadastrar cliente");
+      setFeedback("Erro de conexão ao cadastrar cliente");
     }
   }
 
@@ -127,6 +136,7 @@ function Cadastro_cliente() {
               placeholder="Digite o nome completo do cliente"
               value={form.nome_social}
               onChange={(e) => setForm({ ...form, nome_social: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -142,6 +152,7 @@ function Cadastro_cliente() {
                   setTipoPessoa(e.target.value);
                   setForm({ ...form, tipo_pessoa: e.target.value, cpf_cnpj: "" });
                 }}
+                disabled={loading}
               >
                 <option value="" disabled>Selecione o Tipo</option>
                 <option value="PFisica">Pessoa Física</option>
@@ -168,6 +179,7 @@ function Cadastro_cliente() {
                     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
                   setForm({ ...form, cpf_cnpj: value });
                 }}
+                disabled={loading}
               />
             </div>
           )}
@@ -192,6 +204,7 @@ function Cadastro_cliente() {
                     .replace(/(\d{4})(\d)/, "$1-$2");
                   setForm({ ...form, cpf_cnpj: value });
                 }}
+                disabled={loading}
               />
             </div>
           )}
@@ -224,6 +237,7 @@ function Cadastro_cliente() {
                 setForm({ ...form, cep: valor });
                 if (valor.length === 9) buscarCEP(valor);
               }}
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -233,6 +247,7 @@ function Cadastro_cliente() {
             <select
               value={form.uf || ""}
               onChange={(e) => setForm({ ...form, uf: e.target.value })}
+              disabled={loading}
             >
               <option value="">Selecione</option>
               {[
@@ -253,6 +268,7 @@ function Cadastro_cliente() {
               placeholder="Cidade"
               value={form.cidade}
               onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -266,6 +282,7 @@ function Cadastro_cliente() {
               placeholder="Digite o nome da rua"
               value={form.logradouro}
               onChange={(e) => setForm({ ...form, logradouro: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -279,6 +296,7 @@ function Cadastro_cliente() {
               placeholder="Digite o nome do bairro"
               value={form.bairro}
               onChange={(e) => setForm({ ...form, bairro: e.target.value })}
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -290,6 +308,7 @@ function Cadastro_cliente() {
               placeholder="Informe o número"
               value={form.numero}
               onChange={(e) => setForm({ ...form, numero: e.target.value })}
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -299,6 +318,7 @@ function Cadastro_cliente() {
               placeholder="Informe o complemento"
               value={form.complemento}
               onChange={(e) => setForm({ ...form, complemento: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -323,6 +343,7 @@ function Cadastro_cliente() {
               placeholder="Informe o e-mail do cliente"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value.toLowerCase() })}
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -334,6 +355,7 @@ function Cadastro_cliente() {
               placeholder="Informe o número de Telefone"
               value={form.telefone || ""}
               onChange={(e) => setForm({ ...form, telefone: maskTelefone(e.target.value) })}
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -343,13 +365,16 @@ function Cadastro_cliente() {
               placeholder="Informe o número de WhatsApp"
               value={form.whatsapp || ""}
               onChange={(e) => setForm({ ...form, whatsapp: maskTelefone(e.target.value) })}
+              disabled={loading}
             />
           </div>
         </div>
       </section>
+      {feedback && <p className="feedback">{feedback}</p>}
       <div className="botao_geral">
-        <button className="btn" onClick={handleSubmit}>
-          Cadastrar
+        <button className="btn" onClick={handleSubmit} disabled={loading}>
+          {loading && <span className="spinner"></span>}
+          {loading ? "" : "Cadastrar"}
         </button>
       </div>
     </main>

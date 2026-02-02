@@ -8,6 +8,10 @@ function Editar_cliente() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
   const [tipoPessoa, setTipoPessoa] = useState("");
   const [form, setForm] = useState({});
   const [formOriginal, setFormOriginal] = useState({});
@@ -40,7 +44,7 @@ function Editar_cliente() {
 
       } catch (error) {
         console.error("Erro ao carregar:", error);
-        alert("Erro ao carregar dados do cliente.");
+        setFeedback("Erro ao carregar dados do cliente.");
       }
     };
     fetchCliente();
@@ -56,12 +60,23 @@ function Editar_cliente() {
 
   const cancelarAlteracoes = () => {
     if (!window.confirm("Deseja cancelar todas as alterações?")) return;
-    setForm(formOriginal);
-    setTipoPessoa(formOriginal.tipo_pessoa);
+    setLoadingCancel(true);
+    setFeedback("Operação cancelada!");
+    setTimeout(() => {
+      setForm(formOriginal);
+      setTipoPessoa(formOriginal.tipo_pessoa);
+      setLoadingCancel(false);
+      navigate("/clientes");
+    }, 1000);
   };
 
   async function handleSubmit() {
+    setFeedback("");
     const token = localStorage.getItem("token");
+
+    setLoading(true);
+    setFeedback("Atualizando cliente...");
+
 
     try {
       const response = await fetch(
@@ -78,10 +93,14 @@ function Editar_cliente() {
 
       if (!response.ok) throw new Error();
 
-      alert("Cliente atualizado com sucesso!");
-      navigate("/clientes");
-    } catch {
-      alert("Erro ao salvar alterações");
+      setFeedback("Cliente atualizado com sucesso!");
+      setTimeout(() => {
+        navigate("/clientes")
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Erro ao atualizar dados do cliente:", error);
+      setFeedback("Erro ao salvar alterações");
     }
   }
 
@@ -116,6 +135,7 @@ function Editar_cliente() {
               type="text"
               value={form.nome_social || ""}
               onChange={(e) => setForm({ ...form, nome_social: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -133,6 +153,7 @@ function Editar_cliente() {
                   cpf_cnpj: ""
                 });
               }}
+              disabled={loading}
             >
               <option value="">Selecione</option>
               <option value="PFisica">Pessoa Física</option>
@@ -146,6 +167,7 @@ function Editar_cliente() {
               type="text"
               value={form.cpf_cnpj || ""}
               onChange={(e) => setForm({ ...form, cpf_cnpj: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -168,6 +190,7 @@ function Editar_cliente() {
               type="text"
               value={form.cep || ""}
               onChange={(e) => setForm({ ...form, cep: e.target.value })}
+              disabled={loading}
             />
           </div>
 
@@ -177,6 +200,7 @@ function Editar_cliente() {
               type="text"
               value={form.uf || ""}
               onChange={(e) => setForm({ ...form, uf: e.target.value })}
+              disabled={loading}
             />
           </div>
 
@@ -186,6 +210,7 @@ function Editar_cliente() {
               type="text"
               value={form.cidade || ""}
               onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -197,6 +222,7 @@ function Editar_cliente() {
               type="text"
               value={form.logradouro || ""}
               onChange={(e) => setForm({ ...form, logradouro: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -208,6 +234,7 @@ function Editar_cliente() {
               type="text"
               value={form.bairro || ""}
               onChange={(e) => setForm({ ...form, bairro: e.target.value })}
+              disabled={loading}
             />
           </div>
 
@@ -217,6 +244,7 @@ function Editar_cliente() {
               type="text"
               value={form.numero || ""}
               onChange={(e) => setForm({ ...form, numero: e.target.value })}
+              disabled={loading}
             />
           </div>
 
@@ -226,6 +254,7 @@ function Editar_cliente() {
               type="text"
               value={form.complemento || ""}
               onChange={(e) => setForm({ ...form, complemento: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -250,6 +279,7 @@ function Editar_cliente() {
               onChange={(e) =>
                 setForm({ ...form, email: e.target.value.toLowerCase() })
               }
+              disabled={loading}
             />
           </div>
 
@@ -261,6 +291,7 @@ function Editar_cliente() {
               onChange={(e) =>
                 setForm({ ...form, telefone: maskTelefone(e.target.value) })
               }
+              disabled={loading}
             />
           </div>
 
@@ -272,19 +303,24 @@ function Editar_cliente() {
               onChange={(e) =>
                 setForm({ ...form, whatsapp: maskTelefone(e.target.value) })
               }
+              disabled={loading}
             />
           </div>
         </div>
       </section>
 
+      {feedback && <p className="feedback">{feedback}</p>}
+
       {/* ================= BOTÕES ================= */}
       <div className="botao_geral">
-        <button className="btn btn-cancelar" onClick={cancelarAlteracoes}>
-          Cancelar Alterações
+        <button className="btn btn-cancelar" onClick={cancelarAlteracoes} disabled={loading}> 
+          {loadingCancel && <span className="spinner"></span>}
+          {loadingCancel ? "" : "Cancelar Alterações"}
         </button>
 
-        <button className="btn" onClick={handleSubmit}>
-          Salvar Alterações
+        <button className="btn" onClick={handleSubmit} disabled={loading}>
+          {loading && <span className="spinner"></span>}
+          {loading ? "" : "Salvar Alterações"}
         </button>
       </div>
     </main>

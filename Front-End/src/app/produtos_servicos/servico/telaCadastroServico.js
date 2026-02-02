@@ -14,15 +14,23 @@ function Tela_Cadastro_Servico() {
         cst_pis_cofins: "", regime_especial: "", municipio: ""
     });
 
+    const [loading, setLoading] = useState(false);
+    const [feedback, setFeedback] = useState("");
+
     const handleSubmit = async () => {
+        setFeedback("");
+        setLoading(true);
+        setFeedback("Cadastrando serviço...");
+
         try {
             const token = localStorage.getItem("token");
             await axios.post("https://project-finc.onrender.com/servicos", form, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert("Serviço cadastrado!");
-            navigate("/produtos");
-        } catch (err) { alert("Erro ao cadastrar serviço"); }
+            setFeedback("Serviço cadastrado!");
+            setTimeout(() => {  
+                navigate("/produtos"); }, 2000);
+        } catch (err) { setFeedback("Erro ao cadastrar serviço"); }
     };
 
     return (
@@ -40,6 +48,7 @@ function Tela_Cadastro_Servico() {
                     value={form.nome}
                     onChange={e => setForm({ ...form, nome: e.target.value })}
                     placeholder="Informe o nome do serviço"
+                    disabled={loading}
                 />
                 </div>
             </div> 
@@ -47,7 +56,7 @@ function Tela_Cadastro_Servico() {
             {/* Categoria + Código Interno */}
             <div className="form-row">
                     <div className="form-group"><label>Categoria <span className="campo-obrigatório">*</span></label>
-                        <select value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>
+                        <select value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} disabled={loading}>
                             <option value="" disabled>Selecione a categoria</option>
 
                                 <option>Alimentos</option>
@@ -185,7 +194,7 @@ function Tela_Cadastro_Servico() {
                     type="text"
                     value={form.codigo_interno}
                     onChange={e => setForm({ ...form, codigo_interno: e.target.value })}
-                    placeholder="Informe o código interno/SKU"
+                    placeholder="Informe o código interno/SKU" disabled={loading}
                 />
                 </div>
             </div>
@@ -199,6 +208,7 @@ function Tela_Cadastro_Servico() {
                     value={form.descricao_detalhada}
                     onChange={e => setForm({ ...form, descricao_detalhada: e.target.value })}
                     placeholder=" Descreva o serviço"
+                    disabled={loading}
                 />
                 </div>
             </div>
@@ -214,11 +224,12 @@ function Tela_Cadastro_Servico() {
                     value={form.preco}
                     onChange={e => setForm({ ...form, preco: e.target.value })}
                     placeholder="Informe o preço unitário do serviço"
+                    disabled={loading}
                 />
                 </div>
 
                 <div className="form-group"><label>Unidade de Medida <span className="campo-obrigatório">*</span></label>
-                    <select value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})}>
+                    <select value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})} disabled={loading}>
                         <option value="" disabled>Selecione a unidade</option>
 
                         <option>Unidade</option>
@@ -275,6 +286,7 @@ function Tela_Cadastro_Servico() {
                     value={form.cnae}
                     onChange={e => setForm({ ...form, cnae: e.target.value })}
                     placeholder="Informe o código CNAE referente o serviço"
+                    disabled={loading}
                 />
                 </div>
 
@@ -285,6 +297,7 @@ function Tela_Cadastro_Servico() {
                     value={form.codigo_servico}
                     onChange={e => setForm({ ...form, codigo_servico: e.target.value })}
                     placeholder="Informe o código de serviço"
+                    disabled={loading}
                 />
                 </div>
             </div>
@@ -298,6 +311,7 @@ function Tela_Cadastro_Servico() {
                     value={form.item_lista}
                     onChange={e => setForm({ ...form, item_lista: e.target.value })}
                     placeholder="Informe o Item da Lista"
+                    disabled={loading}
                 />
                 </div>
 
@@ -310,6 +324,7 @@ function Tela_Cadastro_Servico() {
                     value={form.aliquota_iss}
                     onChange={e => setForm({ ...form, aliquota_iss: e.target.value })}
                     placeholder="Informe o valor de ISS"
+                    disabled={loading}
                 />
                 </div>
             </div>
@@ -324,6 +339,7 @@ function Tela_Cadastro_Servico() {
                     value={form.cst_pis_cofins}
                     onChange={e => setForm({ ...form, cst_pis_cofins: e.target.value })}
                     placeholder="Informe o COFINS"
+                    disabled={loading}
                 />
                 </div>
 
@@ -334,6 +350,7 @@ function Tela_Cadastro_Servico() {
                     value={form.regime_especial}
                     onChange={e => setForm({ ...form, regime_especial: e.target.value })}
                     placeholder="Informe a taxa de regime especial"
+                    disabled={loading}
                 />
                 </div>
             </div>
@@ -345,14 +362,20 @@ function Tela_Cadastro_Servico() {
                     type="text"
                     value={form.municipio}
                     onChange={e => setForm({ ...form, municipio: e.target.value })}
-                    placeholder="Informe o Municío que foi prestado o serviço"
+                    placeholder="Informe o Município que foi prestado o serviço"
+                    disabled={loading}
                 />
                 </div>
             </div>
 
             </section>
-
-            <div className="botao_geral"><button className="btn" onClick={handleSubmit}>Cadastrar</button></div>
+            {feedback && <p className="feedback">{feedback}</p>}
+            <div className="botao_geral">
+                <button className="btn" onClick={handleSubmit}>
+                    {loading && <span className="spinner"></span>}
+                    {loading ? "" : "Cadastrar"}
+                </button>
+            </div>
         </main>
     );
 }

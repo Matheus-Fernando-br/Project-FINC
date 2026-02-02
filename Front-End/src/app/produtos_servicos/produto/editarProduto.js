@@ -10,6 +10,10 @@ function Editar_produto() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ nome: "", preco_unitario: 0, sku: "", categoria: "", descricao: "" });
 
+  const [loading, setLoading] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -18,20 +22,39 @@ function Editar_produto() {
           headers: { Authorization: `Bearer ${token}` }
         });
         setForm(res.data);
-      } catch (error) { alert("Erro ao carregar produto."); }
+      } catch (error) { setFeedback("Erro ao carregar produto."); }
     };
     fetchData();
   }, [id]);
 
+    const cancelarAlteracoes = () => {
+    if (!window.confirm("Deseja cancelar todas as alterações?")) return;
+    setLoadingCancel(true);
+    setFeedback("Operação cancelada!");
+    setTimeout(() => {
+      setForm(form);
+      setLoadingCancel(false);
+      navigate("/produtos");
+    }, 1000);
+  };
+
   const handleSave = async () => {
+    setFeedback("");
+    setLoading(true);
+    setFeedback("Atualizando Produto...");
+
     try {
       const token = localStorage.getItem("token");
       await axios.put(`https://project-finc.onrender.com/produtos/${id}`, form, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert("Produto atualizado!");
-      navigate("/produtos");
-    } catch (error) { alert("Erro ao salvar."); }
+      setFeedback("Produto atualizado!");
+      setTimeout(() => { 
+        navigate("/produtos"); }, 2000);
+     
+    } catch (error) {
+      console.error("Erro ao atualizar dados do produto:", error);
+      setFeedback("Erro ao salvar."); }
   };
 
   return (
@@ -40,12 +63,12 @@ function Editar_produto() {
       <div className="form-footer voltar"><Link to="/produtos" className="previous-step">Voltar</Link></div>
         <section className="form-section">
             <div className="form-row">
-                <div className="form-group"><label>Nome <span className="campo-obrigatório">*</span></label><input type="text" value={form.nome} onChange={e => setForm({...form, nome: e.target.value})} placeholder="Informe o nome do Produto" /></div>
-                <div className="form-group"><label>Fabricante <span className="campo-obrigatório">*</span></label><input type="text" value={form.fabricante} onChange={e => setForm({...form, fabricante: e.target.value})} placeholder="Informe o Fabricante do Produto" /></div>
+                <div className="form-group"><label>Nome <span className="campo-obrigatório">*</span></label><input type="text" value={form.nome} onChange={e => setForm({...form, nome: e.target.value})} placeholder="Informe o nome do Produto" disabled={loading}/></div>
+                <div className="form-group"><label>Fabricante <span className="campo-obrigatório">*</span></label><input type="text" value={form.fabricante} onChange={e => setForm({...form, fabricante: e.target.value})} placeholder="Informe o Fabricante do Produto" disabled={loading}/></div>
             </div>
             <div className='form-row'>
                 <div className="form-group"><label>Categoria <span className="campo-obrigatório">*</span></label>
-                    <select value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>
+                    <select value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} disabled={loading}>
                         <option value="" disabled>Selecione a categoria</option>
 
                             <option>Alimentos</option>
@@ -176,7 +199,7 @@ function Editar_produto() {
                     </select>
                 </div>
                 <div className="form-group"><label>Unidade de Medida <span className="campo-obrigatório">*</span></label>
-                    <select value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})}>
+                    <select value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})} disabled={loading}>
                         <option value="" disabled>Selecione a unidade</option>
 
                         <option>Unidade</option>
@@ -222,27 +245,27 @@ function Editar_produto() {
 
                     </select>
                 </div>
-                <div className="form-group"><label>SKU <span className="campo-obrigatório">*</span></label><input type="text" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} placeholder="Informe o código do seu produto"/></div>
+                <div className="form-group"><label>SKU <span className="campo-obrigatório">*</span></label><input type="text" value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} placeholder="Informe o código do seu produto" disabled={loading}/></div>
             </div>
             <div className='form-row'>
                 <div className="form-group">
                     <label>Descrição </label>
-                    <input type="text" value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} placeholder="Descreva seu produto..." />
+                    <input type="text" value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} placeholder="Descreva seu produto..." disabled={loading}/>
                 </div>
             </div>
             <div className="form-row">
-                <div className="form-group input-prefix"><label>Preço <span className="campo-obrigatório">*</span></label><span className="prefix">R$</span><input type="number" value={form.preco_unitario} onChange={e => setForm({...form, preco_unitario: e.target.value})} placeholder="Informe o preço unitário"/></div>
-                <div className="form-group"><label>NCM <span className="campo-obrigatório">*</span></label><input type="text" value={form.ncm} onChange={e => setForm({...form, ncm: e.target.value})} placeholder="Informe o código NCM"/></div>
-                <div className="form-group"><label>CFOP <span className="campo-obrigatório">*</span></label><input type="text" value={form.cfop} onChange={e => setForm({...form, cfop: e.target.value})} placeholder="Informe o código CFOP"/></div>
+                <div className="form-group input-prefix"><label>Preço <span className="campo-obrigatório">*</span></label><span className="prefix">R$</span><input type="number" value={form.preco_unitario} onChange={e => setForm({...form, preco_unitario: e.target.value})} placeholder="Informe o preço unitário" disabled={loading}/></div>
+                <div className="form-group"><label>NCM <span className="campo-obrigatório">*</span></label><input type="text" value={form.ncm} onChange={e => setForm({...form, ncm: e.target.value})} placeholder="Informe o código NCM" disabled={loading}/></div>
+                <div className="form-group"><label>CFOP <span className="campo-obrigatório">*</span></label><input type="text" value={form.cfop} onChange={e => setForm({...form, cfop: e.target.value})} placeholder="Informe o código CFOP" disabled={loading}/></div>
             </div>
             <div className="form-row">
-                <div className="form-group input-suffix"><label>ICMS <span className="campo-obrigatório">*</span></label><span className="suffix">%</span><input type="text" value={form.icms} onChange={e => setForm({...form, icms: e.target.value})} placeholder="Informe o ICMS"/></div>
-                <div className="form-group input-suffix"><label>COFINS <span className="campo-obrigatório">*</span></label><span className="suffix">%</span><input type="text" value={form.pis_cofins} onChange={e => setForm({...form, pis_cofins: e.target.value})} placeholder="Informe o COFINS"/></div>
+                <div className="form-group input-suffix"><label>ICMS <span className="campo-obrigatório">*</span></label><span className="suffix">%</span><input type="text" value={form.icms} onChange={e => setForm({...form, icms: e.target.value})} placeholder="Informe o ICMS" disabled={loading}/></div>
+                <div className="form-group input-suffix"><label>COFINS <span className="campo-obrigatório">*</span></label><span className="suffix">%</span><input type="text" value={form.pis_cofins} onChange={e => setForm({...form, pis_cofins: e.target.value})} placeholder="Informe o COFINS" disabled={loading}/></div>
             </div>
             <div className="form-row">
                 <div className="form-group">
                     <label>Origem do Produto <span className="campo-obrigatório">*</span></label>
-                    <select value={form.origem} onChange={e => setForm({...form, origem: e.target.value})}>
+                    <select value={form.origem} onChange={e => setForm({...form, origem: e.target.value})} disabled={loading}>
                         <option value="" disabled>Selecione a origem</option>
 
                         <option value="0">0 - Nacional</option>
@@ -259,7 +282,17 @@ function Editar_produto() {
                 </div>
             </div>
         </section>
-      <div className="botao_geral"><button className="btn" onClick={handleSave}>Salvar Alterações</button></div>
+        {feedback && <p className="feedback">{feedback}</p>}
+      <div className="botao_geral">
+        <button className="btn btn-cancelar" onClick={cancelarAlteracoes} disabled={loading}> 
+          {loadingCancel && <span className="spinner"></span>}
+          {loadingCancel ? "" : "Cancelar Alterações"}
+        </button>
+
+        <button className="btn" onClick={handleSave} disabled={loading}>
+          {loading && <span className="spinner"></span>}
+          {loading ? "" : "Salvar Alterações"}
+        </button></div>
     </main>
   );
 }

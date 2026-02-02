@@ -10,6 +10,10 @@ function Editar_servico() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ nome: "", preco: 0, cnae: "", municipio: "" });
 
+  const [loading, setLoading] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -18,20 +22,39 @@ function Editar_servico() {
           headers: { Authorization: `Bearer ${token}` }
         });
         setForm(res.data);
-      } catch (error) { alert("Erro ao carregar serviço."); }
+      } catch (error) { setFeedback("Erro ao carregar serviço."); }
     };
     fetchData();
   }, [id]);
 
+    const cancelarAlteracoes = () => {
+        if (!window.confirm("Deseja cancelar todas as alterações?")) return;
+        setLoadingCancel(true);
+        setFeedback("Operação cancelada!");
+        setTimeout(() => {
+        setForm(form);
+        setLoadingCancel(false);
+        navigate("/produtos");
+        }, 1000);
+    };
+
   const handleSave = async () => {
+    setFeedback("");
+    setLoading(true);
+    setFeedback("Atualizando Serviço...");
+
     try {
       const token = localStorage.getItem("token");
       await axios.put(`https://project-finc.onrender.com/servicos/${id}`, form, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert("Serviço atualizado!");
-      navigate("/produtos");
-    } catch (error) { alert("Erro ao salvar."); }
+      setFeedback("Serviço atualizado!");
+      setTimeout(() => { 
+        navigate("/produtos"); }, 2000);
+
+    } catch (error) {
+        console.error("Erro ao atualizar dados do serviço:", error);
+         setFeedback("Erro ao salvar."); }
   };
 
   return (
@@ -50,6 +73,7 @@ function Editar_servico() {
                 value={form.nome}
                 onChange={e => setForm({ ...form, nome: e.target.value })}
                 placeholder="Informe o nome do serviço"
+                disabled={loading}
             />
             </div>
         </div> 
@@ -57,7 +81,7 @@ function Editar_servico() {
         {/* Categoria + Código Interno */}
         <div className="form-row">
                 <div className="form-group"><label>Categoria <span className="campo-obrigatório">*</span></label>
-                    <select value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>
+                    <select value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} disabled={loading}>
                         <option value="" disabled>Selecione a categoria</option>
 
                             <option>Alimentos</option>
@@ -196,6 +220,7 @@ function Editar_servico() {
                 value={form.codigo_interno}
                 onChange={e => setForm({ ...form, codigo_interno: e.target.value })}
                 placeholder="Informe o código interno/SKU"
+                disabled={loading}
             />
             </div>
         </div>
@@ -209,6 +234,7 @@ function Editar_servico() {
                 value={form.descricao_detalhada}
                 onChange={e => setForm({ ...form, descricao_detalhada: e.target.value })}
                 placeholder=" Descreva o serviço"
+                disabled={loading}
             />
             </div>
         </div>
@@ -224,11 +250,12 @@ function Editar_servico() {
                 value={form.preco}
                 onChange={e => setForm({ ...form, preco: e.target.value })}
                 placeholder="Informe o preço unitário do serviço"
+                disabled={loading}
             />
             </div>
 
             <div className="form-group"><label>Unidade de Medida <span className="campo-obrigatório">*</span></label>
-                <select value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})}>
+                <select value={form.unidade_medida} onChange={e => setForm({...form, unidade_medida: e.target.value})} disabled={loading}>
                     <option value="" disabled>Selecione a unidade</option>
 
                     <option>Unidade</option>
@@ -285,6 +312,7 @@ function Editar_servico() {
                 value={form.cnae}
                 onChange={e => setForm({ ...form, cnae: e.target.value })}
                 placeholder="Informe o código CNAE referente o serviço"
+                disabled={loading}            
             />
             </div>
 
@@ -295,6 +323,7 @@ function Editar_servico() {
                 value={form.codigo_servico}
                 onChange={e => setForm({ ...form, codigo_servico: e.target.value })}
                 placeholder="Informe o código de serviço"
+                disabled={loading}
             />
             </div>
         </div>
@@ -308,6 +337,7 @@ function Editar_servico() {
                 value={form.item_lista}
                 onChange={e => setForm({ ...form, item_lista: e.target.value })}
                 placeholder="Informe o Item da Lista"
+                disabled={loading}
             />
             </div>
 
@@ -320,6 +350,7 @@ function Editar_servico() {
                 value={form.aliquota_iss}
                 onChange={e => setForm({ ...form, aliquota_iss: e.target.value })}
                 placeholder="Informe o valor de ISS"
+                disabled={loading}
             />
             </div>
         </div>
@@ -334,6 +365,7 @@ function Editar_servico() {
                 value={form.cst_pis_cofins}
                 onChange={e => setForm({ ...form, cst_pis_cofins: e.target.value })}
                 placeholder="Informe o COFINS"
+                disabled={loading}
             />
             </div>
 
@@ -344,6 +376,7 @@ function Editar_servico() {
                 value={form.regime_especial}
                 onChange={e => setForm({ ...form, regime_especial: e.target.value })}
                 placeholder="Informe a taxa de regime especial"
+                disabled={loading}
             />
             </div>
         </div>
@@ -356,12 +389,24 @@ function Editar_servico() {
                 value={form.municipio}
                 onChange={e => setForm({ ...form, municipio: e.target.value })}
                 placeholder="Informe o Municío que foi prestado o serviço"
+                disabled={loading}
             />
             </div>
         </div>
 
         </section>
-      <div className="botao_geral"><button className="btn" onClick={handleSave}>Salvar Alterações</button></div>
+        {feedback && <p className="feedback">{feedback}</p>}
+      <div className="botao_geral">
+        <button className="btn btn-cancelar" onClick={cancelarAlteracoes} disabled={loading}> 
+          {loadingCancel && <span className="spinner"></span>}
+          {loadingCancel ? "" : "Cancelar Alterações"}
+        </button>
+
+        <button className="btn" onClick={handleSave}>
+          {loading && <span className="spinner"></span>}
+          {loading ? "" : "Salvar Alterações"}
+        </button>
+    </div>
     </main>
   );
 }

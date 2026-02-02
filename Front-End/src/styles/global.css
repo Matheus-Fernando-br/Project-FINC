@@ -115,3 +115,16 @@ body,
     transform: rotate(360deg);
   }
 }
+
+.feedback {
+  font-size: 14px;
+  color: var(--cor-texto-escuro);
+  text-align: center;
+  animation: feedRed 3s ease-in-out;
+}
+
+@keyframes feedRed {
+  0% { color: var(--cor-texto-escuro); }
+  50% { color: var(--cor-pending); }
+  100% { color: var(--cor-texto-escuro); }
+}

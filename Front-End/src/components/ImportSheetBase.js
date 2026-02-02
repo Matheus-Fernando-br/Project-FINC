@@ -13,6 +13,9 @@ function ImportSheetBase({ type }) {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    const [loadingDownload, setLoadingDownload] = useState(false);
+    const [feedback, setFeedback] = useState("");
+
     function normalizeHeader(text) {
         if (!text) return "";
         return text
@@ -67,6 +70,7 @@ function ImportSheetBase({ type }) {
 
 
     const downloadModel = () => {
+        setLoadingDownload(true);
         const fileMap = {
             clientes: "/ImportSheet/modelo-clientes.xlsx",
             servicos: "/ImportSheet/modelo-servico.xlsx",
@@ -79,6 +83,8 @@ function ImportSheetBase({ type }) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        setTimeout(() => setLoadingDownload(false), 1000);
     };
 
     const handleFileUpload = (e) => {
@@ -208,13 +214,14 @@ function ImportSheetBase({ type }) {
                 }
             });
 
-            alert("Importação concluída com sucesso!");
-            navigate(normalizedType === 'clientes' ? '/clientes' : '/produtos');
-
+            setTimeout(() => {
+                setFeedback("Importação concluída com sucesso!");
+                navigate(normalizedType === 'clientes' ? '/clientes' : '/produtos');
+            }, 1500);
         } catch (err) {
             console.error("Erro na importação:", err.response?.data || err.message);
             const msgErro = err.response?.data?.error || err.response?.data?.message || "Erro desconhecido.";
-            alert(`Erro 400: ${msgErro}`);
+            setFeedback(`Erro 400: ${msgErro}`);
         } finally {
             setIsImporting(false);
         }
@@ -236,9 +243,13 @@ function ImportSheetBase({ type }) {
                     <hr className="divider" />
                     <label>Baixe o modelo, preencha e carregue abaixo.</label>
                     <section className="botoes" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                        <button className="btn btn-azul" onClick={downloadModel}>Baixar Modelo</button>
+                        <button className="btn btn-azul" 
+                            onClick={downloadModel}>
+                            {loadingDownload && <span className="spinner"></span>}
+                            {loadingDownload ? "" : "Baixar Modelo  "}
+                        </button>
                         <button className="btn-upload-wrapper btn-verde">
-                            <input type="file" accept=".xlsx" onChange={handleFileUpload} />
+                            <input type="file" accept=".xlsx" onChange={handleFileUpload}></input>
                         </button>
                     </section>
                     {error && <p style={{ color: "red", marginTop: "15px" }}>{error}</p>}
@@ -270,11 +281,15 @@ function ImportSheetBase({ type }) {
                     ) : <label>Nenhum dado válido encontrado na planilha.</label>}
 
                     <section className="botoes" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                        <button className="btn-vermelho" onClick={() => setPreviewData([])} disabled={isImporting}>Cancelar</button>
+                        <button className="btn-vermelho" onClick={() => setPreviewData([])} disabled={isImporting}>
+                            Cancelar
+                        </button>
                         <button className="btn btn-verde" onClick={handleImport} disabled={previewData.length === 0 || isImporting}>
-                            {isImporting ? "Processando..." : `Salvar ${previewData.length} ${type}`}
+                            {isImporting && <span className="spinner"></span>}
+                            {isImporting ? "" : `Salvar ${previewData.length} ${type}`}
                         </button>
                     </section>
+                    {feedback && <p className="feedback">{feedback}</p>}
                 </section>
             </main>
         </Layout>
