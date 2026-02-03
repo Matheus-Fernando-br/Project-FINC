@@ -61,7 +61,7 @@ function Tela_1_notificacao() {
               className={`btn ${ativo.sms ? "btn-verde" : "btn-vermelho"}`}
               onClick={() => toggle("sms")}
             >
-              SMS
+              Telegram
             </button>
           </section>
         </section>

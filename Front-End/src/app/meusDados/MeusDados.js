@@ -17,6 +17,7 @@ function MeusDados() {
     uf: "",
     cidade: "",
     logradouro: "",
+    bairro: "",
     numero: "",
     complemento: ""
   });
@@ -127,6 +128,56 @@ function MeusDados() {
 
   const disabled = !editando || loading;
 
+  const maskCpfCnpj = (value, tipoPessoa) => {
+    let v = value.replace(/\D/g, "");
+
+    if (tipoPessoa === "PFisica") {
+      return v
+        .slice(0, 11)
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    }
+
+    if (tipoPessoa === "PJuridica") {
+      return v
+        .slice(0, 14)
+        .replace(/^(\d{2})(\d)/, "$1.$2")
+        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1/$2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    }
+
+    return value;
+  };
+
+
+const buscarCEP = async (cep) => {
+  const cepLimpo = cep.replace(/\D/g, "");
+
+  if (cepLimpo.length !== 8) return;
+
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+    const data = await res.json();
+
+    if (!data.erro) {
+      setUserData((prev) => ({
+        ...prev,
+        cep: cep,
+        uf: data.uf || "",
+        cidade: data.localidade || "",
+        logradouro: data.logradouro || "",
+        bairro: data.bairro || ""
+      }));
+    }
+  } catch (err) {
+    console.error("Erro ao buscar CEP", err);
+  }
+};
+
+
+
   return (
     <main className="content MeusDados">
       <section className="titulo-secao">
@@ -203,8 +254,12 @@ function MeusDados() {
             <input
               value={userData.cpf_cnpj}
               disabled={disabled}
+              maxLength={userData.tipo_pessoa === "PFisica" ? 14 : 18}
               onChange={(e) =>
-                setUserData({ ...userData, cpf_cnpj: e.target.value })
+                setUserData({
+                  ...userData,
+                  cpf_cnpj: maskCpfCnpj(e.target.value, userData.tipo_pessoa)
+                })
               }
             />
           </div>
@@ -248,11 +303,21 @@ function MeusDados() {
           <div className="form-group">
             <label>CEP</label>
             <input
-              value={userData.cep}
+              type="text"
+              value={userData.cep || ""}
               disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, cep: e.target.value })
-              }
+              onChange={(e) => {
+                let valor = e.target.value
+                  .replace(/\D/g, "")
+                  .replace(/^(\d{5})(\d)/, "$1-$2")
+                  .slice(0, 9);
+
+                setUserData({ ...userData, cep: valor });
+
+                if (valor.length === 9) {
+                  buscarCEP(valor);
+                }
+              }}
             />
           </div>
 
