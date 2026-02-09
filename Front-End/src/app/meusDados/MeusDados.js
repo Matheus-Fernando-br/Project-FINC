@@ -192,8 +192,11 @@ const buscarCEP = async (cep) => {
       </div>
 
       <section className="form-section">
+         <div className="section-header">
+          <span className="icon"><i className={icons.clientePerson}></i></span>
+          <h3>Dados pessoais</h3>
+        </div>
         <hr />
-
         <div className="form-row">
           <div className="form-group">
             <label>Nome</label>
@@ -206,24 +209,7 @@ const buscarCEP = async (cep) => {
             />
           </div>
         </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>E-mail</label>
-            <input value={userData.email} disabled />
-          </div>
-
-          <div className="form-group">
-            <label>Telefone</label>
-            <input
-              value={userData.telefone}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, telefone: e.target.value })
-              }
-            />
-          </div>
-        </div>
+          
 
         <div className="form-row">
           <div className="form-group">
@@ -264,8 +250,42 @@ const buscarCEP = async (cep) => {
             />
           </div>
         </div>
+        </section>
+
+           <section className="form-section">
+            <div className="section-header">
+              <span className="icon"><i className={icons.celular}></i></span>
+              <h3>Contato</h3>
+            </div>
+            <hr />
+            <div className="form-row">
+              <div className="form-group">
+                <label>E-mail</label>
+                <input value={userData.email} disabled />
+              </div>
+    
+              <div className="form-group">
+                <label>Telefone</label>
+                <input
+                  value={userData.telefone}
+                  disabled={disabled}
+                  onChange={(e) =>
+                    setUserData({ ...userData, telefone: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            </section>
+        
+
 
         {editando && (
+          <section className="form-section">
+            <div className="section-header">
+              <span className="icon"><i className={icons.cadeado}></i></span>
+              <h3>Senhas</h3>
+            </div>
+            <hr />
           <div className="form-row">
             <div className="form-group">
               <label>Senha Atual</label>
@@ -276,6 +296,9 @@ const buscarCEP = async (cep) => {
                 onChange={(e) => setSenhaAtual(e.target.value)}
               />
             </div>
+            </div>
+
+          <div className="form-row">
 
             <div className="form-group">
               <label>Nova Senha</label>
@@ -297,8 +320,14 @@ const buscarCEP = async (cep) => {
               />
             </div>
           </div>
+          </section>
         )}
-
+        <section className="form-section">
+        <div className="section-header">
+          <span className="icon"><i className={icons.mapa}></i></span>
+          <h3>Endereço Fiscal</h3>
+        </div>
+        <hr />
         <div className="form-row">
           <div className="form-group">
             <label>CEP</label>

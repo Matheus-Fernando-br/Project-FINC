@@ -87,10 +87,10 @@ function Sidebar() {
             </Link>
           </li>
 
-          <li className={location.pathname.includes("/pagamento") ? "ativo" : ""}>
-            <Link to="/pagamento" onClick={closeMenu}>
-              <i className={icons.pagamento}></i>
-              <span className="label">Pagamento</span>
+          <li className={location.pathname.includes("/configuracao") ? "ativo" : ""}>
+            <Link to="/configuracao" onClick={closeMenu}>
+              <i className={icons.configuracao}></i>
+              <span className="label">Configurações</span>
             </Link>
           </li>
 

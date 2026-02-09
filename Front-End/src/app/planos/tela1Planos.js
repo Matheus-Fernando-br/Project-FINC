@@ -3,6 +3,7 @@ import PlanoPremium from '../../components/planos/planoPremium';
 import PlanoBlack from '../../components/planos/planoBlack';
 import icons from "../../components/Icons";
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function Tela_1_planos() {
   const [ativo, setAtivo] = useState(null);
@@ -46,6 +47,11 @@ function Tela_1_planos() {
           onClick={() => togglePlano("black")} 
         />
       </section>
+      <div className="botao_geral">
+        <Link to="/pagamento">
+          <button className="btn-cadastrar">Alterar plano</button>
+        </Link>
+      </div>
     </main>
   );
 }

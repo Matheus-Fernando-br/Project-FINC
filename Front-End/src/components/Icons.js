@@ -18,13 +18,17 @@ const icons = {
   notificacoes: "bi bi-bell",
   feedback: "bi bi-chat-dots",
   feedbackTel: "bi bi-telephone-forward",
+  ajuda: "bi bi-question-circle",
   sair: "bi bi-box-arrow-right",
   menuAberto: "bi bi-x",
   menuFechado: "bi bi-list",
   mapa: "bi bi-geo-alt-fill",
   edit: "bi bi-pencil-square",
   contador: "bi-calculator",
-  duvidas: "bi bi-question-circle"
+  duvidas: "bi bi-question-circle",
+  configuracao: "bi bi-gear",
+  celular: "bi bi-telephone",
+  cadeado: "bi bi-lock",
 };
 
 export default icons;

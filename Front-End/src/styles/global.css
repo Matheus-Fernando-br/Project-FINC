@@ -31,13 +31,13 @@
   --cor-ok: #1e7d44;
   --cor-pending: #b52d2d;
 
-    --cor-fundo: #111;
+  --cor-fundo: #111;
   --cor-card: #2a2a2a;
   --cor-card-hover: #202020;
 
   --cor-preco: #4caf50;
 
-    --bg-blur: rgba(255, 255, 255, 0.295);
+  --bg-blur: rgba(255, 255, 255, 0.295);
   --cor-preta-apagada: #000000d2;
 }
 

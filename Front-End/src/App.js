@@ -39,7 +39,7 @@ import EditarServico from "./app/produtos_servicos/servico/editarServico";
 
 import Tela1Notificacao from "./app/notificacao/tela1Notificacao";
 import Tela1Planos from "./app/planos/tela1Planos";
-import Pagamento from "./app/pagamento/tela1Pagamento";
+import Configuracao from "./app/configuracao/configuracao";
 import Tela1Contador from "./app/contador/tela1Contador";
 import MenuSair from "./app/sair/MenuSair";
 
@@ -308,11 +308,11 @@ export default function App() {
       />
 
       <Route
-        path="/pagamento"
+        path="/configuracao"
         element={
           <ProtectedRoute>
             <Layout>
-              <Pagamento />
+              <Configuracao />
             </Layout>
           </ProtectedRoute>
         }

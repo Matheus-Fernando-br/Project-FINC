@@ -1,0 +1,178 @@
+/* config.css */
+
+/* ===== Layout principal ===== */
+.configuracao {
+  font-family: "Inter", Arial, sans-serif;
+}
+
+
+/* ===== Barra de busca ===== */
+.configuracao .search-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.configuracao .search-bar {
+  width: 100%;
+  min-width: 60vw;
+  margin: 0;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.configuracao .search-bar input {
+  width: 100%;
+  padding: 15px 40px 15px 20px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.configuracao .search-bar input:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.configuracao .search-bar i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--cor-primaria);
+}
+
+.configuracao .search-bar:hover input {
+  transform: scale(0.99);
+  cursor: pointer;
+}
+
+/* ===== Perfil ===== */
+.configuracao .meus-dados-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0px;
+}
+
+.configuracao .profile i {
+  font-size: 5rem;
+  color: var(--cor-primaria);
+  transition: all 0.2s ease;
+}
+
+.configuracao .profile i:hover {
+  transform: scale(0.98);
+}
+
+.configuracao .user-name {
+  font-size: 16px;
+  list-style: none;
+  font-weight: 500;
+  color: var(--cor-texto-escuro);
+  cursor: pointer;
+}
+
+.configuracao .user-name:hover {
+  color: #3b82f6;
+}
+
+/* ===== Lista de configurações ===== */
+.configuracao .config-options {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+/* ===== Card Botão ===== */
+.configuracao .config-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.configuracao .config-item:hover {
+  border-color: var(--cor-primaria);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  background: var(--bg);
+}
+
+/* ===== Header dos botões ===== */
+.configuracao .config-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.configuracao .config-header i {
+  font-size: 20px;
+  color: var(--cor-primaria);
+}
+
+.configuracao .config-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.configuracao .config-item p {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* ===== Separadores ===== */
+.configuracao hr {
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  margin: 8px 0;
+}
+
+/* ===== Seções ===== */
+.configuracao .form-section {
+  margin-bottom: 25px;
+}
+
+/* ===== Responsividade ===== */
+@media (max-width: 900px) {
+  .configuracao .titulo-secao h1 {
+    font-size: 22px;
+  }
+
+  .configuracao .config-options {
+    grid-template-columns: 1fr;
+  }
+
+  .configuracao .profile i {
+    font-size: 36px;
+  }
+
+  .configuracao .user-name {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .configuracao {
+    padding: 20px 12px;
+  }
+
+  .configuracao .search-bar input {
+    font-size: 13px;
+  }
+
+  .configuracao .config-item {
+    padding: 15px;
+  }
+}
