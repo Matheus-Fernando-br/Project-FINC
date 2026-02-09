@@ -1,29 +1,29 @@
 import "../config.css";
-import icons from "../../../components/Icons";
 import { useNavigate } from "react-router-dom";
 
 export default function Seguranca() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <main className="content configuracao">
-
       <section className="form-section">
         <h2 className="config-subtitulo">Segurança</h2>
-         <section className="form-section">
-            <div className="search-bar">
-            <input type="text" placeholder="Pesquisar configurações..."/>
+        <section className="form-section">
+          <div className="search-bar">
+            <input type="text" placeholder="Pesquisar configurações..." />
             <i className="bi bi-search"></i>
-            </div>
-            <hr />
-            <div className="config-back">
-                <button className="config-voltar" onClick={() => navigate("/configuracao")}>
-                    <i className="bi bi-arrow-left"></i> Voltar
-                </button>
-            </div>
+          </div>
+          <hr />
+          <div className="config-back">
+            <button
+              className="config-voltar"
+              onClick={() => navigate("/configuracao")}
+            >
+              <i className="bi bi-arrow-left"></i> Voltar
+            </button>
+          </div>
         </section>
 
         <div className="config-options-2">
-
           <div className="config-item">
             <div className="menu-esquerda">
               <i className="bi bi-key"></i>
@@ -52,10 +52,8 @@ export default function Seguranca() {
               </select>
             </div>
           </div>
-
         </div>
       </section>
-
     </main>
   );
 }

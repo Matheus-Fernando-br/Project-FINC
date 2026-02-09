@@ -1,5 +1,4 @@
 import "../config.css";
-import icons from "../../../components/Icons";
 import { useNavigate } from "react-router-dom";
 
 export default function Aparencia() {
