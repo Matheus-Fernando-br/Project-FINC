@@ -48,7 +48,7 @@ function Tela_1_planos() {
         />
       </section>
       <div className="botao_geral">
-        <Link to="/pagamento">
+        <Link to="/configuracao/pagamento">
           <button className="btn-cadastrar">Alterar plano</button>
         </Link>
       </div>

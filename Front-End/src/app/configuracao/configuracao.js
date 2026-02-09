@@ -1,12 +1,9 @@
 // Configuracoes.jsx
 import "./config.css";
 import icons from "../../components/Icons";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-export default function Configuracoes() {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const nomeCompleto = user.social_name || "Usuário";
+export default function ConfiguracoesGeral() {
   const navigate = useNavigate();
 
   return (
@@ -15,32 +12,18 @@ export default function Configuracoes() {
         <h1><i className={icons.configuracao}></i> Configurações</h1>
       </section>    
 
- 
-        <div className="search-wrapper">
-          <div className="search-bar">
-          <input type="text" placeholder="Pesquisar configurações..."/>
-          <i className="bi bi-search"></i>
-          </div>
-        </div>
-
-
       <section className="form-section">
-        <div className="meus-dados-header">
-
-        <div className="profile">
-          <Link to="/MeusDados">
-            <i className="bi bi-person-circle"></i>
-          </Link>
+        <div className="search-bar">
+        <input type="text" placeholder="Pesquisar configurações..."/>
+        <i className="bi bi-search"></i>
         </div>
-        <Link to="/MeusDados">
-          <span className="user-name">{nomeCompleto}</span>
-        </Link>
-        </div>
+         <hr />
       </section>
+
 
       <section className="form-section">
         <div className="config-options">
-          <button className="config-item" onClick={() => navigate("/Seguranca")}>
+          <button className="config-item" onClick={() => navigate("/Configuracao/geral")}>
             <div className="config-header">
               <i className="bi bi-display"></i>
               <h3>Geral</h3>
@@ -51,33 +34,49 @@ export default function Configuracoes() {
           <button className="config-item" onClick={() => navigate("/meusdados")}>
             <div className="config-header">
               <i className="bi bi-key"></i>
-              <h3>Conta</h3>
+              <h3>Conta / Empresa</h3>
             </div>
             <p>Dados da conta, Endereço Fiscal</p>
           </button>
           <hr />
-          <button className="config-item" onClick={() => navigate("/pagamento")}>
+          <button className="config-item" onClick={() => navigate("/configuracao/notas")}>
             <div className="config-header">
-              <i className={icons.planos}></i>
-              <h3>Plano mensal</h3>
+              <i className={icons.emitirNota}></i>
+              <h3>Notas Fiscais</h3>
             </div>
-            <p>Gerencie suas formas de pagamento</p>
+            <p>Gerencie suas notas fiscais, número de série</p>
           </button>
           <hr />
-          <button className="config-item" onClick={() => navigate("/pagamento")}>
+          <button className="config-item" onClick={() => navigate("/configuracao/financeiro")}>
+            <div className="config-header">
+              <i className={icons.cash}></i>
+              <h3>Financeiro</h3>
+            </div>
+            <p>Relatórios, Tributações e Impostos</p>
+          </button>
+          <hr />
+          <button className="config-item" onClick={() => navigate("/configuracao/integracoes")}>
+            <div className="config-header">
+              <i className={icons.planos}></i>
+              <h3>Integrações</h3>
+            </div>
+            <p>Integrações SEFAZ, Certificado Digital</p>
+          </button>
+          <hr />
+          <button className="config-item" onClick={() => navigate("/configuracao/seguranca")}>
+            <div className="config-header">
+              <i className="bi bi-shield-lock"></i>
+              <h3>Segurança</h3>
+            </div>
+            <p>Gerencie suas senhas, autenticação de dois fatores e outras opções de segurança.</p>
+          </button>
+          <hr />
+          <button className="config-item" onClick={() => navigate("/configuracao/pagamento")}>
             <div className="config-header">
               <i className="bi bi-credit-card"></i>
               <h3>Pagamento</h3>
             </div>
             <p>Gerencie suas formas de pagamento</p>
-          </button>
-          <hr />
-          <button className="config-item" onClick={() => navigate("/pagamento")}>
-            <div className="config-header">
-              <i className={icons.emitirNota}></i>
-              <h3>Notas Fiscais</h3>
-            </div>
-            <p>Gerencie suas notas fiscais, integrações, número de série</p>
           </button>
           <hr />
           <button className="config-item" onClick={() => navigate("/notificacao")}>
@@ -88,15 +87,7 @@ export default function Configuracoes() {
             <p>Gerencie suas notificações, por onde serão exibidas</p>
           </button>
           <hr />
-          <button className="config-item" onClick={() => navigate("/Seguranca")}>
-            <div className="config-header">
-              <i className="bi bi-shield-lock"></i>
-              <h3>Segurança</h3>
-            </div>
-            <p>Gerencie suas senhas, autenticação de dois fatores e outras opções de segurança.</p>
-          </button>
-          <hr />
-          <button className="config-item" onClick={() => navigate("/Seguranca")}>
+          <button className="config-item" onClick={() => navigate("/configuracao/aparencia")}>
             <div className="config-header">
               <i className="bi bi-palette"></i>
               <h3>Aparência</h3>
@@ -104,7 +95,7 @@ export default function Configuracoes() {
             <p>Personalize a aparência do seu perfil</p>
           </button>
           <hr />
-          <button className="config-item" onClick={() => navigate("/ajuda")}>
+          <button className="config-item" onClick={() => navigate("/configuracao/ajuda")}>
             <div className="config-header">
               <i className={icons.ajuda}></i>
               <h3>Ajuda e Feedback</h3>
@@ -114,7 +105,7 @@ export default function Configuracoes() {
           <hr />
           <button className="config-item" onClick={() => navigate("/sair")}>
             <div className="config-header">
-              <i className={icons.sair}></i>
+              <i className={icons.sair} style={{color:"red"}}></i>
               <h3>Desconectar</h3>
             </div>
             <p>Faça Loggout, Saia da plataforma com segurança</p>

@@ -7,81 +7,47 @@
 
 
 /* ===== Barra de busca ===== */
-.configuracao .search-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.configuracao .form-section {
+  width: 100%;
 }
 
 .configuracao .search-bar {
   width: 100%;
-  min-width: 60vw;
-  margin: 0;
   position: relative;
-  margin-bottom: 2rem;
 }
 
 .configuracao .search-bar input {
   width: 100%;
-  padding: 15px 40px 15px 20px;
-  border-radius: 10px;
+  padding: 16px 48px 16px 20px;
+  border-radius: 12px;
   border: 1px solid #e5e7eb;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: 0.3s ease;
+  box-sizing: border-box;
 }
 
 .configuracao .search-bar input:focus {
   outline: none;
   border-color: var(--cor-primaria);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .configuracao .search-bar i {
   position: absolute;
-  right: 15px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
+  font-size: 18px;
   color: var(--cor-primaria);
 }
 
-.configuracao .search-bar:hover input {
+.configuracao .search-bar input:hover {
   transform: scale(0.99);
-  cursor: pointer;
 }
 
-/* ===== Perfil ===== */
-.configuracao .meus-dados-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 0px;
-}
-
-.configuracao .profile i {
-  font-size: 5rem;
-  color: var(--cor-primaria);
-  transition: all 0.2s ease;
-}
-
-.configuracao .profile i:hover {
-  transform: scale(0.98);
-}
-
-.configuracao .user-name {
-  font-size: 16px;
-  list-style: none;
-  font-weight: 500;
-  color: var(--cor-texto-escuro);
-  cursor: pointer;
-}
-
-.configuracao .user-name:hover {
-  color: #3b82f6;
-}
 
 /* ===== Lista de configurações ===== */
-.configuracao .config-options {
+.configuracao .config-options, .configuracao .config-options-2 {
   display: flex;
   flex-direction: column;
   gap: .5rem;
@@ -94,16 +60,16 @@
   padding: 18px;
   background: #ffffff;
   text-align: left;
-  cursor: pointer;
+  
   transition: 0.25s ease;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.configuracao .config-item:hover {
+.configuracao .config-options .config-item:hover {
   border-color: var(--cor-primaria);
-  transform: translateY(-4px);
+  transform: translateY(2px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
   background: var(--bg);
 }
@@ -123,7 +89,7 @@
 .configuracao .config-header h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--cor-texto-escuro);
 }
 
 .configuracao .config-item p {
@@ -174,5 +140,258 @@
 
   .configuracao .config-item {
     padding: 15px;
+  }
+}
+
+/*Voltar*/
+.config-back {
+  display: flex;
+  justify-content: center;
+}
+
+.config-voltar {
+  border: none;
+  background: var(--cor-primaria);
+  max-width: 12vw;
+  color: white  ;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+} 
+
+
+/* ===== Submenus / linhas de configuração ===== */
+.configuracao .config-item-row {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  transition: 0.25s ease;
+}
+
+/* Lado esquerdo */
+.configuracao .menu-esquerda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.configuracao .menu-esquerda i {
+  font-size: 20px;
+  color: var(--cor-primaria);
+}
+
+.configuracao .menu-esquerda h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.configuracao .menu-esquerda p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Lado direito */
+.configuracao .menu-direita {
+  display: flex;
+  align-items: center;
+}
+
+/* Select */
+.configuracao .select-config {
+  min-width: 200px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/*NOTAS FISCAIS */
+
+/* ===== FORÇA LAYOUT HORIZONTAL PARA TODAS CONFIG ROW ===== */
+
+.configuracao .config-subtitulo {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cor-texto-escuro);
+  margin-bottom: 12px;
+}
+
+.configuracao .config-options-2 .config-item {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Garante que o lado esquerdo cresça */
+.configuracao .config-options-2 .menu-esquerda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Garante que o lado direito fique colado à direita */
+.configuracao .config-options-2 .menu-direita {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Evita quebra de layout nos textos */
+.configuracao .menu-esquerda > div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Melhor alinhamento vertical */
+.configuracao .config-options-2 .config-item p {
+  margin: 0;
+}
+
+/*Pagamento*/
+.pagamento-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+/* Títulos */
+.cartao-atual h3,
+.novo-cartao h3,
+.cadastro-cartao h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.3rem;
+}
+
+/* Visual do cartão */
+.cartao-visual {
+  width: 260px;
+  height: 160px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7d00a9, #a100d6);
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cartao-header {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.cartao-numero {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.cartao-footer {
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+/* Checkboxes */
+.novo-cartao label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
+/* Cadastro novo cartão */
+.cadastro-cartao {
+  margin-top: 2rem;
+}
+
+.cadastro-cartao form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.cadastro-cartao form input {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.cadastro-cartao form input:focus {
+  border-color: #7d00a9;
+  box-shadow: 0 0 6px rgba(125, 0, 169, 0.4);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .pagamento-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .cartao-visual {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .cadastro-cartao form {
+    grid-template-columns: 1fr; /* inputs em uma única coluna */
+  }
+}
+
+@media (max-width: 600px) {
+  .pagamento-container {
+    gap: 1.5rem;
+  }
+
+  .cartao-visual {
+    width: 100%;
+    height: auto;
+    min-height: 150px;
+    padding: 1rem;
+  }
+
+  .cartao-header {
+    font-size: 0.9rem;
+  }
+
+  .cartao-numero {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .cartao-footer {
+    font-size: 0.8rem;
+  }
+
+  .novo-cartao label {
+    font-size: 0.85rem;
+  }
+
+  .cadastro-cartao form input {
+    font-size: 0.85rem;
+    padding: 0.5rem;
   }
 }

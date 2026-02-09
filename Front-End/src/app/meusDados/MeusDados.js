@@ -294,6 +294,7 @@ const buscarCEP = async (cep) => {
                 value={senhaAtual}
                 disabled={loading}
                 onChange={(e) => setSenhaAtual(e.target.value)}
+                placeholder="***********"
               />
             </div>
             </div>

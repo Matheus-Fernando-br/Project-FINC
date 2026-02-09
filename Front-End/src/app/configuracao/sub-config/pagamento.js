@@ -1,13 +1,50 @@
-import icons from "../../components/Icons";
-import "./Pagamento.css";
+import "../config.css";
+import icons from "../../../components/Icons";
+import { useNavigate } from "react-router-dom";
 
-function Pagamento() {
+export default function Pagamento() {
+    const navigate = useNavigate();
   return (
-    <div className="content">
-      <section className='titulo-secao'>
-        <h1><i className={icons.pagamento}></i> Pagamento</h1>
-      </section>        
-      <div className="pagamento-container">
+    <main className="content configuracao">
+
+      <section className="form-section">
+        <h2 className="config-subtitulo">Pagamento</h2>
+         <section className="form-section">
+            <div className="search-bar">
+            <input type="text" placeholder="Pesquisar configurações..."/>
+            <i className="bi bi-search"></i>
+            </div>
+            <hr />
+            <div className="config-back">
+                <button className="config-voltar" onClick={() => navigate("/configuracao")}>
+                    <i className="bi bi-arrow-left"></i> Voltar
+                </button>
+            </div>
+        </section>
+
+        <div className="config-options-2">
+
+          <div className="config-item">
+            <div className="menu-esquerda">
+              <i className="bi bi-credit-card"></i>
+              <div>
+                <h3>Método de pagamento</h3>
+                <p>Forma padrão de cobrança</p>
+              </div>
+            </div>
+            <div className="menu-direita">
+              <select className="select-config">
+                <option>Cartão de crédito</option>
+                <option>Boleto</option>
+                <option>PIX</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </section>
+      <section className="form-section">
+         <div className="pagamento-container">
         {/* Cartão atual */}
         <div className="cartao-atual">
           <h3>Cartão de crédito atual</h3>
@@ -64,10 +101,8 @@ function Pagamento() {
           <button className="btn-cadastrar">Cadastrar Cartão</button>
           </div>
       </div>
+      </section>
 
-
-      </div>
+    </main>
   );
 }
-
-export default Pagamento;

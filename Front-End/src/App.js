@@ -39,13 +39,22 @@ import EditarServico from "./app/produtos_servicos/servico/editarServico";
 
 import Tela1Notificacao from "./app/notificacao/tela1Notificacao";
 import Tela1Planos from "./app/planos/tela1Planos";
-import Configuracao from "./app/configuracao/configuracao";
 import Tela1Contador from "./app/contador/tela1Contador";
 import MenuSair from "./app/sair/MenuSair";
 
 import Tela2PlanilhaClientes from "./app/clientes/tela2PlanilhaClientes";
 import Tela2PlanilhaProduto from "./app/produtos_servicos/produto/telaPlanilhaProduto";
 import Tela2PlanilhaServico from "./app/produtos_servicos/servico/telaPlanilhaServico";
+
+import Configuracao from "./app/configuracao/configuracao";
+import ConfigGeral from "./app/configuracao/sub-config/geral";
+import ConfigNotas from "./app/configuracao/sub-config/notasFiscais";
+import ConfigFinanceiro from "./app/configuracao/sub-config/financeiro";
+import ConfigIntegracoes from "./app/configuracao/sub-config/integracoes";
+import ConfigSeguranca from "./app/configuracao/sub-config/seguranca";
+import ConfigPagamento from "./app/configuracao/sub-config/pagamento";
+import ConfigAparencia from "./app/configuracao/sub-config/aparencia";
+import ConfigAjuda from "./app/configuracao/sub-config/ajuda";
 
 export default function App() {
   const location = useLocation();
@@ -307,16 +316,6 @@ export default function App() {
         }
       />
 
-      <Route
-        path="/configuracao"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Configuracao />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path="/contador"
@@ -368,6 +367,97 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <Tela2PlanilhaServico />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      {/* Configurações */}
+      <Route
+        path="/configuracao"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Configuracao />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/geral"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigGeral />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/notas"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigNotas />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/financeiro"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigFinanceiro />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/integracoes"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigIntegracoes />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/seguranca"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigSeguranca />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/pagamento"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigPagamento />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/aparencia"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigAparencia />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/ajuda"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConfigAjuda />
             </Layout>
           </ProtectedRoute>
         }
