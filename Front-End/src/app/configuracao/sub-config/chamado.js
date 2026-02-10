@@ -86,15 +86,24 @@ export default function AjudaFeedback() {
   /* polling estilo whatsapp */
   useEffect(() => {
 
-    if (!chamado) return;
+  if (!chamado) return;
 
-    buscarMensagens();
+  const buscar = async () => {
+    const res = await fetch(
+      `https://project-finc.onrender.com/mensagens/${chamado.id}`
+    );
+    const data = await res.json();
+    setMensagens(data);
+  };
 
-    const interval = setInterval(buscarMensagens, 3000);
+  buscar();
 
-    return () => clearInterval(interval);
+  const interval = setInterval(buscar, 3000);
 
-  }, [chamado]);
+  return () => clearInterval(interval);
+
+}, [chamado]);
+
 
   return (
     <main className="content configuracao">
