@@ -1,4 +1,3 @@
-import Seguranca from "../app/configuracao/sub-config/seguranca";
 
 const icons = {
   casa: "bi bi-house",
