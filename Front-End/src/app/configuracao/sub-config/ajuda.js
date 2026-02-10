@@ -1,11 +1,35 @@
 import "../config.css";
 import icons from "../../../components/Icons";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function AjudaFeedback() {
     const navigate = useNavigate();
+    const [feedback, setFeedback] = useState("");
 
-  return (
+    async function enviarFeedbackSistema() {
+
+      if (!feedback.trim()) {
+        alert("Digite uma mensagem");
+        return;
+      }
+
+      await fetch("https://project-finc.onrender.com/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          mensagem: feedback,
+          
+        })
+      });
+
+      alert("Feedback enviado!");
+      setFeedback("");
+    }
+
+  return ( 
     <main className="content configuracao">
       <section className='titulo-secao'>
         <h1><i className={icons.ajuda}></i> Ajuda e Feedback</h1>
@@ -31,8 +55,8 @@ export default function AjudaFeedback() {
             <div className="menu-esquerda">
               <i className={icons.relatorio}></i>
               <div>
-                <h3>Central de ajuda</h3>
-                <p>Acesse tutoriais e documentação do sistema</p>
+                <h3>Documentação</h3>
+                <p>Acesse a documentação do sistema e todos seus detalhes</p>
               </div>
             </div>
 
@@ -60,23 +84,6 @@ export default function AjudaFeedback() {
             </div>
           </div>
 
-          {/* Feedback */}
-          <div className="config-item">
-            <div className="menu-esquerda">
-              <i className={icons.feedback}></i>
-              <div>
-                <h3>Enviar feedback</h3>
-                <p>Conte para nós como podemos melhorar</p>
-              </div>
-            </div>
-
-            <div className="menu-direita">
-              <button className="select-config">
-                Enviar
-              </button>
-            </div>
-          </div>
-
           {/* Status sistema */}
           <div className="config-item">
             <div className="menu-esquerda">
@@ -97,10 +104,10 @@ export default function AjudaFeedback() {
           {/* Contato */}
           <div className="config-item">
             <div className="menu-esquerda">
-              <i className="bi bi-envelope"></i>
+              <i class="bi bi-info-circle-fill"></i>
               <div>
-                <h3>Contato direto</h3>
-                <p>Entre em contato via email ou WhatsApp</p>
+                <h3>Tutorial do sistema</h3>
+                <p>Acesse o tutorial do sistema para aprender onde fica cada funcionalidade</p>
               </div>
             </div>
 
@@ -111,6 +118,34 @@ export default function AjudaFeedback() {
             </div>
           </div>
 
+          {/* Feedback */}
+          <div className="config-item">
+            <div className="menu-esquerda">
+              <i className={icons.feedback}></i>
+              <div>
+                <h3>Enviar feedback</h3>
+                <p>Conte para nós como podemos melhorar</p>
+              </div>
+            </div>
+
+            <div className="menu-direita feedback">
+            <input
+              className="select-config"
+              type="text"
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder="Digite seu feedback..."
+            />
+
+            <button
+              className="btn"
+              onClick={enviarFeedbackSistema}
+            >
+              Enviar
+            </button>
+
+            </div>
+          </div>
         </div>
       </section>
 

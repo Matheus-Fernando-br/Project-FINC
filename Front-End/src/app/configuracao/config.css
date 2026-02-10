@@ -503,3 +503,13 @@
   gap: 10px;
 }
 
+/*Feedback ao sistema*/
+.config-item .feedback {
+  gap: 2rem;
+}
+
+.config-item .feedback input {
+  cursor:auto;
+  padding: 1rem 5rem;
+  font-size: 12px;
+}
