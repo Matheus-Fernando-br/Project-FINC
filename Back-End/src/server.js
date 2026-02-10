@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import { criarChamado, enviarMensagem, listarMensagens } from "./telegram/chamados.js";
+import { telegramWebhook } from "./telegram/webhook.js";
 // Importação das rotas
 import authRoutes from "./routes/auth.routes.js";
 import clienteRoutes from "./routes/cliente.routes.js";
@@ -28,6 +30,18 @@ app.use(
 
 app.use(express.json());
 
+/* ============================= */
+/* ROTAS CHAMADOS */
+/* ============================= */
+app.post("/chamados", criarChamado);
+app.post("/mensagem", enviarMensagem);
+app.get("/mensagens/:chamado_id", listarMensagens);
+
+/* ============================= */
+/* WEBHOOK TELEGRAM */
+/* ============================= */
+app.post("/telegram-webhook", telegramWebhook);
+
 /* ===== REGISTRO DE ROTAS ===== */
 app.use("/auth", authRoutes);
 app.use("/clientes", clienteRoutes);
@@ -45,5 +59,7 @@ const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
   console.log(`🚀 API rodando na porta ${PORT}`);
 });
+
+
 
 export default app;
