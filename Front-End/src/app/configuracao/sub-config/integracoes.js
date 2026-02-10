@@ -1,12 +1,15 @@
 import "../config.css";
 import { useNavigate } from "react-router-dom";
+import icons from "../../../components/Icons";
 
 export default function Integracoes() {
   const navigate = useNavigate();
   return (
     <main className="content configuracao">
+      <section className='titulo-secao'>
+          <h1><i className={icons.planos}></i> Integrações</h1>
+      </section>
       <section className="form-section">
-        <h2 className="config-subtitulo">Integrações</h2>
         <section className="form-section">
           <div className="search-bar">
             <input type="text" placeholder="Pesquisar configurações..." />

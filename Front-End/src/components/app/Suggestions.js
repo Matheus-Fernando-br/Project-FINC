@@ -10,7 +10,7 @@ const suggestions = [
   { label: "Notificações", icon: "bi-bell", to: "/notificacao" },
   { label: "Contador", icon: "bi-calculator", to: "/contador" },
   { label: "Sair", icon: "bi-door-open", to: "/sair" },
-  { label: "Ajuda", icon: "bi-question-circle", to: "" },
+  { label: "Ajuda", icon: "bi-question-circle", to: "/configuracao/ajuda" },
   { label: "Configurações", icon: "bi-gear", to: "/configuracao" },
   { label: "Meu Perfil", icon: "bi-person-circle", to: "/MeusDados" },
   { label: "Relatórios", icon: "bi-bar-chart", to: "/app" },

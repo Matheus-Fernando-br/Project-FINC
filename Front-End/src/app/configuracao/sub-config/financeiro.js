@@ -1,14 +1,16 @@
 import "../config.css";
 import { useNavigate } from "react-router-dom";
+import icons from "../../../components/Icons";
 
 export default function Financeiro() {
   const navigate = useNavigate();
 
   return (
     <main className="content configuracao">
-
+      <section className='titulo-secao'>
+        <h1><i className={icons.cash}></i> Financeiro</h1>
+      </section> 
       <section className="form-section">
-        <h2 className="config-subtitulo">Financeiro</h2>
          <section className="form-section">
             <div className="search-bar">
             <input type="text" placeholder="Pesquisar configurações..."/>

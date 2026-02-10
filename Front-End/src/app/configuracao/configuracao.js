@@ -65,7 +65,7 @@ export default function ConfiguracoesGeral() {
           <hr />
           <button className="config-item" onClick={() => navigate("/configuracao/seguranca")}>
             <div className="config-header">
-              <i className="bi bi-shield-lock"></i>
+              <i className={icons.seguranca}></i>
               <h3>Segurança</h3>
             </div>
             <p>Gerencie suas senhas, autenticação de dois fatores e outras opções de segurança.</p>
@@ -73,7 +73,7 @@ export default function ConfiguracoesGeral() {
           <hr />
           <button className="config-item" onClick={() => navigate("/configuracao/pagamento")}>
             <div className="config-header">
-              <i className="bi bi-credit-card"></i>
+              <i className={icons.cartao}></i>
               <h3>Pagamento</h3>
             </div>
             <p>Gerencie suas formas de pagamento</p>
@@ -81,7 +81,7 @@ export default function ConfiguracoesGeral() {
           <hr />
           <button className="config-item" onClick={() => navigate("/notificacao")}>
             <div className="config-header">
-              <i className="bi bi-bell"></i>
+              <i className={icons.notificacoes}></i>
               <h3>Notificações</h3>
             </div>
             <p>Gerencie suas notificações, por onde serão exibidas</p>
@@ -89,7 +89,7 @@ export default function ConfiguracoesGeral() {
           <hr />
           <button className="config-item" onClick={() => navigate("/configuracao/aparencia")}>
             <div className="config-header">
-              <i className="bi bi-palette"></i>
+              <i className={icons.aparencia}></i>
               <h3>Aparência</h3>
             </div>
             <p>Personalize a aparência do seu perfil</p>

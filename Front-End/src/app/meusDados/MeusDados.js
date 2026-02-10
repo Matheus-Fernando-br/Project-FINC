@@ -1,258 +1,212 @@
-import icons from "../../components/Icons";
-import { useState, useEffect } from "react";
-import "./MeusDados.css";
+  import icons from "../../components/Icons";
+  import { useState, useEffect } from "react";
+  import "./MeusDados.css";
 
-function MeusDados() {
-  const [editando, setEditando] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  function MeusDados() {
+    const [editando, setEditando] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [feedback, setFeedback] = useState("");
 
-  const [userData, setUserData] = useState({
-    social_name: "",
-    email: "",
-    cpf_cnpj: "",
-    telefone: "",
-    tipo_pessoa: "",
-    cep: "",
-    uf: "",
-    cidade: "",
-    logradouro: "",
-    bairro: "",
-    numero: "",
-    complemento: ""
-  });
-
-  const [backupData, setBackupData] = useState(null);
-
-  const [senhaAtual, setSenhaAtual] = useState("");
-  const [senha, setSenha] = useState("");
-  const [repetirSenha, setRepetirSenha] = useState("");
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setUserData({
-      social_name: user.social_name || "",
-      email: user.email || "",
-      cpf_cnpj: user.cpf_cnpj || "",
-      telefone: user.telefone || "",
-      tipo_pessoa: user.tipo_pessoa || "",
-      cep: user.cep || "",
-      uf: user.uf || "",
-      cidade: user.cidade || "",
-      logradouro: user.logradouro || "",
-      numero: user.numero || "",
-      complemento: user.complemento || ""
+    const [userData, setUserData] = useState({
+      social_name: "",
+      email: "",
+      cpf_cnpj: "",
+      telefone: "",
+      tipo_pessoa: "",
+      cep: "",
+      uf: "",
+      cidade: "",
+      logradouro: "",
+      bairro: "",
+      numero: "",
+      complemento: ""
     });
-  }, []);
 
-  const salvarAlteracoes = async () => {
-    setFeedback("");
-    setLoading(true);
+    const [backupData, setBackupData] = useState(null);
 
-    try {
-      // 🔐 troca de senha
-      if (senha || repetirSenha || senhaAtual) {
-        if (!senhaAtual) {
-          setFeedback("Informe a senha atual");
-          setLoading(false);
-          return;
-        }
+    useEffect(() => {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setUserData({
+        social_name: user.social_name || "",
+        email: user.email || "",
+        cpf_cnpj: user.cpf_cnpj || "",
+        telefone: user.telefone || "",
+        tipo_pessoa: user.tipo_pessoa || "",
+        cep: user.cep || "",
+        uf: user.uf || "",
+        cidade: user.cidade || "",
+        logradouro: user.logradouro || "",
+        numero: user.numero || "",
+        complemento: user.complemento || ""
+      });
+    }, []);
 
-        if (senha !== repetirSenha) {
-          setFeedback("As senhas não coincidem!");
-          setLoading(false);
-          return;
-        }
+    const salvarAlteracoes = async () => {
+      setFeedback("");
+      setLoading(true);
 
-        setFeedback("Alterando senha...");
+      try {
 
-        const resSenha = await fetch(
-          "https://project-finc.onrender.com/api/profile/password",
+        // 📦 update profile
+        setFeedback("Salvando dados do perfil...");
+
+        const res = await fetch(
+          "https://project-finc.onrender.com/api/profile",
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("token")}`
             },
-            body: JSON.stringify({
-              senhaAtual,
-              novaSenha: senha
-            })
+            body: JSON.stringify(userData)
           }
         );
 
-        const dataSenha = await resSenha.json();
+        const data = await res.json();
 
-        if (!resSenha.ok) {
-          setFeedback(dataSenha.error || "Erro ao alterar senha");
+        if (!res.ok) {
+          setFeedback(data.error || "Erro ao salvar dados");
           setLoading(false);
           return;
         }
+
+        localStorage.setItem("user", JSON.stringify(userData));
+        setFeedback("Perfil atualizado com sucesso ✅");
+        setEditando(false);
+      } catch (err) {
+        setFeedback("Erro de conexão com o servidor");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const disabled = !editando || loading;
+
+    const maskCpfCnpj = (value, tipoPessoa) => {
+      let v = value.replace(/\D/g, "");
+
+      if (tipoPessoa === "PFisica") {
+        return v
+          .slice(0, 11)
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
       }
 
-      // 📦 update profile
-      setFeedback("Salvando dados do perfil...");
+      if (tipoPessoa === "PJuridica") {
+        return v
+          .slice(0, 14)
+          .replace(/^(\d{2})(\d)/, "$1.$2")
+          .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/, ".$1/$2")
+          .replace(/(\d{4})(\d)/, "$1-$2");
+      }
 
-      const res = await fetch(
-        "https://project-finc.onrender.com/api/profile",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          },
-          body: JSON.stringify(userData)
-        }
-      );
+      return value;
+    };
 
+
+  const buscarCEP = async (cep) => {
+    const cepLimpo = cep.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) return;
+
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
       const data = await res.json();
 
-      if (!res.ok) {
-        setFeedback(data.error || "Erro ao salvar dados");
-        setLoading(false);
-        return;
+      if (!data.erro) {
+        setUserData((prev) => ({
+          ...prev,
+          cep: cep,
+          uf: data.uf || "",
+          cidade: data.localidade || "",
+          logradouro: data.logradouro || "",
+          bairro: data.bairro || ""
+        }));
       }
-
-      localStorage.setItem("user", JSON.stringify(userData));
-      setFeedback("Perfil atualizado com sucesso ✅");
-      setEditando(false);
-      setSenha("");
-      setSenhaAtual("");
-      setRepetirSenha("");
     } catch (err) {
-      setFeedback("Erro de conexão com o servidor");
-    } finally {
-      setLoading(false);
+      console.error("Erro ao buscar CEP", err);
     }
   };
 
-  const disabled = !editando || loading;
-
-  const maskCpfCnpj = (value, tipoPessoa) => {
-    let v = value.replace(/\D/g, "");
-
-    if (tipoPessoa === "PFisica") {
-      return v
-        .slice(0, 11)
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-    }
-
-    if (tipoPessoa === "PJuridica") {
-      return v
-        .slice(0, 14)
-        .replace(/^(\d{2})(\d)/, "$1.$2")
-        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-        .replace(/\.(\d{3})(\d)/, ".$1/$2")
-        .replace(/(\d{4})(\d)/, "$1-$2");
-    }
-
-    return value;
-  };
 
 
-const buscarCEP = async (cep) => {
-  const cepLimpo = cep.replace(/\D/g, "");
+    return (
+      <main className="content MeusDados">
+        <section className="titulo-secao">
+          <h1>
+            <i className={icons.clientePerson}></i> Meu Perfil
+          </h1>
+        </section>
 
-  if (cepLimpo.length !== 8) return;
-
-  try {
-    const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-    const data = await res.json();
-
-    if (!data.erro) {
-      setUserData((prev) => ({
-        ...prev,
-        cep: cep,
-        uf: data.uf || "",
-        cidade: data.localidade || "",
-        logradouro: data.logradouro || "",
-        bairro: data.bairro || ""
-      }));
-    }
-  } catch (err) {
-    console.error("Erro ao buscar CEP", err);
-  }
-};
-
-
-
-  return (
-    <main className="content MeusDados">
-      <section className="titulo-secao">
-        <h1>
-          <i className={icons.clientePerson}></i> Meu Perfil
-        </h1>
-      </section>
-
-      <div className="perfil">
-        <i className="bi bi-person-circle"></i>
-        <h2>{userData.social_name}</h2>
-      </div>
-
-      <section className="form-section">
-         <div className="section-header">
-          <span className="icon"><i className={icons.clientePerson}></i></span>
-          <h3>Dados pessoais</h3>
+        <div className="perfil">
+          <i className="bi bi-person-circle"></i>
+          <h2>{userData.social_name}</h2>
         </div>
-        <hr />
-        <div className="form-row">
-          <div className="form-group">
-            <label>Nome</label>
-            <input
-              value={userData.social_name}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, social_name: e.target.value })
-              }
-            />
+
+        <section className="form-section">
+          <div className="section-header">
+            <span className="icon"><i className={icons.clientePerson}></i></span>
+            <h3>Dados pessoais</h3>
           </div>
-        </div>
-          
+          <hr />
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nome</label>
+              <input
+                value={userData.social_name}
+                disabled={disabled}
+                onChange={(e) =>
+                  setUserData({ ...userData, social_name: e.target.value })
+                }
+              />
+            </div>
+          </div>
+            
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Tipo de Pessoa</label>
-            {editando ? (
-              <select
-                value={userData.tipo_pessoa}
-                disabled={loading}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Tipo de Pessoa</label>
+              {editando ? (
+                <select
+                  value={userData.tipo_pessoa}
+                  disabled={loading}
+                  onChange={(e) =>
+                    setUserData({
+                      ...userData,
+                      tipo_pessoa: e.target.value,
+                      cpf_cnpj: ""
+                    })
+                  }
+                >
+                  <option value="">Selecione</option>
+                  <option value="PFisica">Pessoa Física</option>
+                  <option value="PJuridica">Pessoa Jurídica</option>
+                </select>
+              ) : (
+                <input value={userData.tipo_pessoa} disabled />
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>CPF / CNPJ</label>
+              <input
+                value={userData.cpf_cnpj}
+                disabled={disabled}
+                maxLength={userData.tipo_pessoa === "PFisica" ? 14 : 18}
                 onChange={(e) =>
                   setUserData({
                     ...userData,
-                    tipo_pessoa: e.target.value,
-                    cpf_cnpj: ""
+                    cpf_cnpj: maskCpfCnpj(e.target.value, userData.tipo_pessoa)
                   })
                 }
-              >
-                <option value="">Selecione</option>
-                <option value="PFisica">Pessoa Física</option>
-                <option value="PJuridica">Pessoa Jurídica</option>
-              </select>
-            ) : (
-              <input value={userData.tipo_pessoa} disabled />
-            )}
+              />
+            </div>
           </div>
+          </section>
 
-          <div className="form-group">
-            <label>CPF / CNPJ</label>
-            <input
-              value={userData.cpf_cnpj}
-              disabled={disabled}
-              maxLength={userData.tipo_pessoa === "PFisica" ? 14 : 18}
-              onChange={(e) =>
-                setUserData({
-                  ...userData,
-                  cpf_cnpj: maskCpfCnpj(e.target.value, userData.tipo_pessoa)
-                })
-              }
-            />
-          </div>
-        </div>
-        </section>
-
-           <section className="form-section">
+          <section className="form-section">
             <div className="section-header">
               <span className="icon"><i className={icons.celular}></i></span>
               <h3>Contato</h3>
@@ -261,7 +215,7 @@ const buscarCEP = async (cep) => {
             <div className="form-row">
               <div className="form-group">
                 <label>E-mail</label>
-                <input value={userData.email} disabled />
+                <input value={userData.email} disabled={disabled} />
               </div>
     
               <div className="form-group">
@@ -275,181 +229,135 @@ const buscarCEP = async (cep) => {
                 />
               </div>
             </div>
-            </section>
-        
-
-
-        {editando && (
-          <section className="form-section">
-            <div className="section-header">
-              <span className="icon"><i className={icons.cadeado}></i></span>
-              <h3>Senhas</h3>
-            </div>
-            <hr />
-          <div className="form-row">
-            <div className="form-group">
-              <label>Senha Atual</label>
-              <input
-                type="password"
-                value={senhaAtual}
-                disabled={loading}
-                onChange={(e) => setSenhaAtual(e.target.value)}
-                placeholder="***********"
-              />
-            </div>
-            </div>
-
-          <div className="form-row">
-
-            <div className="form-group">
-              <label>Nova Senha</label>
-              <input
-                type="password"
-                value={senha}
-                disabled={loading}
-                onChange={(e) => setSenha(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Repita a Nova Senha</label>
-              <input
-                type="password"
-                value={repetirSenha}
-                disabled={loading}
-                onChange={(e) => setRepetirSenha(e.target.value)}
-              />
-            </div>
-          </div>
           </section>
-        )}
-        <section className="form-section">
-        <div className="section-header">
-          <span className="icon"><i className={icons.mapa}></i></span>
-          <h3>Endereço Fiscal</h3>
-        </div>
-        <hr />
-        <div className="form-row">
-          <div className="form-group">
-            <label>CEP</label>
-            <input
-              type="text"
-              value={userData.cep || ""}
-              disabled={disabled}
-              onChange={(e) => {
-                let valor = e.target.value
-                  .replace(/\D/g, "")
-                  .replace(/^(\d{5})(\d)/, "$1-$2")
-                  .slice(0, 9);
+          
+          <section className="form-section">
+          <div className="section-header">
+            <span className="icon"><i className={icons.mapa}></i></span>
+            <h3>Endereço Fiscal</h3>
+          </div>
+          <hr />
+          <div className="form-row">
+            <div className="form-group">
+              <label>CEP</label>
+              <input
+                type="text"
+                value={userData.cep || ""}
+                disabled={disabled}
+                onChange={(e) => {
+                  let valor = e.target.value
+                    .replace(/\D/g, "")
+                    .replace(/^(\d{5})(\d)/, "$1-$2")
+                    .slice(0, 9);
 
-                setUserData({ ...userData, cep: valor });
+                  setUserData({ ...userData, cep: valor });
 
-                if (valor.length === 9) {
-                  buscarCEP(valor);
+                  if (valor.length === 9) {
+                    buscarCEP(valor);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>UF</label>
+              <input
+                value={userData.uf}
+                disabled={disabled}
+                onChange={(e) =>
+                  setUserData({ ...userData, uf: e.target.value })
                 }
-              }}
-            />
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>UF</label>
-            <input
-              value={userData.uf}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, uf: e.target.value })
-              }
-            />
-          </div>
-        </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Cidade</label>
+              <input
+                value={userData.cidade}
+                disabled={disabled}
+                onChange={(e) =>
+                  setUserData({ ...userData, cidade: e.target.value })
+                }
+              />
+            </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Cidade</label>
-            <input
-              value={userData.cidade}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, cidade: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Logradouro</label>
-            <input
-              value={userData.logradouro}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, logradouro: e.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Número</label>
-            <input
-              value={userData.numero}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, numero: e.target.value })
-              }
-            />
+            <div className="form-group">
+              <label>Logradouro</label>
+              <input
+                value={userData.logradouro}
+                disabled={disabled}
+                onChange={(e) =>
+                  setUserData({ ...userData, logradouro: e.target.value })
+                }
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Complemento</label>
-            <input
-              value={userData.complemento}
-              disabled={disabled}
-              onChange={(e) =>
-                setUserData({ ...userData, complemento: e.target.value })
-              }
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label>Número</label>
+              <input
+                value={userData.numero}
+                disabled={disabled}
+                onChange={(e) =>
+                  setUserData({ ...userData, numero: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Complemento</label>
+              <input
+                value={userData.complemento}
+                disabled={disabled}
+                onChange={(e) =>
+                  setUserData({ ...userData, complemento: e.target.value })
+                }
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="botao_geral">
-          {!editando ? (
-            <button
-              type="button"
-              onClick={() => {
-                setBackupData(userData);
-                setEditando(true);
-                setFeedback("");
-              }}
-            >
-              Editar
-            </button>
-          ) : (
-            <>
-              <button type="button" onClick={salvarAlteracoes} disabled={loading}>
-                {loading && <span className="spinner"></span>}
-                {loading ? "" : "Salvar Alterações"}
-              </button>
-
+          <div className="botao_geral">
+            {!editando ? (
               <button
                 type="button"
-                className="btn-vermelho"
-                disabled={loading}
                 onClick={() => {
-                  if (backupData) setUserData(backupData);
-                  setEditando(false);
+                  setBackupData(userData);
+                  setEditando(true);
                   setFeedback("");
                 }}
               >
-                Cancelar
+                Editar
               </button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                <button type="button" onClick={salvarAlteracoes} disabled={loading}>
+                  {loading && <span className="spinner"></span>}
+                  {loading ? "" : "Salvar Alterações"}
+                </button>
 
-        {feedback && <p className="feedback">{feedback}</p>}
-      </section>
-    </main>
-  );
-}
+                <button
+                  type="button"
+                  className="btn-vermelho"
+                  disabled={loading}
+                  onClick={() => {
+                    if (backupData) setUserData(backupData);
+                    setEditando(false);
+                    setFeedback("");
+                  }}
+                >
+                  Cancelar
+                </button>
+              </>
+            )}
+          </div>
 
-export default MeusDados;
+          {feedback && <p className="feedback">{feedback}</p>}
+        </section>
+      </main>
+    );
+  }
+
+  export default MeusDados;

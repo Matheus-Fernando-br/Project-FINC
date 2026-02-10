@@ -1,12 +1,15 @@
 import "../config.css";
 import { useNavigate } from "react-router-dom";
+import icons from "../../../components/Icons";
 
 export default function Pagamento() {
   const navigate = useNavigate();
   return (
     <main className="content configuracao">
+      <section className='titulo-secao'>
+          <h1><i className={icons.cartao}></i> Pagamento</h1>
+      </section>
       <section className="form-section">
-        <h2 className="config-subtitulo">Pagamento</h2>
         <section className="form-section">
           <div className="search-bar">
             <input type="text" placeholder="Pesquisar configurações..." />
@@ -26,7 +29,7 @@ export default function Pagamento() {
         <div className="config-options-2">
           <div className="config-item">
             <div className="menu-esquerda">
-              <i className="bi bi-credit-card"></i>
+              <i className={icons.cartao}></i>
               <div>
                 <h3>Método de pagamento</h3>
                 <p>Forma padrão de cobrança</p>

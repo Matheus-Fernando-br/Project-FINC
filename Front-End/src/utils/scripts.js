@@ -1,66 +1,36 @@
-export default function initScripts() {
+export function applyTheme(theme) {
+  localStorage.setItem("theme", theme);
 
-  window.setTimeout(() => {
-
-  // ================== ELEMENTOS ==================
-  const darkModeBtn = document.querySelector(".bi-moon");
-
-  const hamburger = document.querySelector(".hamburger");
-  const closeMenu = document.querySelector(".close-menu");
-  const sidebar = document.querySelector(".sidebar");
-
-  // ================== VARIÁVEIS ==================
-  let fontSize = 100; // percentual inicial do zoom (%)
-
-  // ================== FUNÇÕES ==================
-  function updateZoom() {
-    document.body.style.fontSize = fontSize + "%";
+  if (theme === "dark") {
+    document.body.classList.add("dark-mode");
+  } else if (theme === "light") {
+    document.body.classList.remove("dark-mode");
+  } else {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.body.classList.toggle("dark-mode", prefersDark);
   }
+}
 
-  function zoomIn() {
-    fontSize += 10;
-    updateZoom();
-  }
+export function getTheme() {
+  return localStorage.getItem("theme") || "auto";
+}
 
-  function zoomOut() {
-    if (fontSize > 50) {
-      fontSize -= 10;
-      updateZoom();
-    }
-  }
+export function applyFontSize(size) {
+  localStorage.setItem("fontSize", size);
+  document.documentElement.style.fontSize = size + "%";
+}
 
-  function toggleDarkMode() {
-    document.body.classList.toggle("dark-mode");
-  }
+export function getFontSize() {
+  return Number(localStorage.getItem("fontSize")) || 100;
+}
 
-  // ================== EVENTOS ==================
-  if (darkModeBtn) darkModeBtn.addEventListener("click", toggleDarkMode);
+export function applyBold(isBold) {
+  localStorage.setItem("bold", isBold);
+  document.body.classList.toggle("bold-text", isBold === "true");
+}
 
-  if (hamburger && closeMenu && sidebar) {
-    hamburger.addEventListener("click", () => {
-      sidebar.classList.add("active");
-      hamburger.style.display = "none";
-      closeMenu.style.display = "block";
-    });
-
-    closeMenu.addEventListener("click", () => {
-      sidebar.classList.remove("active");
-      closeMenu.style.display = "none";
-      hamburger.style.display = "block";
-    });
-
-    sidebar.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", () => {
-        sidebar.classList.remove("active");
-        closeMenu.style.display = "none";
-        hamburger.style.display = "block";
-      });
-    });
-  }
-
-  // Inicializa no 100%
-  updateZoom();
-
-  }, 100);
-
+export function loadPreferences() {
+  applyTheme(getTheme());
+  applyFontSize(getFontSize());
+  applyBold(localStorage.getItem("bold") || "false");
 }

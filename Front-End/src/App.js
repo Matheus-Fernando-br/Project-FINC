@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import AnimatedRoutes from "./components/AnimatedRoutes";
 
 import "./styles/global.css";
@@ -14,6 +15,7 @@ import CadastroLogin from "./TelaInicial/login/cadastro/CadastroLogin";
 import Termos from "./TelaInicial/login/cadastro/Termos";
 
 // Pós-login
+import { loadPreferences } from "./utils/scripts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/app/Layout";
 import Home from "./app/Home";
@@ -56,8 +58,13 @@ import ConfigPagamento from "./app/configuracao/sub-config/pagamento";
 import ConfigAparencia from "./app/configuracao/sub-config/aparencia";
 import ConfigAjuda from "./app/configuracao/sub-config/ajuda";
 
+import Chamado from "./app/configuracao/sub-config/chamado";
+
 export default function App() {
   const location = useLocation();
+  useEffect(() => {
+    loadPreferences();
+  }, []);
 
   return (
     <Routes location={location} key={location.pathname}>
@@ -458,6 +465,16 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <ConfigAjuda />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/ajuda/suporte"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Chamado />
             </Layout>
           </ProtectedRoute>
         }

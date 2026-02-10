@@ -1,9 +1,35 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import suggestions from "./Suggestions";
+import {   applyTheme, getTheme, applyFontSize, getFontSize } from "../../utils/scripts";
+
 
 function Header() {
-  const [fontSize, setFontSize] = useState(100);
+  const [theme, setTheme] = useState(getTheme());
+  const [fontSize, setFontSize] = useState(getFontSize());
+
+  function toggleTheme() {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    applyTheme(newTheme);
+  }
+
+  function zoomIn() {
+    const newSize = fontSize + 10;
+    setFontSize(newSize);
+    applyFontSize(newSize);
+  }
+
+  function zoomOut() {
+    if (fontSize > 50) {
+      const newSize = fontSize - 10;
+      setFontSize(newSize);
+      applyFontSize(newSize);
+    }
+  }
+
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [openDropdown, setOpenDropdown] = useState(false);
   const [animateClose, setAnimateClose] = useState(false);
@@ -14,21 +40,6 @@ function Header() {
   const filteredSuggestions = suggestions.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  function zoomIn() {
-    const newSize = fontSize + 10;
-    setFontSize(newSize);
-    document.documentElement.style.fontSize = newSize + "%";
-  }
-  function zoomOut() {
-    const newSize = fontSize > 50 ? fontSize - 10 : fontSize;
-    setFontSize(newSize);
-    document.documentElement.style.fontSize = newSize + "%";
-  }
-
-  function toggleDarkMode() {
-    document.body.classList.toggle("dark-mode");
-  }
 
   function executeSearch() {
     if (searchTerm.trim() === "") return;
@@ -58,6 +69,20 @@ function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const handleStorage = () => {
+      setTheme(getTheme());
+      setFontSize(getFontSize());
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
 
   function handleKeyDown(e) {
     if (e.key === "Enter") {
@@ -136,7 +161,10 @@ function Header() {
         </div>
 
         <div className="icons">
-          <i className="bi bi-moon" onClick={toggleDarkMode}></i>
+          <i
+            className={`bi ${theme === "dark" ? "bi-sun" : "bi-moon"}`}
+            onClick={toggleTheme}
+          />
           <i className="bi bi-zoom-in" onClick={zoomIn}></i>
           <i className="bi bi-zoom-out" onClick={zoomOut}></i>
         </div>

@@ -1,13 +1,16 @@
 import "../config.css";
+import icons from "../../../components/Icons";
 import { useNavigate } from "react-router-dom";
 
 export default function AjudaFeedback() {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
+
   return (
     <main className="content configuracao">
-
+      <section className='titulo-secao'>
+        <h1><i className={icons.ajuda}></i> Ajuda e Feedback</h1>
+      </section>  
       <section className="form-section">
-        <h2 className="config-subtitulo">Ajuda e Feedback</h2>
          <section className="form-section">
             <div className="search-bar">
             <input type="text" placeholder="Pesquisar configurações..."/>
@@ -26,7 +29,7 @@ export default function AjudaFeedback() {
           {/* Central de ajuda */}
           <div className="config-item">
             <div className="menu-esquerda">
-              <i className="bi bi-book"></i>
+              <i className={icons.relatorio}></i>
               <div>
                 <h3>Central de ajuda</h3>
                 <p>Acesse tutoriais e documentação do sistema</p>
@@ -34,8 +37,8 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="select-config">
-                Abrir
+              <button className="btn" onClick={() => window.open("https://docs.google.com/document/d/1LvHCiI3aFqa4oMXx1HV6ZG6sc_cHrqM-/edit", "_blank")}>
+                Abrir Documentação
               </button>
             </div>
           </div>
@@ -43,7 +46,7 @@ export default function AjudaFeedback() {
           {/* Abrir chamado */}
           <div className="config-item">
             <div className="menu-esquerda">
-              <i className="bi bi-headset"></i>
+              <i className={icons.suporte}></i>
               <div>
                 <h3>Suporte técnico</h3>
                 <p>Abra um chamado com nossa equipe</p>
@@ -51,7 +54,7 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="select-config">
+              <button className="btn" onClick={() => navigate("/configuracao/ajuda/suporte")}>
                 Solicitar suporte
               </button>
             </div>
@@ -60,7 +63,7 @@ export default function AjudaFeedback() {
           {/* Feedback */}
           <div className="config-item">
             <div className="menu-esquerda">
-              <i className="bi bi-chat-dots"></i>
+              <i className={icons.feedback}></i>
               <div>
                 <h3>Enviar feedback</h3>
                 <p>Conte para nós como podemos melhorar</p>

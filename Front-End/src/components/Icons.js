@@ -1,3 +1,5 @@
+import Seguranca from "../app/configuracao/sub-config/seguranca";
+
 const icons = {
   casa: "bi bi-house",
   emitirNota: "bi bi-file-earmark-plus",
@@ -29,6 +31,11 @@ const icons = {
   configuracao: "bi bi-gear",
   celular: "bi bi-telephone",
   cadeado: "bi bi-lock",
+  chave: "bi bi-key",
+  suporte: "bi bi-headset",
+  seguranca:"bi bi-shield-lock",
+  cartao: "bi bi-credit-card",
+  aparencia: "bi bi-palette"
 };
 
 export default icons;

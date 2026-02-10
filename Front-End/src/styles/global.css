@@ -128,3 +128,12 @@ body,
   50% { color: var(--cor-pending); }
   100% { color: var(--cor-texto-escuro); }
 }
+
+.bold-text {
+  font-weight: bold;
+}
+
+body {
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
