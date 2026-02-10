@@ -4,54 +4,74 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function AjudaFeedback() {
-    const navigate = useNavigate();
-    const [feedback, setFeedback] = useState("");
+  const navigate = useNavigate();
+  const [feedback, setFeedback] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    async function enviarFeedbackSistema() {
+  async function enviarFeedbackSistema() {
+    if (!feedback.trim()) {
+      alert("Digite uma mensagem");
+      return;
+    }
 
-      if (!feedback.trim()) {
-        alert("Digite uma mensagem");
-        return;
-      }
+    setLoading(true);
 
-      await fetch("https://project-finc.onrender.com/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+    try {
+      const response = await fetch(
+        "https://project-finc.onrender.com/feedback",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mensagem: feedback,
+          }),
         },
-        body: JSON.stringify({
-          mensagem: feedback,
-          
-        })
-      });
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro no servidor");
+      }
 
       alert("Feedback enviado!");
       setFeedback("");
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao enviar feedback. Verifique o servidor.");
+    } finally {
+      setLoading(false);
     }
+  }
 
-  return ( 
+  return (
     <main className="content configuracao">
-      <section className='titulo-secao'>
-        <h1><i className={icons.ajuda}></i> Ajuda e Feedback</h1>
-      </section>  
+      <section className="titulo-secao">
+        <h1>
+          <i className={icons.ajuda}></i> Ajuda e Feedback
+        </h1>
+      </section>
       <section className="form-section">
-         <section className="form-section">
-            <div className="search-bar">
-            <input type="text" placeholder="Pesquisar configurações..."/>
+        <section className="form-section">
+          <div className="search-bar">
+            <input type="text" placeholder="Pesquisar configurações..." />
             <i className="bi bi-search"></i>
-            </div>
-            <hr />
-            <div className="config-back">
-                <button className="config-voltar" onClick={() => navigate("/configuracao")}>
-                    <i className="bi bi-arrow-left"></i> Voltar
-                </button>
-            </div>
+          </div>
+          <hr />
+          <div className="config-back">
+            <button
+              className="config-voltar"
+              onClick={() => navigate("/configuracao")}
+              disabled={loading}
+            >
+              <i className="bi bi-arrow-left"></i> Voltar
+            </button>
+          </div>
         </section>
 
         <div className="config-options-2">
-
           {/* Central de ajuda */}
-          <div className="config-item">
+          <div className="config-item documentacao">
             <div className="menu-esquerda">
               <i className={icons.relatorio}></i>
               <div>
@@ -61,7 +81,16 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="btn" onClick={() => window.open("https://docs.google.com/document/d/1LvHCiI3aFqa4oMXx1HV6ZG6sc_cHrqM-/edit", "_blank")}>
+              <button
+                className="btn btn-clicar"
+                onClick={() =>
+                  window.open(
+                    "https://docs.google.com/document/d/1LvHCiI3aFqa4oMXx1HV6ZG6sc_cHrqM-/edit",
+                    "_blank",
+                  )
+                }
+                disabled={loading}
+              >
                 Abrir Documentação
               </button>
             </div>
@@ -78,7 +107,11 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="btn" onClick={() => navigate("/configuracao/ajuda/suporte")}>
+              <button
+                className="btn"
+                onClick={() => navigate("/configuracao/ajuda/suporte")}
+                disabled={loading}
+              >
                 Solicitar suporte
               </button>
             </div>
@@ -95,7 +128,7 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="select-config">
+              <button className="select-config" disabled={loading}>
                 Ver status
               </button>
             </div>
@@ -104,15 +137,18 @@ export default function AjudaFeedback() {
           {/* Contato */}
           <div className="config-item">
             <div className="menu-esquerda">
-              <i class="bi bi-info-circle-fill"></i>
+              <i className="bi bi-info-circle-fill"></i>
               <div>
                 <h3>Tutorial do sistema</h3>
-                <p>Acesse o tutorial do sistema para aprender onde fica cada funcionalidade</p>
+                <p>
+                  Acesse o tutorial do sistema para aprender onde fica cada
+                  funcionalidade
+                </p>
               </div>
             </div>
 
             <div className="menu-direita">
-              <button className="select-config">
+              <button className="select-config" disabled={loading}>
                 Contatar
               </button>
             </div>
@@ -129,26 +165,27 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita feedback">
-            <input
-              className="select-config"
-              type="text"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Digite seu feedback..."
-            />
+              <input
+                className="select-config"
+                type="text"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="Digite seu feedback..."
+                disabled={loading}
+              />
 
-            <button
-              className="btn"
-              onClick={enviarFeedbackSistema}
-            >
-              Enviar
-            </button>
-
+              <button
+                className="btn"
+                onClick={enviarFeedbackSistema}
+                disabled={loading}
+              >
+                {loading && <span className="spinner"></span>}
+                {loading ? "" : "Enviar"}
+              </button>
             </div>
           </div>
         </div>
       </section>
-
     </main>
   );
 }

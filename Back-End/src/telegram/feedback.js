@@ -6,19 +6,24 @@ export async function enviarFeedback(req, res) {
 
     const { mensagem, user } = req.body;
 
+    const nome = user?.nome || "Não informado";
+    const email = user?.email || "Não informado";
+
+
     if (!mensagem || !mensagem.trim()) {
       return res.status(400).json({ erro: "Mensagem vazia" });
     }
 
     await enviarTelegram(
-`FEEDBACK DO SISTEMA:
--------
-Usuário: ${user.nome}
-E-mail: ${user.email}
+    `FEEDBACK DO SISTEMA:
+    --------
+    Usuário: ${nome}
+    E-mail: ${email}
 
-Mensagem:
-${mensagem}`
+    Mensagem:
+    ${mensagem}`
     );
+
 
     res.sendStatus(200);
 
