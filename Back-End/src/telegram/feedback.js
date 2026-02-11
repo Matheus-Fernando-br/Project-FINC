@@ -15,14 +15,14 @@ export async function enviarFeedback(req, res) {
     }
 
     await enviarTelegram(
-    `FEEDBACK DO SISTEMA:
-    --------
-    Usuário: ${nome}
-    E-mail: ${email}
+`FEEDBACK DO SISTEMA:
+----------------
+Usuário: ${nome}
+E-mail: ${email}
 
-    Mensagem:
-    ${mensagem}`
-    );
+Mensagem:
+${mensagem}`
+);
 
 
     res.sendStatus(200);

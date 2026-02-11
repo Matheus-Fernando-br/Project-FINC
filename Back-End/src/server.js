@@ -3,9 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 // Rotas Telegram
-import { criarChamado, enviarMensagem, listarMensagens } from "./telegram/chamados.js";
+import { criarChamado, enviarMensagem, listarMensagens, buscarChamado } from "./telegram/chamados.js";
 import { telegramWebhook } from "./telegram/webhook.js";
 import { enviarFeedback } from "./telegram/feedback.js";
+
 
 // Importação das rotas
 import authRoutes from "./routes/auth.routes.js";
@@ -40,11 +41,12 @@ app.post("/chamados", criarChamado);
 app.post("/mensagem", enviarMensagem);
 app.get("/mensagens/:chamado_id", listarMensagens);
 app.post("/feedback", enviarFeedback);
+app.get("/chamados/:id", buscarChamado);
+
 /* ============================= */
 /* WEBHOOK TELEGRAM */
 /* ============================= */
 app.post("/telegram-webhook", telegramWebhook);
-
 
 /* ===== REGISTRO DE ROTAS ===== */
 app.use("/auth", authRoutes);

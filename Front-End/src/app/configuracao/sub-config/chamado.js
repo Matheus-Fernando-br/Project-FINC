@@ -48,6 +48,8 @@ export default function AjudaFeedback() {
   /* ================= */
   async function enviarMsg() {
 
+    if (!chamado || chamado.status === "fechado") return;
+
     if (!mensagem.trim()) return;
 
     await fetch(
@@ -80,8 +82,21 @@ export default function AjudaFeedback() {
     );
 
     const data = await res.json();
-    setMensagens(data);
+    setMensagens(data || []);
   }
+
+  async function atualizarChamado() {
+
+    if (!chamado) return;
+
+    const res = await fetch(
+      `https://project-finc.onrender.com/chamados/${chamado.id}`
+    );
+
+    const data = await res.json();
+    setChamado(data);
+  }
+
 
   /* polling estilo whatsapp */
   useEffect(() => {
@@ -93,7 +108,8 @@ export default function AjudaFeedback() {
       `https://project-finc.onrender.com/mensagens/${chamado.id}`
     );
     const data = await res.json();
-    setMensagens(data);
+    setMensagens(data || []);
+    await atualizarChamado();
   };
 
   buscar();

@@ -66,6 +66,16 @@ export async function enviarMensagem(req, res) {
 
     const { chamado_id, mensagem } = req.body;
 
+    const { data: chamado } = await supabase
+      .from("chamados")
+      .select("status")
+      .eq("id", chamado_id)
+      .single();
+
+    if (chamado?.status === "fechado") {
+      return res.status(400).json({ erro: "Chamado encerrado" });
+    }
+
     await supabase.from("mensagens").insert({
       chamado_id,
       autor: "user",
@@ -78,6 +88,7 @@ export async function enviarMensagem(req, res) {
     res.status(500).json({ erro: "Erro ao enviar mensagem" });
   }
 }
+
 
 
 /* ================= */
@@ -93,5 +104,29 @@ export async function listarMensagens(req, res) {
     .eq("chamado_id", chamado_id)
     .order("created_at", { ascending: true });
 
-  res.json(data);
+  res.json(data || []);
 }
+
+export async function buscarChamado(req, res) {
+  try {
+
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from("chamados")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ erro: "Chamado não encontrado" });
+    }
+
+    res.json(data);
+
+  } catch {
+    res.status(500).json({ erro: "Erro ao buscar chamado" });
+  }
+}
+
+
