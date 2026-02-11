@@ -30,6 +30,11 @@
         .from("chamados")
         .update({ status: "fechado" })
         .eq("id", chamado.id);
+
+        await enviarTelegram(
+`✅ Chamado ${protocolo} encerrado`
+  );
+
     }
 
     if (texto.startsWith("/responder")) {

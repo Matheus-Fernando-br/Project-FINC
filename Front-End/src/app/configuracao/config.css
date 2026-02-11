@@ -602,6 +602,24 @@
 
 }
 
+.status-alert {
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.status-alert.aceito {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.status-alert.fechado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
 
 /* ================= HEADER ================= */
 

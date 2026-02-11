@@ -1,165 +1,207 @@
-    import "../../config.css";
-    import { useParams } from "react-router-dom";
-    import { useState, useEffect, useRef } from "react";
+import "../../config.css";
+import { useParams } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-    export default function Chat() {
+export default function Chat() {
 
-    const { id } = useParams();
+  const { id } = useParams();
 
-    const [mensagens, setMensagens] = useState([]);
-    const [mensagem, setMensagem] = useState("");
-    const [chamado, setChamado] = useState(null);
+  const [mensagens, setMensagens] = useState([]);
+  const [mensagem, setMensagem] = useState("");
+  const [chamado, setChamado] = useState(null);
 
-    const chatRef = useRef(null);
+  const chatRef = useRef(null);
 
-    /* ================= ENVIAR MSG ================= */
+  /* ================= BUSCAR DADOS ================= */
 
-    async function enviarMsg() {
+  const buscar = useCallback(async () => {
+    try {
 
-        if (!mensagem.trim()) return;
+      const resMsg = await fetch(
+        `https://project-finc.onrender.com/mensagens/${id}`
+      );
 
-        await fetch("https://project-finc.onrender.com/mensagem", {
+      const dataMsg = await resMsg.json();
+      setMensagens(dataMsg || []);
+
+      const resChamado = await fetch(
+        `https://project-finc.onrender.com/chamados/${id}`
+      );
+
+      const dataChamado = await resChamado.json();
+      setChamado(dataChamado);
+
+    } catch (err) {
+      console.error("Erro ao buscar dados:", err);
+    }
+  }, [id]);
+
+  /* ================= ENVIAR MSG ================= */
+
+  async function enviarMsg() {
+
+    if (!mensagem.trim()) return;
+
+    if (chamado?.status === "fechado") return;
+
+    try {
+
+      await fetch("https://project-finc.onrender.com/mensagem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            chamado_id: id,
-            mensagem
+          chamado_id: id,
+          mensagem
         })
-        });
+      });
 
-        setMensagem("");
-        buscar();
+      setMensagem("");
+      buscar();
+
+    } catch (err) {
+      console.error("Erro ao enviar mensagem:", err);
+    }
+  }
+
+  /* ================= AUTO REFRESH ================= */
+
+  useEffect(() => {
+
+    buscar();
+
+    const interval = setInterval(buscar, 3000);
+    return () => clearInterval(interval);
+
+  }, [buscar]);
+
+  /* ================= AUTO SCROLL ================= */
+
+  useEffect(() => {
+
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
 
-    /* ================= BUSCAR DADOS ================= */
+  }, [mensagens]);
 
-    async function buscar() {
+  /* ================= TRAVAR SAÍDA ================= */
 
-        const resMsg = await fetch(
-        `https://project-finc.onrender.com/mensagens/${id}`
-        );
+  useEffect(() => {
 
-        const dataMsg = await resMsg.json();
-        setMensagens(dataMsg);
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
 
-        const resChamado = await fetch(
-        `https://project-finc.onrender.com/chamados/${id}`
-        );
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-        const dataChamado = await resChamado.json();
-        setChamado(dataChamado);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+
+  }, []);
+
+  /* ================= ENCERRAR CHAMADO ================= */
+
+  async function encerrarChamado() {
+    try {
+
+      await fetch(
+        `https://project-finc.onrender.com/chamados/${id}/encerrar`,
+        { method: "PUT" }
+      );
+
+      buscar();
+
+    } catch (err) {
+      console.error("Erro ao encerrar chamado:", err);
     }
+  }
 
-    /* ================= AUTO REFRESH ================= */
+  return (
+    <main className="content configuracao">
 
-    useEffect(() => {
+      {/* ===== HEADER ===== */}
 
-        buscar();
+      <div className="chat-header">
 
-        const interval = setInterval(buscar, 3000);
-        return () => clearInterval(interval);
+        <div>
+          <h1>Chat do Chamado #{chamado?.protocolo}</h1>
 
-    }, [id]);
-
-    /* ================= AUTO SCROLL ================= */
-
-    useEffect(() => {
-
-        if (chatRef.current) {
-        chatRef.current.scrollTop = chatRef.current.scrollHeight;
-        }
-
-    }, [mensagens]);
-
-    /* ================= TRAVAR SAÍDA ================= */
-
-    useEffect(() => {
-
-        const handleBeforeUnload = (e) => {
-        e.preventDefault();
-        e.returnValue = "";
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        return () => {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-
-    }, []);
-
-    /* ================= ENCERRAR CHAMADO ================= */
-
-    async function encerrarChamado() {
-
-        await fetch(`https://project-finc.onrender.com/chamados/${id}/encerrar`, {
-        method: "PUT"
-        });
-
-        buscar();
-    }
-
-    return (
-        <main className="content configuracao">
-
-        {/* ===== HEADER ===== */}
-
-        <div className="chat-header">
-
-            <div>
-            <h1>Chat do Chamado #{chamado?.protocolo}</h1>
-            <p className="chat-info">
-                {chamado?.categoria} • {chamado?.assunto}
-            </p>
-            </div>
-            <div className="botao_geral">
-                <button className="btn btn-cancelar" onClick={encerrarChamado}>
-                Encerrar Chamado
-                </button>
-            </div>
-
+          <p className="chat-info">
+            {chamado?.categoria} • {chamado?.assunto}
+          </p>
         </div>
 
-        {/* ===== CHAT ===== */}
+        <div className="botao_geral">
+          {chamado?.status !== "fechado" && (
+            <button
+              className="btn btn-cancelar"
+              onClick={encerrarChamado}
+            >
+              Encerrar Chamado
+            </button>
+          )}
+        </div>
 
-        <div className="chat-container">
+      </div>
 
-            {/* PRIMEIRA MSG */}
-            {chamado?.mensagem_inicial && (
-            <div className="chat-first">
-                <strong>Mensagem inicial:</strong>
-                <p>{chamado.mensagem_inicial}</p>
-                <span className="status">Aguardando atendente...</span>
+      {/* ===== ALERTAS STATUS ===== */}
+
+      {chamado?.status === "aceito" && (
+        <div className="status-alert aceito">
+          ✅ Seu chamado foi aceito por um atendente
+        </div>
+      )}
+
+      {chamado?.status === "fechado" && (
+        <div className="status-alert fechado">
+          🔒 Este chamado foi encerrado
+        </div>
+      )}
+
+      {/* ===== CHAT ===== */}
+
+      <div className="chat-container">
+
+        {/* PRIMEIRA MSG */}
+        {chamado?.mensagem_inicial && (
+          <div className="chat-first">
+            <strong>Mensagem inicial:</strong>
+            <p>{chamado.mensagem_inicial}</p>
+            <span className="status">Aguardando atendente...</span>
+          </div>
+        )}
+
+        {/* MENSAGENS */}
+        <div className="chat-messages" ref={chatRef}>
+          {mensagens.map((m) => (
+            <div key={m.id} className={`bubble ${m.autor}`}>
+              {m.mensagem}
+              <span className="msg-status">✓ entregue</span>
             </div>
-            )}
+          ))}
+        </div>
 
-            {/* MENSAGENS */}
-            <div className="chat-messages" ref={chatRef}>
-            {mensagens.map((m, i) => (
-                <div key={i} className={`bubble ${m.autor}`}>
-                {m.mensagem}
-                <span className="msg-status">✓ entregue</span>
-                </div>
-            ))}
-            </div>
-
-            {/* INPUT */}
-            <div className="chat-input">
+        {/* INPUT */}
+        {chamado?.status !== "fechado" && (
+          <div className="chat-input">
 
             <input
-                placeholder="Digite sua mensagem..."
-                value={mensagem}
-                onChange={e => setMensagem(e.target.value)}
+              placeholder="Digite sua mensagem..."
+              value={mensagem}
+              onChange={(e) => setMensagem(e.target.value)}
             />
 
             <button onClick={enviarMsg}>
-                Enviar
+              Enviar
             </button>
 
-            </div>
+          </div>
+        )}
 
-        </div>
+      </div>
 
-        </main>
-    );
-    }
+    </main>
+  );
+}
