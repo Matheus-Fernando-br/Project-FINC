@@ -489,6 +489,12 @@
 }
 
 /* ================= CHAT ================= */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
 
 .chat-container {
   background: #f7f9fc;
