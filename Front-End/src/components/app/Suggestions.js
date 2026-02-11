@@ -14,7 +14,7 @@ const suggestions = [
   { label: "Configurações", icon: "bi-gear", to: "/configuracao" },
   { label: "Meu Perfil", icon: "bi-person-circle", to: "/MeusDados" },
   { label: "Relatórios", icon: "bi-bar-chart", to: "/app" },
-  { label: "Central de Suporte", icon: "bi-headset", to: "/notificacao" },
+  { label: "Central de Suporte", icon: "bi-headset", to: "/configuracao/chamado" },
 ];
 
 export default suggestions;

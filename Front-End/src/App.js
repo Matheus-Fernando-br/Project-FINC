@@ -58,7 +58,8 @@ import ConfigPagamento from "./app/configuracao/sub-config/pagamento";
 import ConfigAparencia from "./app/configuracao/sub-config/aparencia";
 import ConfigAjuda from "./app/configuracao/sub-config/ajuda";
 
-import Chamado from "./app/configuracao/sub-config/chamado";
+import Chamado from "./app/configuracao/sub-config/chamado/chamado";
+import ChamadoChat from "./app/configuracao/sub-config/chamado/chat";
 
 export default function App() {
   const location = useLocation();
@@ -470,11 +471,21 @@ export default function App() {
         }
       />
       <Route
-        path="/configuracao/ajuda/suporte"
+        path="/configuracao/chamado"
         element={
           <ProtectedRoute>
             <Layout>
               <Chamado />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configuracao/chat/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ChamadoChat />
             </Layout>
           </ProtectedRoute>
         }

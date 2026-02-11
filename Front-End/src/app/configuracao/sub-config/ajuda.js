@@ -82,7 +82,7 @@ export default function AjudaFeedback() {
 
             <div className="menu-direita">
               <button
-                className="btn btn-clicar"
+                className="btn"
                 onClick={() =>
                   window.open(
                     "https://docs.google.com/document/d/1LvHCiI3aFqa4oMXx1HV6ZG6sc_cHrqM-/edit",
@@ -109,27 +109,10 @@ export default function AjudaFeedback() {
             <div className="menu-direita">
               <button
                 className="btn"
-                onClick={() => navigate("/configuracao/ajuda/suporte")}
+                onClick={() => navigate("/configuracao/chamado")}
                 disabled={loading}
               >
                 Solicitar suporte
-              </button>
-            </div>
-          </div>
-
-          {/* Status sistema */}
-          <div className="config-item">
-            <div className="menu-esquerda">
-              <i className="bi bi-activity"></i>
-              <div>
-                <h3>Status do sistema</h3>
-                <p>Verifique disponibilidade dos serviços</p>
-              </div>
-            </div>
-
-            <div className="menu-direita">
-              <button className="select-config" disabled={loading}>
-                Ver status
               </button>
             </div>
           </div>
@@ -150,6 +133,23 @@ export default function AjudaFeedback() {
             <div className="menu-direita">
               <button className="select-config" disabled={loading}>
                 Contatar
+              </button>
+            </div>
+          </div>
+
+          {/* Status sistema */}
+          <div className="config-item">
+            <div className="menu-esquerda">
+              <i className="bi bi-activity"></i>
+              <div>
+                <h3>Status do sistema</h3>
+                <p>Verifique disponibilidade dos serviços</p>
+              </div>
+            </div>
+
+            <div className="menu-direita">
+              <button className="select-config" disabled={loading}>
+                Ver status
               </button>
             </div>
           </div>
