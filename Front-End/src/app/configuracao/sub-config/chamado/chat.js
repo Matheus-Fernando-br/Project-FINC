@@ -164,15 +164,6 @@ export default function Chat() {
 
       <div className="chat-container">
 
-        {/* PRIMEIRA MSG */}
-        {chamado?.mensagem_inicial && (
-          <div className="chat-first">
-            <strong>Mensagem inicial:</strong>
-            <p>{chamado.mensagem_inicial}</p>
-            <span className="status">Aguardando atendente...</span>
-          </div>
-        )}
-
         {/* MENSAGENS */}
         <div className="chat-messages" ref={chatRef}>
           {mensagens.map((m) => (

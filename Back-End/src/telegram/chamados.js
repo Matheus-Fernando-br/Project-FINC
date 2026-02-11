@@ -5,107 +5,95 @@ import { enviarTelegram } from "./telegram.js";
 /* CRIAR CHAMADO */
 /* ================= */
 export async function criarChamado(req, res) {
-
   try {
 
-    const { assunto, categoria, mensagem, user } = req.body;
+    const { categoria, assunto, mensagem, user } = req.body;
 
-    const protocolo =
-      "FINC-" +
-      new Date().getFullYear() +
-      "-" +
-      String(Math.floor(Math.random() * 9999)).padStart(4, "0");
+    /* ===== GERAR PROTOCOLO ===== */
+    const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const { data, error } = await supabase
+    /* ===== CRIAR CHAMADO ===== */
+    const { data: chamado, error: erroChamado } = await supabase
       .from("chamados")
       .insert({
         protocolo,
         user_id: user.id,
-        assunto,
         categoria,
-        mensagem_inicial: mensagem,
-        status: "aguardando"
+        assunto
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (erroChamado) {
+      console.error(erroChamado);
+      return res.status(500).json(erroChamado);
+    }
 
-    await supabase.from("mensagens").insert({
-      chamado_id: data.id,
-      autor: "user",
-      mensagem
-    });
+    /* ===== CRIAR PRIMEIRA MENSAGEM ===== */
 
-    await enviarTelegram(
-`🆕 Novo chamado ${protocolo}
+    const { error: erroMsg } = await supabase
+      .from("mensagens")
+      .insert({
+        chamado_id: chamado.id,
+        autor: "cliente",
+        mensagem
+      });
 
-👤 Usuário: ${user.nome}
-📧 Email: ${user.email}
+    if (erroMsg) {
+      console.error(erroMsg);
+      return res.status(500).json(erroMsg);
+    }
 
-📂 Categoria: ${categoria}
-📌 Assunto: ${assunto}
-
-💬 Mensagem inicial:
-${mensagem}
-
-──────────────
-Comandos:
-/aceitar #${protocolo}
-/responder #${protocolo} mensagem
-/fechar #${protocolo}`
-);
-
-    res.json(data);
+    res.json(chamado);
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ erro: "Erro ao criar chamado" });
+    console.error(err);
+    res.status(500).json({ erro: err.message });
   }
 }
-
 
 /* ================= */
 /* ENVIAR MENSAGEM */
 /* ================= */
 export async function enviarMensagem(req, res) {
-
   try {
 
     const { chamado_id, mensagem } = req.body;
 
-    /* ===== BUSCAR CHAMADO ===== */
     const { data: chamado } = await supabase
       .from("chamados")
       .select("*")
       .eq("id", chamado_id)
       .single();
 
-    if (!chamado) {
+    if (!chamado)
       return res.status(404).json({ erro: "Chamado não encontrado" });
-    }
 
-    if (chamado.status === "fechado") {
+    if (chamado.status === "fechado")
       return res.status(400).json({ erro: "Chamado encerrado" });
-    }
 
-    /* ===== SALVAR MENSAGEM ===== */
-    await supabase.from("mensagens").insert({
-      chamado_id,
-      autor: "user",
-      mensagem
-    });
+    /* SALVAR */
+    const { error } = await supabase
+      .from("mensagens")
+      .insert({
+        chamado_id,
+        autor: "cliente",
+        mensagem
+      });
 
-    /* ===== BUSCAR USUÁRIO ===== */
+    if (error)
+      return res.status(500).json(error);
+
+    /* BUSCAR USER */
     const { data: usuario } = await supabase
       .from("users")
       .select("*")
       .eq("id", chamado.user_id)
       .single();
 
-    /* ===== ENVIAR TELEGRAM ===== */
-    await enviarTelegram(
-`📩 Nova mensagem no chamado ${chamado.protocolo}
+    /* TELEGRAM */
+    try {
+      await enviarTelegram(`📩 Nova mensagem no chamado ${chamado.protocolo}
 
 👤 Usuário: ${usuario?.nome || "Desconhecido"}
 📧 Email: ${usuario?.email || "-"}
@@ -114,13 +102,10 @@ export async function enviarMensagem(req, res) {
 📌 Assunto: ${chamado.assunto}
 
 💬 Mensagem:
-${mensagem}
-
-──────────────
-Comandos:
-/responder #${chamado.protocolo} mensagem
-/fechar #${chamado.protocolo}`
-    );
+${mensagem}`);
+    } catch (e) {
+      console.error("Telegram erro:", e);
+    }
 
     res.sendStatus(200);
 
@@ -141,7 +126,7 @@ export async function listarMensagens(req, res) {
     .from("mensagens")
     .select("*")
     .eq("chamado_id", chamado_id)
-    .order("created_at", { ascending: true });
+    .order("criado_em", { ascending: true });
 
   res.json(data || []);
 }
