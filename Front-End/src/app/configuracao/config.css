@@ -376,7 +376,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .pagamento-container {
     gap: 1.5rem;
   }
@@ -574,7 +574,7 @@
 /* 📱 RESPONSIVO */
 /* ================================================= */
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
 
   .modal-overlay {
     padding: 15px;
@@ -794,4 +794,8 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.ajudafeed .btn {
+  width: 15vw;
 }

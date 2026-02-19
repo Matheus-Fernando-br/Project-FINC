@@ -78,7 +78,7 @@ export default function AjudaFeedback() {
   }
 
   return (
-    <main className="content configuracao">
+    <main className="content configuracao ajudafeed">
       <section className="titulo-secao">
         <h1>
           <i className={icons.ajuda}></i> Ajuda e Feedback
@@ -164,7 +164,7 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <a href="https://youtu.be/l5bRmxChJC8" target="_blank">
+              <a href="https://youtu.be/l5bRmxChJC8" target="_blank" rel="noreferrer">
                 <button className="btn" disabled={loading}>
                   Assistir
                 </button>
@@ -188,7 +188,8 @@ export default function AjudaFeedback() {
                 onClick={verificarStatusSistema}
                 disabled={loading || checandoStatus}
               >
-                {checandoStatus ? "Verificando..." : "Ver status"}
+                {checandoStatus && <span className="spinner"></span>}
+                {checandoStatus ? "" : "Ver status"}
               </button>
             </div>
           </div>

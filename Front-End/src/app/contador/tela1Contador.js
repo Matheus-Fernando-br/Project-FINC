@@ -1,7 +1,20 @@
+import { useState } from "react";
 import icons from "../../components/Icons";
 import './contador.css'
 
 function Tela_1_feedback() {
+  const [abrirContador, setAbrirContador] = useState(false);
+  const [loadingCriar, setLoadingCriar] = useState(false);
+
+  async function criarContador() {
+    setLoadingCriar(true);
+    setTimeout (() => {
+      setLoadingCriar(false);
+      setAbrirContador(true);
+    }, 500);
+    
+    
+  }
 
   return (
       <main className="content TelaContador">
@@ -12,42 +25,45 @@ function Tela_1_feedback() {
       </section>
 
       {/* SECTION: CRIAR CONTADOR */}
-      <section className="form-section">
-        <div className="section-header">
-          <span className="icon"><i className={icons.clientePerson}></i></span>
-          <h3>Criar Contador</h3>
-        </div>
-
-        <hr className="divider" />
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Nome do Contador: </label>
-            <input type="text" placeholder="Informe o nome completo do contador" />
+      <div className="botao_geral">
+        <button className="btn" onClick={criarContador}>
+          {loadingCriar && <span className="spinner"></span>}
+          {loadingCriar ? "" : "Criar Contador"}
+        </button>
+      </div>
+      {abrirContador && (
+        <section className="form-section">
+          <div className="section-header">
+            <span className="icon"><i className={icons.clientePerson}></i></span>
+            <h3>Criar Contador</h3>
           </div>
 
-          <div className="form-group">
-            <label>E-mail: </label>
-            <input type="email" placeholder="Informe o e-mail profissional" />
-          </div>
-        </div>
+          <hr className="divider" />
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>CPF / CNPJ: </label>
-            <input type="text" placeholder="Informe o CPF ou CNPJ" />
-          </div>
-          <div className="form-group">
-            <label>Telefone: </label>
-            <input type="text" placeholder="Informe o telefone do contador" />
-          </div>
-        </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nome do Contador: </label>
+              <input type="text" placeholder="Informe o nome completo do contador" />
+            </div>
 
-        <div className="botao_geral">
-          <button className="btn">Criar Contador</button>
-        </div>
-      </section>
+            <div className="form-group">
+              <label>E-mail: </label>
+              <input type="email" placeholder="Informe o e-mail profissional" />
+            </div>
+          </div>
 
+          <div className="form-row">
+            <div className="form-group">
+              <label>CPF / CNPJ: </label>
+              <input type="text" placeholder="Informe o CPF ou CNPJ" />
+            </div>
+            <div className="form-group">
+              <label>Telefone: </label>
+              <input type="text" placeholder="Informe o telefone do contador" />
+            </div>
+          </div>
+        </section>
+      )}
       {/* SECTION: PERMISSÕES */}
       <section className="form-section">
         <div className="section-header">
