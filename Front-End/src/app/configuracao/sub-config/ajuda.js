@@ -8,6 +8,39 @@ export default function AjudaFeedback() {
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [abrirStatus, setAbrirStatus] = useState(false);
+  const [statusSistema, setStatusSistema] = useState(null);
+  const [checandoStatus, setChecandoStatus] = useState(false);
+
+  async function verificarStatusSistema() {
+    setAbrirStatus(true);
+    setChecandoStatus(true);
+
+    const resultado = {
+      frontend: true,
+      backend: false,
+      banco: false,
+      internet: navigator.onLine,
+    };
+
+    try {
+      const response = await fetch(
+        "https://project-finc.onrender.com/"
+      );
+
+      if (response.ok) {
+        resultado.backend = true;
+        resultado.banco = true; // assume que se backend respondeu, banco também
+      }
+    } catch (error) {
+      console.error("Erro ao verificar backend:", error);
+    }
+
+    setStatusSistema(resultado);
+    setChecandoStatus(false);
+  }
+
+
   async function enviarFeedbackSistema() {
     if (!feedback.trim()) {
       alert("Digite uma mensagem");
@@ -131,9 +164,11 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="select-config" disabled={loading}>
-                Contatar
-              </button>
+              <a href="https://youtu.be/l5bRmxChJC8" target="_blank">
+                <button className="btn" disabled={loading}>
+                  Assistir
+                </button>
+              </a>
             </div>
           </div>
 
@@ -148,11 +183,39 @@ export default function AjudaFeedback() {
             </div>
 
             <div className="menu-direita">
-              <button className="select-config" disabled={loading}>
-                Ver status
+              <button
+                className="btn"
+                onClick={verificarStatusSistema}
+                disabled={loading || checandoStatus}
+              >
+                {checandoStatus ? "Verificando..." : "Ver status"}
               </button>
             </div>
           </div>
+
+          {abrirStatus && (
+            <div className="dropdown-status">
+              {checandoStatus && <p>Checando serviços...</p>}
+
+              {statusSistema && !checandoStatus && (
+                <>
+                  <p>
+                    Frontend: {statusSistema.frontend ? "✅ Online" : "❌ Offline"}
+                  </p>
+                  <p>
+                    Backend: {statusSistema.backend ? "✅ Online" : "❌ Offline"}
+                  </p>
+                  <p>
+                    Banco de Dados: {statusSistema.banco ? "✅ Online" : "❌ Offline"}
+                  </p>
+                  <p>
+                    Internet: {statusSistema.internet ? "✅ Conectado" : "❌ Sem conexão"}
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
 
           {/* Feedback */}
           <div className="config-item">

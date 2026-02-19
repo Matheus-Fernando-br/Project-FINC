@@ -18,7 +18,7 @@ body {
   align-items: center;
   background: linear-gradient(to top,var(--cor-terciaria)30%,var(--cor-secundaria));
   color: var(--cor-texto-claro);
-  padding: 2vh 2vw;
+  padding: 3vh 2vw;
   position: fixed;
   top: 0;
   left: 3vw; 
@@ -36,7 +36,6 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
 }
 .header-right a {
   text-decoration: none;
@@ -49,20 +48,40 @@ body {
   
   .header-right .icons {
     display: flex;
-    flex-direction: column; /* coloca em coluna */
     gap: 0.5rem;
   align-items: center;    /* centraliza horizontalmente */
   cursor: pointer;
+  border: 2px solid var(--cor-texto-claro);
+  box-shadow: 0 0 1px 0.5px var(--cor-texto-claro);
+  padding: 8px;
+  border-radius: 50%;
+  transition: all .3s ease-in-out;
+}
+
+.header-right .icons:hover {
+  transform: scale(1.05);
+}
+
+.header-right .icons i {
+  transition: all .4s ease-in;
 }
 
 .header-right .icons i:hover {
-  transform: scale(1.1);
+  transform: rotate(-105deg);
 }
 
 .profile i {
   font-size: 2rem;
-  margin-right: 1rem;
+  margin-right: 2rem;
 }
+
+.header-right .meuperfil {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: .5rem;
+}
+
 
 /* Animação SearchBar */
 .search-bar {

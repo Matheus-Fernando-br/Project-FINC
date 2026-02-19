@@ -1,33 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import suggestions from "./Suggestions";
-import {   applyTheme, getTheme, applyFontSize, getFontSize } from "../../utils/scripts";
+import { applyTheme, getTheme } from "../../utils/scripts";
 
 
 function Header() {
   const [theme, setTheme] = useState(getTheme());
-  const [fontSize, setFontSize] = useState(getFontSize());
 
   function toggleTheme() {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     applyTheme(newTheme);
   }
-
-  function zoomIn() {
-    const newSize = fontSize + 10;
-    setFontSize(newSize);
-    applyFontSize(newSize);
-  }
-
-  function zoomOut() {
-    if (fontSize > 50) {
-      const newSize = fontSize - 10;
-      setFontSize(newSize);
-      applyFontSize(newSize);
-    }
-  }
-
 
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,7 +57,6 @@ function Header() {
   useEffect(() => {
     const handleStorage = () => {
       setTheme(getTheme());
-      setFontSize(getFontSize());
     };
 
     window.addEventListener("storage", handleStorage);
@@ -150,6 +133,7 @@ function Header() {
 
 
       <div className="header-right">
+        <div className="meuperfil">
         <Link to="/MeusDados">
           <span className="user-name">{nomeCompleto}</span>
         </Link>
@@ -159,14 +143,13 @@ function Header() {
             <i className="bi bi-person-circle"></i>
           </Link>
         </div>
+        </div>
 
         <div className="icons">
           <i
             className={`bi ${theme === "dark" ? "bi-sun" : "bi-moon"}`}
             onClick={toggleTheme}
           />
-          <i className="bi bi-zoom-in" onClick={zoomIn}></i>
-          <i className="bi bi-zoom-out" onClick={zoomOut}></i>
         </div>
       </div>
     </header>

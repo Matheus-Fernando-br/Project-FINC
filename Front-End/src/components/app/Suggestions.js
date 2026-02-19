@@ -6,7 +6,7 @@ const suggestions = [
   { label: "Clientes", icon: "bi-people", to: "/clientes" },
   { label: "Produtos e Serviços", icon: "bi-bag", to: "/produtos" },
   { label: "Planos", icon: "bi-stars", to: "/planos" },
-  { label: "Pagamento", icon: "bi-credit-card", to: "/pagamento" },
+  { label: "Pagamento", icon: "bi-credit-card", to: "/configuracao/pagamento" },
   { label: "Notificações", icon: "bi-bell", to: "/notificacao" },
   { label: "Contador", icon: "bi-calculator", to: "/contador" },
   { label: "Sair", icon: "bi-door-open", to: "/sair" },
