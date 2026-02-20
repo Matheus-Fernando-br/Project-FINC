@@ -1,17 +1,17 @@
-import { Router } from "express";
-import { listarPlanos, buscarPlanoPorTipo, meuPlano } from "../controllers/planos.controller.js";
-import authMiddleware from "../middlewares/authMiddleware.js"; 
-// ajuste o caminho conforme seu projeto (você disse que já tem)
+import express from "express";
+import { listarPlanos, buscarPlanoPorTipo, meuPlanoAtual } from "../controllers/planos.controller.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
-const router = Router();
-// Privado: plano atual do usuário logado
-router.get("/meu/atual", authMiddleware, meuPlano);
+const router = express.Router();
 
-// Público: listar planos disponíveis
+// público
 router.get("/", listarPlanos);
 
-// Público: buscar por tipo (basico/premium/black)
-router.get("/:tipo", buscarPlanoPorTipo);
+// rotas fixas (privadas)
+router.get("/meu", authMiddleware, meuPlanoAtual);
+router.get("/meu/atual", authMiddleware, meuPlanoAtual);
 
+// 🚫 NUNCA MAIS /meu cai no /:tipo
+router.get("/:tipo(free|basico|premium|black)", buscarPlanoPorTipo);
 
 export default router;

@@ -68,7 +68,6 @@ function Tela_1_emitir_nota() {
      ======================= */
  useEffect(() => {
   async function carregarClientes() {
-    const token = localStorage.getItem("token");
 
     try {
       const response = await apiFetch("/clientes", {

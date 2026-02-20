@@ -40,7 +40,10 @@ import EditarProduto from "./app/produtos_servicos/produto/editarProduto";
 import EditarServico from "./app/produtos_servicos/servico/editarServico";
 
 import Tela1Notificacao from "./app/notificacao/tela1Notificacao";
+
 import Tela1Planos from "./app/planos/tela1Planos";
+import Tela2Planos from "./app/planos/tela2planos";
+
 import Tela1Contador from "./app/contador/tela1Contador";
 import MenuSair from "./app/sair/MenuSair";
 
@@ -319,6 +322,17 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <Tela1Planos />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/planos/trocar"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela2Planos />
             </Layout>
           </ProtectedRoute>
         }

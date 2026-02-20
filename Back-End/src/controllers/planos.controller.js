@@ -75,32 +75,36 @@ export async function buscarPlanoPorTipo(req, res) {
   }
 }
 
-/**
- * GET /planos/meu
- * Retorna o plano atual do usuário (precisa do authMiddleware)
- *
- * ⚠️ Aqui depende de COMO você salva o plano do usuário.
- * Normalmente: tabela "profiles" com coluna "tipo_plano" ou "plano_id".
- */
-export async function meuPlano(req, res) {
+export async function meuPlanoAtual(req, res) {
   try {
-    const userId = req.user?.id; // <- depende do seu authMiddleware setar req.user
+    const userId = req.user?.id;
     if (!userId) return res.status(401).json({ erro: "Não autenticado." });
 
-    // pega id_plan do profile
-    const { data: profile, error: profileError } = await supabase
+    // tenta profiles.id = userId
+    let { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id_plan")
       .eq("id", userId)
       .maybeSingle();
 
+    // se não achou profile e não deu erro, tenta profiles.user_id = userId
+    if (!profile?.id_plan && !profileError) {
+      const alt = await supabase
+        .from("profiles")
+        .select("id_plan")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      profile = alt.data || profile;
+      profileError = alt.error || profileError;
+    }
+
     if (profileError) return res.status(500).json({ erro: profileError.message });
     if (!profile?.id_plan) return res.status(404).json({ erro: "Usuário sem plano definido." });
 
-    // busca o plano pelo id
     const { data: plano, error: planoError } = await supabase
       .from("planos")
-      .select("id, Nome, tipo_plano, valor, limite_notas, limite_clientes, limite_produtos, limite_servicos, limite_contadores, detalhes")
+      .select("id, Nome, tipo_plano, valor, limite_notas, detalhes")
       .eq("id", profile.id_plan)
       .maybeSingle();
 
@@ -114,7 +118,9 @@ export async function meuPlano(req, res) {
         tipo: plano.tipo_plano,
         valor: plano.valor,
         descricao:
-          plano.limite_notas === null ? "emissões ilimitadas" : `até ${plano.limite_notas} notas/boletos mensais`,
+          plano.limite_notas == null
+            ? "emissões ilimitadas"
+            : `até ${plano.limite_notas} notas/boletos mensais`,
         detalhes: Array.isArray(plano.detalhes) ? plano.detalhes : [],
       },
     });

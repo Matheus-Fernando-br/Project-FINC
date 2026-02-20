@@ -66,8 +66,6 @@ function Editar_cliente() {
 
   async function handleSubmit() {
     setFeedback("");
-    const token = localStorage.getItem("token");
-
     setLoading(true);
     setFeedback("Atualizando cliente...");
 

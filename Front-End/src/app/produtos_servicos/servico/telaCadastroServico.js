@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import icons from "../../../components/Icons";
 import { Link, useNavigate } from 'react-router-dom';
-import axios from "axios";
 import '../produtos.css'
 import '../../../styles/app.css'
 import { apiFetch } from "../../../utils/api.js";
