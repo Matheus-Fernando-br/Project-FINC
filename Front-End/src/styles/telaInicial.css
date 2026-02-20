@@ -1793,3 +1793,18 @@
 .termos-container .final {
   font-weight: 500;
 }
+
+.tela-planos .loading-box {
+  color: white;
+  gap: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.61);
+}
+
+.tela-planos .loading-text h3 {
+  font-weight: bold
+}
+
+.tela-planos .spinner {
+    width: 26px;
+  height: 26px;
+}

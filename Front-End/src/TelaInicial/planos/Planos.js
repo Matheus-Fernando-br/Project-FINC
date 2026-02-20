@@ -18,9 +18,8 @@ function Planos() {
         setErro("");
         setLoading(true);
         const json = await apiFetch("/planos", { method: "GET" });
-        setPlanos(json?.planos || []);
+        setPlanos(json.planos || []);
       } catch (e) {
-        console.error(e);
         setErro(e.message || "Erro ao carregar planos.");
       } finally {
         setLoading(false);
@@ -50,12 +49,7 @@ function Planos() {
         </div>
       )}
 
-      {!loading && erro && (
-        <div className="erro-box" style={{ maxWidth: 520, margin: "12px auto" }}>
-          <h3>Não foi possível carregar 😕</h3>
-          <p>{erro}</p>
-        </div>
-      )}
+      {!loading && erro && <p style={{ textAlign: "center" }}>{erro}</p>}
 
       {!loading && !erro && (
         <section className="panel_planos">
@@ -70,8 +64,8 @@ function Planos() {
                     ? "emissões ilimitadas"
                     : `até ${p.limites?.notas} notas/boletos mensais`
                 }
-                detalhes={Array.isArray(p.detalhes) ? p.detalhes : []}
-                ativo={false}
+                detalhes={p.detalhes || []}
+                // sem onClick — apenas abre/fecha detalhes
               />
             ))}
           </div>

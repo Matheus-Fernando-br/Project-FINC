@@ -5,65 +5,74 @@ import icons from "../../components/Icons";
 import { apiFetch } from "../../utils/api.js";
 
 function Tela_2_planos() {
-  const [ativo, setAtivo] = useState(null);     // plano escolhido nos disponíveis
-  const [planos, setPlanos] = useState([]);
-  const [meuPlano, setMeuPlano] = useState(null); // plano atual (visual)
+  const [meuPlano, setMeuPlano] = useState(null);
+  const [disponiveis, setDisponiveis] = useState([]);
+  const [ativo, setAtivo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingTroca, setLoadingTroca] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   const formatBRL = (v) =>
     (v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+  const carregar = async () => {
+    const [meu, disp] = await Promise.all([
+      apiFetch("/planos/meu", { method: "GET" }),
+      apiFetch("/planos/disponiveis", { method: "GET" }),
+    ]);
+    setMeuPlano(meu.plano || null);
+    setDisponiveis(disp.planos || []);
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-
-        const jsonPlanos = await apiFetch("/planos", { method: "GET" });
-        setPlanos(jsonPlanos.planos || []);
-
-        const jsonMeu = await apiFetch("/planos/meu", { method: "GET" }).catch(() => null);        if (jsonMeu?.plano) setMeuPlano(jsonMeu.plano);
+        setFeedback("");
+        await carregar();
       } catch (e) {
         console.error(e);
+        setFeedback(e.message || "Erro ao carregar planos.");
       } finally {
         setLoading(false);
       }
     };
-
     load();
   }, []);
 
-  // disponíveis = todos EXCETO o atual (visual)
-  const planosDisponiveis = useMemo(() => {
-    if (!meuPlano?.id) return planos;
-    return planos.filter((p) => p.id !== meuPlano.id);
-  }, [planos, meuPlano]);
-
   const planoSelecionado = useMemo(
-    () => planosDisponiveis.find((p) => p.id === ativo),
-    [planosDisponiveis, ativo]
+    () => disponiveis.find((p) => p.id === ativo),
+    [disponiveis, ativo]
   );
 
-  const trocarPlanoDemo = () => {
+  const trocarPlano = async () => {
     setFeedback("");
 
-    if (!meuPlano?.id) {
-      setFeedback("Não foi possível identificar seu plano atual.");
-      return;
-    }
     if (!planoSelecionado?.id) {
-      setFeedback("Selecione um plano disponível para trocar.");
+      setFeedback("Selecione um plano disponível.");
       return;
     }
 
-    // ✅ swap visual: selecionado vira atual, o atual volta pra disponíveis
-    const planoAnterior = meuPlano;
-    setMeuPlano(planoSelecionado);
+    try {
+      setLoadingTroca(true);
 
-    // opcional: deixa o anterior já selecionado nos disponíveis após a troca
-    setAtivo(planoAnterior.id);
+      // ✅ update real no banco
+      await apiFetch("/planos/meu", {
+        method: "PUT",
+        body: JSON.stringify({ id_plan: planoSelecionado.id }),
+      });
 
-    setFeedback(`✅ Demonstração: seu plano foi trocado para "${planoSelecionado.nome}".`);
+      // ✅ recarrega do backend (fonte da verdade)
+      await carregar();
+      setAtivo(null);
+
+      setFeedback("✅ Plano alterado com sucesso!");
+    } catch (e) {
+      console.error(e);
+      setFeedback(e.message || "Erro ao trocar plano.");
+    } finally {
+      setLoadingTroca(false);
+    }
   };
 
   return (
@@ -80,70 +89,79 @@ function Tela_2_planos() {
         </Link>
       </div>
 
-      {loading && <p>Carregando planos...</p>}
-
-      {/* Meu plano atual (visual) */}
-      <section className="form-section">
-        <div className="section-header">
-          <span className="icon">
-            <i className={icons.relatorioOk}></i>
-          </span>
-          <h3>Meu plano atual</h3>
+      {loading && (
+        <div className="loading-box">
+          <span className="spinner"></span>
+          <div className="loading-text">
+            <h3>Carregando planos...</h3>
+            <p>Aguarde um instante 👇</p>
+          </div>
         </div>
-        <hr className="divider" />
+      )}
 
-        {meuPlano ? (
-          <PlanoPadrao
-            titulo={meuPlano.nome}
-            preco={formatBRL(meuPlano.valor)}
-            descricao={meuPlano.descricao}
-            detalhes={meuPlano.detalhes || []}
-            ativo={true}
-            onClick={undefined}
-          />
-        ) : (
-          <p>Não foi possível carregar seu plano atual.</p>
-        )}
-      </section>
+      {!loading && (
+        <>
+          {/* Meu plano atual */}
+          <section className="form-section">
+            <div className="section-header">
+              <span className="icon">
+                <i className={icons.relatorioOk}></i>
+              </span>
+              <h3>Meu plano atual</h3>
+            </div>
+            <hr className="divider" />
 
-      {/* Planos disponíveis */}
-      <section className="form-section">
-        <div className="section-header">
-          <span className="icon">
-            <i className={icons.relatorio}></i>
-          </span>
-          <h3>Planos Disponíveis</h3>
-        </div>
-        <hr className="divider" />
+            {meuPlano ? (
+              <PlanoPadrao
+                titulo={meuPlano.nome}
+                preco={formatBRL(meuPlano.valor)}
+                descricao={meuPlano.descricao}
+                detalhes={meuPlano.detalhes || []}
+              />
+            ) : (
+              <p>Não foi possível carregar seu plano atual.</p>
+            )}
+          </section>
 
-        {planosDisponiveis.map((p) => (
-          <PlanoPadrao
-            key={p.id}
-            titulo={p.nome}
-            preco={formatBRL(p.valor)}
-            descricao={
-              p.limites?.notas == null
-                ? "emissões ilimitadas"
-                : `até ${p.limites?.notas} notas/boletos mensais`
-            }
-            detalhes={p.detalhes || []}
-            ativo={ativo === p.id}
-            onClick={() => setAtivo(p.id)}
-          />
-        ))}
+          {/* Disponíveis */}
+          <section className="form-section">
+            <div className="section-header">
+              <span className="icon">
+                <i className={icons.relatorio}></i>
+              </span>
+              <h3>Planos Disponíveis</h3>
+            </div>
+            <hr className="divider" />
 
-        {!loading && planosDisponiveis.length === 0 && (
-          <p>Não existem outros planos disponíveis no momento.</p>
-        )}
-      </section>
+            {disponiveis.map((p) => (
+              <PlanoPadrao
+                key={p.id}
+                titulo={p.nome}
+                preco={formatBRL(p.valor)}
+                descricao={
+                  p.limites?.notas == null
+                    ? "emissões ilimitadas"
+                    : `até ${p.limites?.notas} notas/boletos mensais`
+                }
+                detalhes={p.detalhes || []}
+                ativo={ativo === p.id}
+                onClick={() => setAtivo(p.id)}
+              />
+            ))}
 
-      {feedback && <p className="feedback">{feedback}</p>}
+            {disponiveis.length === 0 && <p>Não há outros planos disponíveis.</p>}
+          </section>
 
-      <div className="botao_geral">
-        <button className="btn-cadastrar" onClick={trocarPlanoDemo} disabled={!ativo}>
-          Trocar plano (demo)
-        </button>
-      </div>
+          {feedback && <p className="feedback">{feedback}</p>}
+
+          <div className="botao_geral">
+            <button className="btn-cadastrar" onClick={trocarPlano} disabled={!ativo || loadingTroca}>
+              {loadingTroca && <span className="spinner"></span>}
+              {loadingTroca ? "" : "Confirmar troca"}
+            </button>
+          </div>
+        </>
+      )}
     </main>
   );
 }

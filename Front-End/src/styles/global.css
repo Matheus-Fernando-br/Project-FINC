@@ -142,12 +142,17 @@ body {
   align-items: center;
   gap: 14px;
 
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  background: rgba(0, 0, 0, 0.18);
+  border: 2px solid rgb(0, 0, 0);
+  background: rgba(109, 107, 107, 0.18);
   border-radius: 14px;
 
   padding: 18px 16px;
   margin: 12px 0 18px;
+}
+
+.appplanos .spinner {
+  width: 34px;
+  height: 34px;
 }
 
 .loading-text h3 {
@@ -158,17 +163,4 @@ body {
 .loading-text p {
   margin: 4px 0 0;
   opacity: 0.85;
-}
-
-/* erro box */
-.erro-box {
-  border: 2px solid rgba(255, 80, 80, 0.35);
-  background: rgba(255, 80, 80, 0.08);
-  border-radius: 14px;
-  padding: 16px;
-  margin: 12px 0 18px;
-}
-
-.erro-box h3 {
-  margin: 0 0 6px;
 }

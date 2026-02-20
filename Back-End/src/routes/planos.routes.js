@@ -1,17 +1,22 @@
-import express from "express";
-import { listarPlanos, buscarPlanoPorTipo, meuPlanoAtual } from "../controllers/planos.controller.js";
+// routes/planos.routes.js
+import { Router } from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import {
+  listarPlanosPublico,
+  meuPlano,
+  planosDisponiveis,
+  atualizarMeuPlano,
+} from "../controllers/planos.controller.js";
 
-const router = express.Router();
+const router = Router();
 
-// público
-router.get("/", listarPlanos);
+// ✅ público
+router.get("/", listarPlanosPublico);
 
-// rotas fixas (privadas)
-router.get("/meu", authMiddleware, meuPlanoAtual);
-router.get("/meu/atual", authMiddleware, meuPlanoAtual);
-
-// 🚫 NUNCA MAIS /meu cai no /:tipo
-router.get("/:tipo(free|basico|premium|black)", buscarPlanoPorTipo);
+// ✅ privado
+router.use(authMiddleware);
+router.get("/meu", meuPlano);
+router.get("/disponiveis", planosDisponiveis);
+router.put("/meu", atualizarMeuPlano);
 
 export default router;
