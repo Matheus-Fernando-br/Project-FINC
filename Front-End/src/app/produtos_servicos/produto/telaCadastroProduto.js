@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import icons from "../../../components/Icons";
 import { Link, useNavigate } from 'react-router-dom';
-import axios from "axios";
 import '../produtos.css'
 import '../../../styles/app.css'
+import { apiFetch } from "../../../utils/api.js";
 
 function Tela_Cadastro_Produto() {
     const navigate = useNavigate();
@@ -21,10 +21,10 @@ function Tela_Cadastro_Produto() {
         setLoading(true);
         setFeedback("Cadastrando produto...");
         try {
-            const token = localStorage.getItem("token");
-            await axios.post("https://project-finc.onrender.com/produtos", form, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await apiFetch("/produtos", {
+            method: "POST",
+            body: JSON.stringify(form),
+            });            
             setFeedback("Produto cadastrado!");
             setTimeout(() => {  navigate("/produtos"); }, 2000);
         } catch (err) {

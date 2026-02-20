@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import "./emitir-nota.css";
 import icons from "../../components/Icons";
 import { Link } from "react-router-dom";
+import { apiFetch } from "../../utils/api.js";
 
 const ANIM_MS = 320;
 const STORAGE_KEY = "emitirNotaData";
@@ -70,10 +71,7 @@ function Tela_1_emitir_nota() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("https://project-finc.onrender.com/clientes", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const response = await apiFetch("/clientes", {
       });
 
       if (!response.ok) {
@@ -286,46 +284,39 @@ const handleSelectCpfCnpj = (e) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   };
 
-useEffect(() => {
-  async function carregarItens() {
-    const token = localStorage.getItem("token");
-    const headers = { Authorization: `Bearer ${token}` };
 
-    try {
-      const [resProd, resServ] = await Promise.all([
-        fetch("https://project-finc.onrender.com/produtos", { headers }),
-        fetch("https://project-finc.onrender.com/servicos", { headers })
-      ]);
+  useEffect(() => {
+    async function carregarItens() {
+      try {
+        const [produtosData, servicosData] = await Promise.all([
+          apiFetch("/produtos", { method: "GET" }),
+          apiFetch("/servicos", { method: "GET" }),
+        ]);
 
-      const produtosData = await resProd.json();
-      const servicosData = await resServ.json();
+        const produtos = (produtosData || []).map((p) => ({
+          ...p,
+          tipo: "produto",
+          nomeExibicao: p.nome,
+          preco: Number(p.preco_unitario),
+          categoria: p.categoria,
+        }));
 
-      const produtos = produtosData.map(p => ({
-        ...p,
-        tipo: "produto",
-        nomeExibicao: p.nome,
-        preco: Number(p.preco_unitario),
-        categoria: p.categoria // 👈 IMPORTANTE
-      }));
+        const servicos = (servicosData || []).map((s) => ({
+          ...s,
+          tipo: "servico",
+          nomeExibicao: s.nome,
+          preco: Number(s.preco),
+          categoria: s.categoria,
+        }));
 
-      const servicos = servicosData.map(s => ({
-        ...s,
-        tipo: "servico",
-        nomeExibicao: s.nome,
-        preco: Number(s.preco),
-        categoria: s.categoria // 👈 IMPORTANTE
-      }));
-
-
-      setListaItens([...produtos, ...servicos]);
-    } catch (err) {
-      console.error("Erro ao carregar produtos/serviços:", err);
+        setListaItens([...produtos, ...servicos]);
+      } catch (err) {
+        console.error("Erro ao carregar produtos/serviços:", err);
+      }
     }
-  }
 
-  carregarItens();
-}, []);
-
+    carregarItens();
+  }, []);
 
 const itensDisponiveis = listaItens.filter(item => {
   if (tipoNota === "NFS-e") return item.tipo === "servico";

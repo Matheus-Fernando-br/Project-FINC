@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
-import axios from "axios";
+import { apiFetch } from "../../utils/api.js"
 
 function Editar_cliente() {
   const { id } = useParams();
@@ -19,13 +19,7 @@ function Editar_cliente() {
   useEffect(() => {
     const fetchCliente = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`https://project-finc.onrender.com/clientes/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        const cliente = response.data;
-
+        const cliente = await apiFetch(`/clientes/${id}`, { method: "GET" });
         // O banco retorna campos planos, não dentro de um objeto 'endereco'
         const dadosMapeados = {
           ...cliente,
@@ -79,30 +73,21 @@ function Editar_cliente() {
 
 
     try {
-      const response = await fetch(
-        `https://project-finc.onrender.com/clientes/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(form)
-        }
-      );
-
-      if (!response.ok) throw new Error();
+      await apiFetch(`/clientes/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(form),
+      });
 
       setFeedback("Cliente atualizado com sucesso!");
-      setTimeout(() => {
-        navigate("/clientes")
-      }, 2000);
-      
+      setTimeout(() => navigate("/clientes"), 2000);
+
     } catch (error) {
       console.error("Erro ao atualizar dados do cliente:", error);
-      setFeedback("Erro ao salvar alterações");
+      setFeedback(error.message || "Erro ao salvar alterações");
+    } finally {
+      setLoading(false);
     }
-  }
+}
 
   return (
     <main className="content">

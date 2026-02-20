@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import '../produtos.css'
 import '../../../styles/app.css'
+import { apiFetch } from "../../../utils/api.js";
 
 function Tela_Cadastro_Servico() {
     const navigate = useNavigate();
@@ -23,10 +24,10 @@ function Tela_Cadastro_Servico() {
         setFeedback("Cadastrando serviço...");
 
         try {
-            const token = localStorage.getItem("token");
-            await axios.post("https://project-finc.onrender.com/servicos", form, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await apiFetch("/servicos", {
+            method: "POST",
+            body: JSON.stringify(form),
+            });            
             setFeedback("Serviço cadastrado!");
             setTimeout(() => {  
                 navigate("/produtos"); }, 2000);

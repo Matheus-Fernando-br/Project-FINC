@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import icons from "../../../components/Icons";
-import axios from "axios";
 import '../produtos.css'
 import '../../../styles/app.css'
+import { apiFetch } from "../../../utils/api.js";
 
 function Editar_produto() {
   const { id } = useParams();
@@ -17,11 +17,8 @@ function Editar_produto() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`https://project-finc.onrender.com/produtos/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setForm(res.data);
+        const data = await apiFetch(`/produtos/${id}`, { method: "GET" });
+        setForm(data);
       } catch (error) { setFeedback("Erro ao carregar produto."); }
     };
     fetchData();
@@ -44,9 +41,9 @@ function Editar_produto() {
     setFeedback("Atualizando Produto...");
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(`https://project-finc.onrender.com/produtos/${id}`, form, {
-        headers: { Authorization: `Bearer ${token}` }
+      await apiFetch(`/produtos/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(form),
       });
       setFeedback("Produto atualizado!");
       setTimeout(() => { 

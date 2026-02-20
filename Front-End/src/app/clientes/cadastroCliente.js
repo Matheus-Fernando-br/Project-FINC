@@ -2,6 +2,7 @@ import icons from "../../components/Icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import './cliente.css'
+import { apiFetch } from "../../utils/api.js"
 
 function Cadastro_cliente() {
   const navigate = useNavigate();
@@ -26,9 +27,9 @@ function Cadastro_cliente() {
     whatsapp: ""
   });
 
+
   async function handleSubmit() {
     setFeedback("");
-    const token = localStorage.getItem("token");
 
     if (!form.nome_social || !form.tipo_pessoa || !form.cpf_cnpj || !form.cep || !form.numero || !form.email || !form.telefone) {
       setFeedback("Preencha os campos obrigatórios");
@@ -39,17 +40,10 @@ function Cadastro_cliente() {
     setFeedback("Cadastrando cliente...");
 
     try {
-      const response = await fetch(
-        "https://project-finc.onrender.com/clientes",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(form)
-        }
-      );
+      const response = await apiFetch("/clientes", {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
 
       const data = await response.json();
 

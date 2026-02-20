@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import icons from "../../../components/Icons";
-import axios from "axios";
 import '../produtos.css'
 import '../../../styles/app.css'
+import { apiFetch } from "../../../utils/api.js";
 
 function Editar_servico() {
   const { id } = useParams();
@@ -17,15 +17,12 @@ function Editar_servico() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`https://project-finc.onrender.com/servicos/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setForm(res.data);
-      } catch (error) { setFeedback("Erro ao carregar serviço."); }
-    };
-    fetchData();
-  }, [id]);
+        const data = await apiFetch(`/servicos/${id}`, { method: "GET" });
+        setForm(data);
+        } catch (error) { setFeedback("Erro ao carregar serviço."); }
+        };
+        fetchData();
+    }, [id]);
 
     const cancelarAlteracoes = () => {
         if (!window.confirm("Deseja cancelar todas as alterações?")) return;
@@ -44,12 +41,12 @@ function Editar_servico() {
     setFeedback("Atualizando Serviço...");
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(`https://project-finc.onrender.com/servicos/${id}`, form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setFeedback("Serviço atualizado!");
-      setTimeout(() => { 
+        await apiFetch(`/servicos/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(form),
+        });
+        setFeedback("Serviço atualizado!");
+        setTimeout(() => { 
         navigate("/produtos"); }, 2000);
 
     } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/telaInicial.css";
+import { apiFetch } from "../../utils/api.js"
 
 function Login() {
   const navigate = useNavigate();
@@ -25,41 +26,28 @@ function Login() {
     setFeedback("Entrando...");
 
     try {
-      const response = await fetch(
-        "https://project-finc.onrender.com/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            login: usuario.trim(),
-            senha
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setFeedback(data.error || "Erro no login");
-        return;
-      }
+      const data = await apiFetch("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          login: usuario.trim(),
+          senha,
+        }),
+      });
 
       if (!data.session?.access_token) {
         setFeedback("Token não retornado pelo servidor");
         return;
       }
 
-      localStorage.removeItem("user"); // 👈 ADICIONE
+      localStorage.removeItem("user");
       localStorage.setItem("token", data.session.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("user_name", data.user.social_name);
 
       navigate("/app");
-
-
     } catch (err) {
       console.error("Erro no login:", err);
-      setFeedback("Erro de conexão com o servidor");
+      setFeedback(err.message || "Erro de conexão com o servidor");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import icons from "../../components/Icons";
 import "./cliente.css";
+import { apiFetch } from "../../utils/api.js";
 
 function Tela_1_clientes() {
   const [clientes, setClientes] = useState([]);
@@ -14,38 +15,23 @@ function Tela_1_clientes() {
 
   useEffect(() => {
     async function buscarClientes() {
-      const token = localStorage.getItem("token");
+      try {
+        const data = await apiFetch("/clientes", { method: "GET" });
 
-        try {
-          const response = await fetch(
-            "https://project-finc.onrender.com/clientes",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
+        const formatados = data.map((c) => ({
+          id: c.id,
+          nome: c.nome_social || "Nome não informado",
+          categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF",
+        }));
 
-          if (!response.ok) {
-            console.error("Erro ao buscar clientes");
-            return;
-          }
-
-          const data = await response.json();
-
-          const formatados = data.map(c => ({
-            id: c.id,
-            nome: c.nome_social || "Nome não informado",
-            categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF"
-          }));
-          setClientes(formatados);
-        } catch (error) {
-          console.error("Erro de conexão ao buscar clientes:", error);
-        }
+        setClientes(formatados);
+      } catch (error) {
+        console.error("Erro de conexão ao buscar clientes:", error);
       }
+    }
 
-      buscarClientes();
-    }, []);
+    buscarClientes();
+  }, []);
 
   // FILTRO DE ABA
   const filtradosPorAba = clientes.filter((item) =>
@@ -84,31 +70,18 @@ function Tela_1_clientes() {
   const excluirCliente = async (id) => {
     if (!window.confirm("Deseja realmente excluir este cliente?")) return;
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    await apiFetch(`/clientes/${id}`, {
+      method: "DELETE",
+    });
 
-      const response = await fetch(
-        `https://project-finc.onrender.com/clientes/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+    setClientes(clientes.filter((c) => c.id !== id));
+    alert("Cliente excluído com sucesso!");
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Erro ao excluir cliente");
-      }
-
-      setClientes(clientes.filter((c) => c.id !== id));
-      alert("Cliente excluído com sucesso!");
-      
-    } catch (error) {
-      console.error("Erro ao excluir:", error);
-      alert(error.message || "Erro ao excluir cliente");
-    }
+  } catch (error) {
+    console.error("Erro ao excluir:", error);
+    alert(error.message || "Erro ao excluir cliente");
+  }
   };
 
   const editarCliente = (id) => {

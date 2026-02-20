@@ -1,7 +1,7 @@
 import React from "react";
 import './styles/plano.css';
 
-function PlanoPadrao({ titulo, preco, descricao, detalhes, ativo, onClick }) {
+function PlanoPadrao({ titulo, preco, descricao, detalhes=[], ativo, onClick }) {
   return (
     <div className={`plano ${ativo ? "ativo" : ""}`} onClick={onClick}>
       
@@ -31,7 +31,7 @@ function PlanoPadrao({ titulo, preco, descricao, detalhes, ativo, onClick }) {
       </div>
 
       <div className="detalhes">
-        {detalhes.map((item, index) => (
+        {(detalhes || []).map((item, index) => (
           <p key={index}>• {item}</p>
         ))}
       </div>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/telaInicial.css";
+import { apiFetch } from "../../../utils/api.js"
 
 function CadastroLogin() {
   const navigate = useNavigate();
@@ -138,11 +139,9 @@ function CadastroLogin() {
     setFeedback("Cadastrando usuário...");
 
     try {
-      const response = await fetch(
-        "https://project-finc.onrender.com/auth/register",
+      const response = await apiFetch("/auth/register",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: formData.email,
             senha: formData.senha,

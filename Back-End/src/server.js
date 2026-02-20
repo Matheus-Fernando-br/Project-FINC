@@ -11,9 +11,10 @@ import { enviarFeedback } from "./telegram/feedback.js";
 // Importação das rotas
 import authRoutes from "./routes/auth.routes.js";
 import clienteRoutes from "./routes/cliente.routes.js";
-import produtoRoutes from "./routes/produto.routes.js"; // Nova rota
-import servicoRoutes from "./routes/servico.routes.js"; // Nova rota
+import produtoRoutes from "./routes/produto.routes.js"; 
+import servicoRoutes from "./routes/servico.routes.js"; 
 import profileRoutes from "./routes/profile.routes.js";
+import planosRoutes from "./routes/planos.routes.js";
 
 dotenv.config();
 
@@ -25,13 +26,14 @@ app.use(
   cors({
     origin: [
       "https://finc-seven.vercel.app",
-      "http://localhost:3000"
+      "http://localhost:3000",
+      "http://localhost:3001",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
+app.options("*", cors());
 app.use(express.json());
 
 /* ============================= */
@@ -44,7 +46,6 @@ app.post("/feedback", enviarFeedback);
 app.get("/chamados/:id", buscarChamado);
 app.put("/chamados/:id/encerrar", encerrarChamado);
 
-
 /* ============================= */
 /* WEBHOOK TELEGRAM */
 /* ============================= */
@@ -56,6 +57,8 @@ app.use("/clientes", clienteRoutes);
 app.use("/produtos", produtoRoutes); // Registrando produtos
 app.use("/servicos", servicoRoutes); // Registrando serviços
 app.use("/api/profile", profileRoutes);
+
+app.use("/planos", planosRoutes);
 
 /* ===== ROTA TESTE ===== */
 app.get("/", (req, res) => {

@@ -1,6 +1,7 @@
   import icons from "../../components/Icons";
   import { useState, useEffect } from "react";
   import "./MeusDados.css";
+  import { apiFetch } from "../../utils/api.js"
 
   function MeusDados() {
     const [editando, setEditando] = useState(false);
@@ -50,14 +51,9 @@
         // 📦 update profile
         setFeedback("Salvando dados do perfil...");
 
-        const res = await fetch(
-          "https://project-finc.onrender.com/api/profile",
+        const res = await apiFetch("/api/profile",
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`
-            },
             body: JSON.stringify(userData)
           }
         );

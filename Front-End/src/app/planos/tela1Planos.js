@@ -1,22 +1,55 @@
-import PlanoBasico from '../../components/planos/planoBasico';
-import PlanoPremium from '../../components/planos/planoPremium';
-import PlanoBlack from '../../components/planos/planoBlack';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import PlanoPadrao from "../../components/planos/planoPadrao";
 import icons from "../../components/Icons";
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { apiFetch } from "../../utils/api.js";
 
 function Tela_1_planos() {
   const [ativo, setAtivo] = useState(null);
+  const [planos, setPlanos] = useState([]);
+  const [meuPlano, setMeuPlano] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const togglePlano = (plano) => {
-    setAtivo((prev) => (prev === plano ? null : plano));
+  const formatBRL = (v) =>
+    (v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const togglePlano = (planoId) => {
+    setAtivo((prev) => (prev === planoId ? null : planoId));
   };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+
+        // 1) planos disponíveis
+        const jsonPlanos = await apiFetch("/planos", { method: "GET" });
+        setPlanos(jsonPlanos.planos || []);
+
+        // 2) meu plano atual (se não tiver token, apiFetch deve falhar/401 -> ignora)
+        const jsonMeu = await apiFetch("/planos/meu/atual", { method: "GET" }).catch(() => null);
+        if (jsonMeu?.plano) setMeuPlano(jsonMeu.plano);
+
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  const planoFree = planos.find((p) => p.tipo === "free");
+  const planosPagos = planos.filter((p) => p.tipo !== "free");
 
   return (
     <main className="content">
-      <section className='titulo-secao'>
+      <section className="titulo-secao">
         <h1><i className={icons.planos}></i> Planos</h1>
-      </section>        
+      </section>
+
+      {loading && <p>Carregando planos...</p>}
 
       <section className="form-section">
         <div className="section-header">
@@ -25,10 +58,18 @@ function Tela_1_planos() {
         </div>
         <hr className="divider" />
 
-        <PlanoBasico 
-          ativo={ativo === "basico"} 
-          onClick={() => togglePlano("basico")} 
-        />
+        {meuPlano ? (
+          <PlanoPadrao
+            titulo={meuPlano.nome}
+            preco={formatBRL(meuPlano.valor)}
+            descricao={meuPlano.descricao}
+            detalhes={meuPlano.detalhes || []}
+            ativo={ativo === meuPlano.id}
+            onClick={() => togglePlano(meuPlano.id)}
+          />
+        ) : (
+          <p>Não foi possível carregar seu plano atual.</p>
+        )}
       </section>
 
       <section className="form-section">
@@ -38,15 +79,38 @@ function Tela_1_planos() {
         </div>
         <hr className="divider" />
 
-        <PlanoPremium 
-          ativo={ativo === "premium"} 
-          onClick={() => togglePlano("premium")} 
-        />
-        <PlanoBlack 
-          ativo={ativo === "black"} 
-          onClick={() => togglePlano("black")} 
-        />
+        {planoFree && (
+          <PlanoPadrao
+            titulo={planoFree.nome}
+            preco={formatBRL(planoFree.valor)}
+            descricao={
+              planoFree.limites?.notas == null
+                ? "emissões ilimitadas"
+                : `até ${planoFree.limites?.notas} notas/boletos mensais`
+            }
+            detalhes={planoFree.detalhes || []}
+            ativo={ativo === planoFree.id}
+            onClick={() => togglePlano(planoFree.id)}
+          />
+        )}
+
+        {planosPagos.map((p) => (
+          <PlanoPadrao
+            key={p.id}
+            titulo={p.nome}
+            preco={formatBRL(p.valor)}
+            descricao={
+              p.limites?.notas == null
+                ? "emissões ilimitadas"
+                : `até ${p.limites?.notas} notas/boletos mensais`
+            }
+            detalhes={p.detalhes || []}
+            ativo={ativo === p.id}
+            onClick={() => togglePlano(p.id)}
+          />
+        ))}
       </section>
+
       <div className="botao_geral">
         <Link to="/configuracao/pagamento">
           <button className="btn-cadastrar">Alterar plano</button>
