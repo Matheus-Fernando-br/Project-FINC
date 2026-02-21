@@ -79,8 +79,8 @@ function Header() {
 
   return (
     <header className="header">
-      <div className="msg">
-        <h2>Olá, {primeiroNome}</h2>
+      <div className="logo">
+        <img src="/Images/FINC.png" alt="Logo Finc"/>
       </div>
 
       <div className="search-wrapper">

@@ -72,7 +72,8 @@ const [shortcuts, setShortcuts] = useState(() => {
   const COLORS = ["#2ecc71", "#27ae60", "#0d6630", "#063e20"];
 
    return (
-    <main className="home-content">
+    <main className="content">
+      <div className="home-content">
 
       <section className="titulo-secao">
         <h1><i className={icons.casa}></i> Dashboard de Indicadores</h1>
@@ -262,6 +263,7 @@ const [shortcuts, setShortcuts] = useState(() => {
             </PieChart>
           </ResponsiveContainer>
         </section>
+        </div>
       </main>
   );
 }
