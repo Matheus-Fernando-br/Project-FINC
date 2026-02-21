@@ -2,12 +2,13 @@ import express from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import {
   changePassword,
-  updateProfile
+  updateProfile,
 } from "../controllers/profile.controller.js";
 
 const router = express.Router();
 
-router.put("/", authMiddleware, updateProfile);
-router.put("/password", authMiddleware, changePassword);
+router.use(authMiddleware);
+router.put("/", updateProfile);
+router.put("/password", changePassword);
 
 export default router;

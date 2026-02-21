@@ -11,7 +11,7 @@ export const changePassword = async (req, res) => {
     // 🔐 valida senha atual
     const { error: signError } = await supabase.auth.signInWithPassword({
       email: req.user.email,
-      password: senhaAtual
+      password: senhaAtual,
     });
 
     if (signError) {
@@ -20,7 +20,7 @@ export const changePassword = async (req, res) => {
 
     // 🔁 atualiza senha
     const { error } = await supabase.auth.updateUser({
-      password: novaSenha
+      password: novaSenha,
     });
 
     if (error) {
@@ -42,12 +42,13 @@ export const updateProfile = async (req, res) => {
     telefone,
     tipo_pessoa,
     cpf_cnpj,
+    inscricao,
     cep,
     uf,
     cidade,
     logradouro,
     numero,
-    complemento
+    complemento,
   } = req.body;
 
   const { error } = await supabase
@@ -57,12 +58,13 @@ export const updateProfile = async (req, res) => {
       telefone,
       tipo_pessoa,
       cpf_cnpj,
+      inscricao,
       cep,
       uf,
       cidade,
       logradouro,
       numero,
-      complemento
+      complemento,
     })
     .eq("id", userId);
 
