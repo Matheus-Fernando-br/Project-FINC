@@ -24,8 +24,10 @@ export async function apiFetch(path, options = {}) {
   const data = isJson ? await res.json().catch(() => null) : await res.text().catch(() => null);
 
   if (!res.ok) {
-    const msg = (data && (data.erro || data && data.message)) || `Erro HTTP ${res.status}`;
-    throw new Error(msg);
+  const msg =
+    (data && (data.error || data.erro || data.message)) ||
+    `Erro HTTP ${res.status}`;
+  throw new Error(msg);
   }
 
   return data;
