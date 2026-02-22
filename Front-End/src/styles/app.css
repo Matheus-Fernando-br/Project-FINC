@@ -1029,15 +1029,16 @@ button:hover {
   }
 
   .search-bar input {
-    width: 80%;
-    padding: 0.6rem 1.5rem;
-    margin-left: 3rem;
+    width: 40vw;
+    padding: 0.6rem 1rem;
+    margin-left: 5rem;
   }
 
   .search-dropdown {
-    width: 200%;
-    left: -60%;
+    width: 70vw;
+    left: 2vw;
     text-align: center;
+    gap: 2rem;
   }
 
   .sidebar {
@@ -1068,7 +1069,7 @@ button:hover {
   }
 
   .hamburger-icon {
-    width: 7vw;
+    width: 8vw;
     height: 4vh;
   }
 
@@ -1114,5 +1115,9 @@ button:hover {
 
   .atalhos-dropdown button {
     font-size: 0.8rem;
+  }
+
+  .content .titulo-secao {
+  font-size: 1.2rem;
   }
 }

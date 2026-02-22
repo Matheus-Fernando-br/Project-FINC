@@ -780,6 +780,7 @@ function Tela_1_emitir_nota() {
               placeholder="0,00"
               value={valorTotal}
               readOnly
+              disabled
             />
           </div>
         </div>
