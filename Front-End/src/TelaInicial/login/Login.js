@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/telaInicial.css";
-import { apiFetch } from "../../utils/api.js"
+import { apiFetch } from "../../utils/api.js";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,9 +9,18 @@ function Login() {
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [lembrarMe, setLembrarMe] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
+
+  // ✅ carrega preferências
+  useEffect(() => {
+    const savedUser = localStorage.getItem("remember_user_login");
+    const savedRemember = localStorage.getItem("remember_me") === "1";
+    if (savedUser) setUsuario(savedUser);
+    setLembrarMe(savedRemember);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,10 +48,25 @@ function Login() {
         return;
       }
 
-      localStorage.removeItem("user");
-      localStorage.setItem("token", data.session.access_token);
+      // ✅ lembrar usuário (somente o login)
+      if (lembrarMe) {
+        localStorage.setItem("remember_me", "1");
+        localStorage.setItem("remember_user_login", usuario.trim());
+      } else {
+        localStorage.removeItem("remember_me");
+        localStorage.removeItem("remember_user_login");
+      }
+
+      // ✅ onde salvar o token
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
+      const storage = lembrarMe ? localStorage : sessionStorage;
+      storage.setItem("token", data.session.access_token);
+
+      // user pode ficar no localStorage mesmo
       localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("user_name", data.user.social_name);
+      localStorage.setItem("user_name", data.user.social_name || "");
 
       navigate("/app");
     } catch (err) {
@@ -52,7 +76,6 @@ function Login() {
       setLoading(false);
     }
   };
-
 
   return (
     <main>
@@ -79,8 +102,9 @@ function Login() {
                 type="text"
                 placeholder="E-mail ou CPF"
                 value={usuario}
-                onChange={(e) => setUsuario(e.target.value)}
+                onChange={(e) => {setUsuario(e.target.value); setFeedback("");}}
                 disabled={loading}
+                autoComplete="username"
               />
             </div>
 
@@ -90,8 +114,9 @@ function Login() {
                 type={mostrarSenha ? "text" : "password"}
                 placeholder="Informe sua senha"
                 value={senha}
-                onChange={(e) => setSenha(e.target.value)}
+                onChange={(e) => {setSenha(e.target.value); setFeedback("");}}
                 disabled={loading}
+                autoComplete="current-password"
               />
               <i
                 className={`bi ${mostrarSenha ? "bi-eye-slash" : "bi-eye"}`}
@@ -101,35 +126,43 @@ function Login() {
 
             <div className="remember-forgot">
               <label>
-                <input type="checkbox" /> Lembrar-me
+                <input
+                  type="checkbox"
+                  checked={lembrarMe}
+                  onChange={(e) => setLembrarMe(e.target.checked)}
+                  disabled={loading}
+                />{" "}
+                Lembrar-me
               </label>
-              <p>Esqueceu a senha?</p>
-            </div>
 
+              {/* ✅ vira link */}
+              <Link to="/TelaInicial/Login/EsqueciSenha">
+                Esqueceu a senha?
+              </Link>
+            </div>
 
             <div className="Interação">
-            <button type="submit" className="btn" disabled={loading}>
-              {loading && <span className="spinner"></span>}
-              {loading ? "" : "Entrar"}
-            </button>
+              <button type="submit" className="btn" disabled={loading}>
+                {loading && <span className="spinner"></span>}
+                {loading ? "" : "Entrar"}
+              </button>
 
-            {feedback && <p className="feedback">{feedback}</p>}
+              {feedback && <p className="feedback">{feedback}</p>}
 
-            <div className="divider">
-              <p>ou</p>
-            </div>
+              <div className="divider">
+                <p>ou</p>
+              </div>
 
-            <button
-              type="button"
-              onClick={() =>
-                navigate("/TelaInicial/Login/Cadastro", {
-                  state: { direction: "right" }
-                })
-              }
-            >
-              Criar Conta
-            </button>
-
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/TelaInicial/Login/Cadastro", {
+                    state: { direction: "right" },
+                  })
+                }
+              >
+                Criar Conta
+              </button>
             </div>
           </form>
         </div>

@@ -11,6 +11,8 @@ import Planos from "./TelaInicial/planos/Planos";
 import QuemSomos from "./TelaInicial/quemSomos/QuemSomos";
 import Duvidas from "./TelaInicial/duvidas/Duvidas";
 import Login from "./TelaInicial/login/Login";
+import EsqueciSenha from "./TelaInicial/login/EsqueciSenha";
+import ResetPassword from "./TelaInicial/login/ResetPassword";
 import CadastroLogin from "./TelaInicial/login/cadastro/CadastroLogin";
 import Termos from "./TelaInicial/login/cadastro/Termos";
 
@@ -123,6 +125,28 @@ export default function App() {
           <AnimatedRoutes>
             <LayoutTelaInicial>
               <Login />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
+
+      <Route
+        path="/TelaInicial/Login/EsqueciSenha"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <EsqueciSenha />
+            </LayoutTelaInicial>
+          </AnimatedRoutes>
+        }
+      />
+
+      <Route
+        path="/reset-password"
+        element={
+          <AnimatedRoutes>
+            <LayoutTelaInicial>
+              <ResetPassword />
             </LayoutTelaInicial>
           </AnimatedRoutes>
         }
@@ -337,7 +361,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
 
       <Route
         path="/contador"
