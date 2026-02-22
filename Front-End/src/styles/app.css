@@ -286,6 +286,7 @@ body {
   color: var(--cor-texto-claro);
   height: 100vh;
   padding: 1rem 0;
+  padding-bottom: 7rem;
   position: fixed;
   top: 16.7vh;
   left: 0;
@@ -1048,6 +1049,7 @@ button:hover {
     border-radius: 15px;
     transition: left 0.4s ease-in-out;
     padding-top: 10vh;
+    padding-bottom: 10vh;
     top: 0;
   }
 
@@ -1059,6 +1061,10 @@ button:hover {
   .sidebar-hamburguer {
     top: 2.5vh;
     left: 0.8vw;
+  }
+
+  .sidebar ul li {
+    padding-bottom: 1vh;
   }
 
   .hamburger-icon {

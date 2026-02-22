@@ -51,14 +51,20 @@ function MeusDados() {
     try {
       setFeedback("Salvando dados do perfil...");
 
+      // 1) faz o PUT (pode voltar só {message})
       await apiFetch("/api/profile", {
         method: "PUT",
         body: JSON.stringify(userData),
       });
 
-      const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
-      const novoUser = { ...userLocal, ...userData };
-      localStorage.setItem("user", JSON.stringify(novoUser));
+      // 2) refaz GET do perfil (estado real do BD)
+      // ✅ ajuste a rota conforme seu backend:
+      const refreshed = await apiFetch("/api/profile/me", { method: "GET" });
+
+      const profile = refreshed?.profile ?? refreshed;
+
+      // 3) atualiza localStorage com o que veio do banco
+      localStorage.setItem("user", JSON.stringify(profile));
 
       setFeedback("Perfil atualizado com sucesso ✅");
       setEditando(false);
