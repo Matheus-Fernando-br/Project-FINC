@@ -121,6 +121,7 @@ function MeusDados() {
 
       setFeedback("Perfil atualizado com sucesso ✅");
       setEditando(false);
+      setTimeout(() => window.location.reload(), 2000);
     } catch (err) {
       console.error("Erro ao salvar perfil:", err);
       setFeedback(err.message || "Erro ao salvar perfil");
@@ -390,12 +391,10 @@ function MeusDados() {
           </div>
         </div>
 
-        {feedback && <p className="feedback">{feedback}</p>}
-
         <div className="botao_geral">
           {!editando ? (
             <button
-              type="button"
+              type="btn"
               onClick={() => {
                 setEditando(true);
                 setFeedback("");
@@ -407,6 +406,7 @@ function MeusDados() {
             <>
               <button
                 type="button"
+                className="btn-vermelho"
                 onClick={cancelarAlteracoes}
                 disabled={loading}
               >
@@ -414,17 +414,15 @@ function MeusDados() {
                 {loadingCancel ? "" : "Cancelar Alterações"}
               </button>
 
-              <button
-                type="button"
-                onClick={salvarAlteracoes}
-                disabled={loading}
-              >
+              <button type="btn" onClick={salvarAlteracoes} disabled={loading}>
                 {loading && <span className="spinner"></span>}
                 {loading ? "" : "Salvar Alterações"}
               </button>
             </>
           )}
         </div>
+
+        {feedback && <p className="feedback">{feedback}</p>}
       </section>
     </main>
   );

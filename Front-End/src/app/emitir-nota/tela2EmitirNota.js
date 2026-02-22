@@ -1,8 +1,8 @@
-// Front-End/src/app/emitir-nota/Tela_2_emitir_nota.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import icons from "../../components/Icons";
 import { Link } from "react-router-dom";
 import html2pdf from "html2pdf.js";
+import { apiFetch } from "../../utils/api.js";
 
 const STORAGE_KEY = "emitirNotaData";
 
@@ -17,77 +17,128 @@ function formatDateYYYYMMDD(date = new Date()) {
   return `${y}${m}${d}`;
 }
 
+function money(v) {
+  const n = Number(v) || 0;
+  return n.toFixed(2);
+}
+
+// ✅ normaliza alíquotas “zoada” (ex: 451020 => 45.1020%)
+function normalizeAliquota(raw) {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 0;
+  if (n > 1000) return n / 10000; // 451020 -> 45.102
+  if (n > 100) return n / 100; // 1800 -> 18
+  return n; // 18 -> 18
+}
+
+function downloadBlob(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function Tela_2_emitir_nota() {
   const [data, setData] = useState(null);
+  const [emissor, setEmissor] = useState(null);
   const previewRef = useRef();
 
+  // carrega dados da etapa 1
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         setData(JSON.parse(saved));
-      } catch (e) {
+      } catch {
         setData(null);
       }
     }
   }, []);
 
+  // ✅ carrega emissor (usuário logado)
   useEffect(() => {
-    if (!data?.produtosServicos) return;
+    const loadEmissor = async () => {
+      try {
+        const r = await apiFetch("/api/profile/me", { method: "GET" });
+        const prof = r?.profile ?? r;
+        setEmissor(prof);
+      } catch (e) {
+        console.error("Erro ao carregar emissor:", e);
+        setEmissor(null);
+      }
+    };
+    loadEmissor();
+  }, []);
 
-    let baseICMS = 0;
-    let valorICMS = 0;
-    let baseISS = 0;
-    let valorISS = 0;
-    let valorProdutos = 0;
-    let valorServicos = 0;
+  const calculo = useMemo(() => {
+    const items = data?.produtosServicos || [];
 
-    data.produtosServicos.forEach((item) => {
+    let baseICMS = 0,
+      valorICMS = 0;
+    let baseISS = 0,
+      valorISS = 0;
+    let valorProdutos = 0,
+      valorServicos = 0;
+
+    // (opcional) pis/cofins “junto” se existir
+    let valorPISCOFINS = 0;
+
+    items.forEach((item) => {
       const qtd = Number(item.quantidade) || 0;
-      const valor = Number(item.valor) || 0;
-      const totalItem = qtd * valor;
+      const v = Number(item.valor) || 0;
+      const totalItem = qtd * v;
 
       if (item.tipo === "produto") {
         valorProdutos += totalItem;
         baseICMS += totalItem;
-        valorICMS += totalItem * (Number(item.icms) / 100);
+
+        const ali = normalizeAliquota(item.icms); // %
+        valorICMS += totalItem * (ali / 100);
+
+        const aliPisCof = normalizeAliquota(item.pis_cofins);
+        valorPISCOFINS += totalItem * (aliPisCof / 100);
       }
 
       if (item.tipo === "servico") {
         valorServicos += totalItem;
         baseISS += totalItem;
-        valorISS += totalItem * (Number(item.aliquota_iss) / 100);
+
+        const ali = normalizeAliquota(item.aliquota_iss);
+        valorISS += totalItem * (ali / 100);
       }
     });
 
-    const descontos =
-      (Number(data.descIncond) || 0) + (Number(data.descCond) || 0);
+    const descIncond = Number(data?.descIncond) || 0;
+    const descCond = Number(data?.descCond) || 0;
+    const descontos = descIncond + descCond;
 
     const totalNota =
-      valorProdutos + valorServicos + valorICMS + valorISS - descontos;
+      valorProdutos +
+      valorServicos +
+      valorICMS +
+      valorISS +
+      valorPISCOFINS -
+      descontos;
 
-    setCalculoImpostos({
-      baseICMS: baseICMS.toFixed(2),
-      valorICMS: valorICMS.toFixed(2),
-      baseISS: baseISS.toFixed(2),
-      valorISS: valorISS.toFixed(2),
-      valorProdutos: valorProdutos.toFixed(2),
-      valorServicos: valorServicos.toFixed(2),
-      valorIPI: "0.00",
-      totalNota: totalNota.toFixed(2),
-    });
+    return {
+      baseICMS,
+      valorICMS,
+      baseISS,
+      valorISS,
+      valorProdutos,
+      valorServicos,
+      valorPISCOFINS,
+      descontos,
+      descIncond,
+      descCond,
+      totalNota,
+    };
   }, [data]);
-
-  const [calculoImpostos, setCalculoImpostos] = useState({
-    baseICMS: "0.00",
-    valorICMS: "0.00",
-    baseISS: "0.00",
-    valorISS: "0.00",
-    valorProdutos: "0.00",
-    valorServicos: "0.00",
-    valorIPI: "0.00",
-    totalNota: "0.00",
-  });
 
   const gerarPdf = () => {
     if (!data) return alert("Nenhum dado salvo para gerar a nota.");
@@ -95,17 +146,140 @@ function Tela_2_emitir_nota() {
     const cpfRaw = onlyDigits(data.clienteCpfCnpj || "semcpf");
     const filename = `nota-fiscal-${cpfRaw || "semcpf"}-${formatDateYYYYMMDD(new Date())}.pdf`;
 
-    // configurações do html2pdf
     const element = previewRef.current;
     const opt = {
       margin: 10,
-      filename: filename,
+      filename,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
 
     html2pdf().set(opt).from(element).save();
+  };
+
+  const gerarXml = () => {
+    if (!data) return;
+
+    const now = new Date().toISOString();
+    const serie = "001";
+    const numero = "000000001";
+
+    const emit = {
+      nome: emissor?.social_name || "EMISSOR",
+      cpfCnpj: emissor?.cpf_cnpj || "",
+      ie: emissor?.inscricao || "",
+      tel: emissor?.telefone || "",
+      endereco: {
+        cep: emissor?.cep || "",
+        uf: emissor?.uf || "",
+        cidade: emissor?.cidade || "",
+        logradouro: emissor?.logradouro || "",
+        bairro: emissor?.bairro || "",
+        numero: emissor?.numero || "",
+        complemento: emissor?.complemento || "",
+      },
+    };
+
+    const dest = {
+      nome: data?.clienteCompleto?.nome_social || "",
+      cpfCnpj: data?.clienteCompleto?.cpf_cnpj || "",
+      tel: data?.clienteCompleto?.telefone || "",
+      email: data?.clienteCompleto?.email || "",
+      endereco: {
+        cep: data?.clienteCompleto?.cep || "",
+        uf: data?.clienteCompleto?.uf || "",
+        cidade: data?.clienteCompleto?.cidade || "",
+        logradouro: data?.clienteCompleto?.logradouro || "",
+        bairro: data?.clienteCompleto?.bairro || "",
+        numero: data?.clienteCompleto?.numero || "",
+        complemento: data?.clienteCompleto?.complemento || "",
+      },
+    };
+
+    const itensXml = (data?.produtosServicos || [])
+      .map((p, idx) => {
+        const total = (Number(p.quantidade) || 0) * (Number(p.valor) || 0);
+        return `
+      <item n="${idx + 1}">
+        <tipo>${p.tipo || ""}</tipo>
+        <descricao>${(p.nome || "").replaceAll("&", "e")}</descricao>
+        <categoria>${(p.categoriaItem || "").replaceAll("&", "e")}</categoria>
+        <qtd>${Number(p.quantidade) || 0}</qtd>
+        <valorUnit>${money(p.valor)}</valorUnit>
+        <subtotal>${money(total)}</subtotal>
+        <obs>${(p.info || "").replaceAll("&", "e")}</obs>
+        <icmsAliq>${normalizeAliquota(p.icms)}</icmsAliq>
+        <issAliq>${normalizeAliquota(p.aliquota_iss)}</issAliq>
+        <pisCofinsAliq>${normalizeAliquota(p.pis_cofins)}</pisCofinsAliq>
+      </item>`;
+      })
+      .join("");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<notaFiscal>
+  <meta>
+    <tipo>${data?.tipoNota || ""}</tipo>
+    <serie>${serie}</serie>
+    <numero>${numero}</numero>
+    <dataEmissao>${now}</dataEmissao>
+  </meta>
+
+  <emissor>
+    <nome>${emit.nome}</nome>
+    <cpfCnpj>${emit.cpfCnpj}</cpfCnpj>
+    <inscricaoEstadual>${emit.ie}</inscricaoEstadual>
+    <telefone>${emit.tel}</telefone>
+    <endereco>
+      <cep>${emit.endereco.cep}</cep>
+      <uf>${emit.endereco.uf}</uf>
+      <cidade>${emit.endereco.cidade}</cidade>
+      <logradouro>${emit.endereco.logradouro}</logradouro>
+      <bairro>${emit.endereco.bairro}</bairro>
+      <numero>${emit.endereco.numero}</numero>
+      <complemento>${emit.endereco.complemento}</complemento>
+    </endereco>
+  </emissor>
+
+  <destinatario>
+    <nome>${dest.nome}</nome>
+    <cpfCnpj>${dest.cpfCnpj}</cpfCnpj>
+    <telefone>${dest.tel}</telefone>
+    <email>${dest.email}</email>
+    <endereco>
+      <cep>${dest.endereco.cep}</cep>
+      <uf>${dest.endereco.uf}</uf>
+      <cidade>${dest.endereco.cidade}</cidade>
+      <logradouro>${dest.endereco.logradouro}</logradouro>
+      <bairro>${dest.endereco.bairro}</bairro>
+      <numero>${dest.endereco.numero}</numero>
+      <complemento>${dest.endereco.complemento}</complemento>
+    </endereco>
+  </destinatario>
+
+  <itens>${itensXml}
+  </itens>
+
+  <totais>
+    <valorProdutos>${money(calculo.valorProdutos)}</valorProdutos>
+    <valorServicos>${money(calculo.valorServicos)}</valorServicos>
+    <baseICMS>${money(calculo.baseICMS)}</baseICMS>
+    <valorICMS>${money(calculo.valorICMS)}</valorICMS>
+    <baseISS>${money(calculo.baseISS)}</baseISS>
+    <valorISS>${money(calculo.valorISS)}</valorISS>
+    <valorPISCOFINS>${money(calculo.valorPISCOFINS)}</valorPISCOFINS>
+    <descontoIncond>${money(calculo.descIncond)}</descontoIncond>
+    <descontoCond>${money(calculo.descCond)}</descontoCond>
+    <totalNota>${money(calculo.totalNota)}</totalNota>
+  </totais>
+
+  <observacoesGerais>${(data?.obsGeral || "").replaceAll("&", "e")}</observacoesGerais>
+  <software>FINC</software>
+</notaFiscal>`;
+
+    const cpfRaw = onlyDigits(data?.clienteCpfCnpj || "semcpf");
+    const filename = `nota-fiscal-${cpfRaw || "semcpf"}-${formatDateYYYYMMDD(new Date())}.xml`;
+    downloadBlob(filename, xml, "application/xml;charset=utf-8");
   };
 
   if (!data) {
@@ -132,7 +306,11 @@ function Tela_2_emitir_nota() {
           </div>
         </section>
         <div className="form-footer-voltar">
-          <Link to="/emitir-nota/Dados" className="previous-step">
+          <Link
+            to="/emitir-nota/Dados"
+            className="previous-step"
+            onClick={() => localStorage.setItem("emitirNotaVoltar", "1")}
+          >
             Voltar <i className="bi bi-chevron-double-left"></i>
             <i className="bi bi-chevron-double-left"></i>
           </Link>
@@ -146,7 +324,6 @@ function Tela_2_emitir_nota() {
       data?.incluirFrete === "sim"
         ? "0 - Por conta do remetente"
         : "9 - Sem frete",
-
     nome_transportador: data?.transNome || "",
     cpf_cnpj: data?.transCpf || "",
     placa: data?.placa || "",
@@ -155,18 +332,11 @@ function Tela_2_emitir_nota() {
     info: data?.infoTransporte || "",
   };
 
-  // total calculado já está em data.valorTotal, mas recalc aqui por segurança
   const somaProdutos = (data.produtosServicos || []).reduce((acc, p) => {
     const q = Number(p.quantidade) || 0;
     const v = Number(p.valor) || 0;
     return acc + q * v;
   }, 0);
-  const descontos =
-    (Number(data.descIncond) || 0) + (Number(data.descCond) || 0);
-  const total =
-    somaProdutos - descontos >= 0
-      ? (somaProdutos - descontos).toFixed(2)
-      : "0.00";
 
   return (
     <main className="content">
@@ -185,7 +355,6 @@ function Tela_2_emitir_nota() {
         </div>
         <hr className="divider" />
 
-        {/* Preview area que será convertida para PDF */}
         <div
           ref={previewRef}
           style={{
@@ -196,7 +365,7 @@ function Tela_2_emitir_nota() {
             padding: 12,
           }}
         >
-          {/* CABEÇALHO */}
+          {/* CABEÇALHO (✅ agora emissor = usuário) */}
           <div
             style={{
               display: "flex",
@@ -216,20 +385,23 @@ function Tela_2_emitir_nota() {
                 }}
               />
               <div style={{ fontSize: 10 }}>
-                <h1>
-                  FINC PLATAFORMA DE EMISSÃO DE NOTAS FISCAIS AUTOMATIZADA LTDA
-                </h1>
+                <h1>{emissor?.social_name || "EMISSOR (carregando...)"}</h1>
                 <br />
-                CNPJ: 03.480.621/0001-15
+                CPF/CNPJ: {emissor?.cpf_cnpj || "-"}
                 <br />
-                Endereço: Rua Dezenove de Novembro, 121
+                IE: {emissor?.inscricao || "-"}
                 <br />
-                Bairro: Centro - CEP: 35180-008
+                Endereço: {emissor?.logradouro || "-"}, {emissor?.numero || "-"}{" "}
+                {emissor?.bairro ? `- ${emissor?.bairro}` : ""}
                 <br />
-                Timóteo – MG <br />
-                Tel: (31) 3846-7000
+                CEP: {emissor?.cep || "-"} - {emissor?.cidade || "-"} /{" "}
+                {emissor?.uf || "-"}
                 <br />
-                Email: finc@gmail.com
+                Tel: {emissor?.telefone || "-"}
+                <br />
+                <span style={{ fontSize: 9, opacity: 0.8 }}>
+                  Emitido via FINC
+                </span>
               </div>
             </div>
 
@@ -249,7 +421,6 @@ function Tela_2_emitir_nota() {
                 <br />
               </p>
               <br />
-
               <strong>0 - Entrada</strong>
               <br />
               <strong>1 - Saída</strong>
@@ -263,7 +434,6 @@ function Tela_2_emitir_nota() {
               >
                 1
               </h2>
-
               <div
                 style={{
                   textAlign: "center",
@@ -293,7 +463,6 @@ function Tela_2_emitir_nota() {
               </h1>
               <br />
 
-              {/* CÓDIGO DE BARRAS FICTÍCIO */}
               <div
                 style={{
                   padding: "6px 10px",
@@ -314,7 +483,6 @@ function Tela_2_emitir_nota() {
                 </div>
               </div>
 
-              {/* CHAVE DE ACESSO */}
               <div
                 style={{
                   marginTop: 6,
@@ -330,7 +498,6 @@ function Tela_2_emitir_nota() {
                 </span>
               </div>
 
-              {/* CONSULTA */}
               <div
                 style={{
                   fontSize: 8,
@@ -346,9 +513,8 @@ function Tela_2_emitir_nota() {
             </div>
           </div>
 
-          {/* DADOS USUARIO */}
+          {/* DADOS DO EMISSOR (linha ICMS etc) */}
           <div style={{ border: "1px solid #000", marginTop: -7 }}>
-            {/* LINHA 1 */}
             <div
               style={{
                 display: "flex",
@@ -366,7 +532,7 @@ function Tela_2_emitir_nota() {
               </div>
               <div
                 style={{
-                  width: "25%",
+                  width: "35%",
                   borderLeft: "1px solid #000",
                   paddingLeft: 8,
                   paddingTop: 3,
@@ -380,14 +546,14 @@ function Tela_2_emitir_nota() {
                 </p>
               </div>
             </div>
-            {/* LINHA 2 */}
+
             <div style={{ display: "flex", padding: "0px 4px" }}>
               <div style={{ width: "40%", paddingTop: 3 }}>
                 <p style={{ fontSize: 8, marginBottom: 5 }}>
                   INSCRIÇÃO ESTADUAL
                 </p>
                 <p style={{ fontSize: 12, marginLeft: 2 }}>
-                  {"ALTERE AQUI CHAT"}
+                  {emissor?.inscricao || "-"}
                 </p>
               </div>
               <div
@@ -405,15 +571,15 @@ function Tela_2_emitir_nota() {
               </div>
               <div
                 style={{
-                  width: "30%",
+                  width: "20%",
                   borderLeft: "1px solid #000",
                   paddingLeft: 8,
                   paddingTop: 3,
                 }}
               >
-                <p style={{ fontSize: 8, marginBottom: 5 }}>CNPJ</p>
+                <p style={{ fontSize: 8, marginBottom: 5 }}>CNPJ/CPF</p>
                 <p style={{ fontSize: 12, marginLeft: 2 }}>
-                  {"ALTERE AQUI CHAT"}
+                  {emissor?.cpf_cnpj || "-"}
                 </p>
               </div>
             </div>
@@ -424,7 +590,6 @@ function Tela_2_emitir_nota() {
             <strong>DESTINATÁRIO / REMETENTE</strong>
 
             <div style={{ border: "1px solid #000", marginTop: 4 }}>
-              {/* LINHA 1 */}
               <div
                 style={{
                   display: "flex",
@@ -469,7 +634,7 @@ function Tela_2_emitir_nota() {
                   </p>
                 </div>
               </div>
-              {/* LINHA 2 */}
+
               <div
                 style={{
                   display: "flex",
@@ -481,8 +646,8 @@ function Tela_2_emitir_nota() {
                   <p style={{ fontSize: 8, marginBottom: 5 }}>ENDEREÇO</p>
                   <p style={{ fontSize: 12, marginLeft: 2 }}>
                     {data.clienteCompleto?.logradouro},{" "}
-                    {data.clienteCompleto?.numero}, COMPLEMENTO{" "}
-                    {data.clienteCompleto?.complemento}
+                    {data.clienteCompleto?.numero},{" "}
+                    {data.clienteCompleto?.complemento || ""}
                   </p>
                 </div>
                 <div
@@ -528,7 +693,6 @@ function Tela_2_emitir_nota() {
                 </div>
               </div>
 
-              {/* LINHA 3 */}
               <div style={{ display: "flex", padding: "0px 4px" }}>
                 <div style={{ width: "38%", paddingTop: 3 }}>
                   <p style={{ fontSize: 8, marginBottom: 5 }}>MUNICÍPIO</p>
@@ -592,20 +756,17 @@ function Tela_2_emitir_nota() {
             </div>
           </div>
 
-          {/* IMPOSTO */}
+          {/* CÁLCULO DO IMPOSTO (✅ agora inclui PIS/COFINS e descontos separados) */}
           <div style={{ padding: "6px 0", fontSize: 9 }}>
             <strong>CÁLCULO DO IMPOSTO</strong>
-
             <div style={{ border: "1px solid #000", marginTop: 4 }}>
-              {/* LINHA 1 */}
               <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
                 <div style={{ width: "25%", padding: "3px 4px" }}>
                   <p style={{ fontSize: 8, marginBottom: 5 }}>
                     BASE DE CÁLCULO DO ICMS
                   </p>
-                  <p style={{ fontSize: 12 }}>R$ {calculoImpostos.baseICMS}</p>
+                  <p style={{ fontSize: 12 }}>R$ {money(calculo.baseICMS)}</p>
                 </div>
-
                 <div
                   style={{
                     width: "15%",
@@ -614,7 +775,40 @@ function Tela_2_emitir_nota() {
                   }}
                 >
                   <p style={{ fontSize: 8, marginBottom: 5 }}>VALOR DO ICMS</p>
-                  <p style={{ fontSize: 12 }}>R$ {calculoImpostos.valorICMS}</p>
+                  <p style={{ fontSize: 12 }}>R$ {money(calculo.valorICMS)}</p>
+                </div>
+                <div
+                  style={{
+                    width: "25%",
+                    borderLeft: "1px solid #000",
+                    padding: "3px 4px",
+                  }}
+                >
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>
+                    BASE DE CÁLCULO DO ISS
+                  </p>
+                  <p style={{ fontSize: 12 }}>R$ {money(calculo.baseISS)}</p>
+                </div>
+                <div
+                  style={{
+                    width: "35%",
+                    borderLeft: "1px solid #000",
+                    padding: "3px 4px",
+                  }}
+                >
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>VALOR DO ISS</p>
+                  <p style={{ fontSize: 12 }}>R$ {money(calculo.valorISS)}</p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex" }}>
+                <div style={{ width: "25%", padding: "3px 4px" }}>
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>
+                    VALOR PIS/COFINS
+                  </p>
+                  <p style={{ fontSize: 12 }}>
+                    R$ {money(calculo.valorPISCOFINS)}
+                  </p>
                 </div>
 
                 <div
@@ -625,85 +819,25 @@ function Tela_2_emitir_nota() {
                   }}
                 >
                   <p style={{ fontSize: 8, marginBottom: 5 }}>
-                    BASE DE CÁLCULO DO ICMS SUBST.
+                    DESCONTO INCOND.
                   </p>
-                  <p style={{ fontSize: 12 }}>R$ 0,00</p>
+                  <p style={{ fontSize: 12 }}>R$ {money(calculo.descIncond)}</p>
                 </div>
 
                 <div
                   style={{
-                    width: "35%",
+                    width: "25%",
                     borderLeft: "1px solid #000",
                     padding: "3px 4px",
                   }}
                 >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>
-                    VALOR TOTAL DOS PRODUTOS
-                  </p>
-                  <p style={{ fontSize: 12 }}>
-                    R$ {calculoImpostos.valorProdutos}
-                  </p>
-                </div>
-              </div>
-
-              {/* LINHA 2 */}
-              <div style={{ display: "flex" }}>
-                <div style={{ width: "20%", padding: "3px 4px" }}>
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>VALOR DO FRETE</p>
-                  <p style={{ fontSize: 12 }}>R$ 0,00</p>
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>DESCONTO COND.</p>
+                  <p style={{ fontSize: 12 }}>R$ {money(calculo.descCond)}</p>
                 </div>
 
                 <div
                   style={{
-                    width: "20%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>
-                    VALOR DO SEGURO
-                  </p>
-                  <p style={{ fontSize: 12 }}>R$ 0,00</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "15%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>DESCONTO</p>
-                  <p style={{ fontSize: 12 }}>R$ 0,00</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "20%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>
-                    OUTRAS DESPESAS
-                  </p>
-                  <p style={{ fontSize: 12 }}>R$ 0,00</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "10%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>VALOR DO IPI</p>
-                  <p style={{ fontSize: 12 }}>R$ {calculoImpostos.valorIPI}</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "15%",
+                    width: "25%",
                     borderLeft: "1px solid #000",
                     padding: "3px 4px",
                   }}
@@ -712,98 +846,17 @@ function Tela_2_emitir_nota() {
                     VALOR TOTAL DA NOTA
                   </p>
                   <p style={{ fontSize: 12, fontWeight: "bold" }}>
-                    R$ {calculoImpostos.totalNota}
+                    R$ {money(calculo.totalNota)}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div style={{ padding: "6px 0", fontSize: 9 }}>
-            <strong>TRANSPORTADOR / VOLUMES TRANSPORTADOS</strong>
-
-            <div style={{ border: "1px solid #000", marginTop: 4 }}>
-              {/* LINHA 1 */}
-              <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
-                <div style={{ width: "30%", padding: "3px 4px" }}>
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>
-                    MODALIDADE DO FRETE
-                  </p>
-                  <p style={{ fontSize: 12 }}>{transporte.modalidade_frete}</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "40%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>TRANSPORTADOR</p>
-                  <p style={{ fontSize: 12 }}>
-                    {transporte.nome_transportador}
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    width: "30%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>CNPJ / CPF</p>
-                  <p style={{ fontSize: 12 }}>{transporte.cpf_cnpj}</p>
-                </div>
-              </div>
-
-              {/* LINHA 2 */}
-              <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
-                <div style={{ width: "50%", padding: "3px 4px" }}>
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>
-                    PLACA DO VEÍCULO
-                  </p>
-                  <p style={{ fontSize: 12 }}>{transporte.placa}</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "25%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>PESO BRUTO</p>
-                  <p style={{ fontSize: 12 }}>{transporte.peso_bruto} Kg</p>
-                </div>
-
-                <div
-                  style={{
-                    width: "25%",
-                    borderLeft: "1px solid #000",
-                    padding: "3px 4px",
-                  }}
-                >
-                  <p style={{ fontSize: 8, marginBottom: 5 }}>PESO LÍQUIDO</p>
-                  <p style={{ fontSize: 12 }}>{transporte.peso_liquido} Kg</p>
-                </div>
-              </div>
-
-              {/* LINHA 3 */}
-              <div style={{ padding: "3px 4px" }}>
-                <p style={{ fontSize: 8, marginBottom: 5 }}>
-                  INFORMAÇÕES ADICIONAIS
-                </p>
-                <p style={{ fontSize: 12 }}>{transporte.info}</p>
-              </div>
-            </div>
-          </div>
-
+          {/* TABELA ITENS (✅ inclui OBS) */}
           <div style={{ padding: "6px 0", fontSize: 9 }}>
             <strong>DADOS DOS PRODUTOS/SERVIÇOS</strong>
-
             <div style={{ marginTop: 4 }}>
-              {/* PRODUTOS */}
               <table
                 width="100%"
                 style={{ borderCollapse: "collapse", marginTop: 6 }}
@@ -816,6 +869,7 @@ function Tela_2_emitir_nota() {
                       "Qtd",
                       "Vlr Unit",
                       "Subtotal",
+                      "Obs",
                     ].map((h) => (
                       <th
                         key={h}
@@ -831,8 +885,9 @@ function Tela_2_emitir_nota() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.produtosServicos.map((p, i) => {
-                    const subtotal = (p.quantidade * p.valor).toFixed(2);
+                  {(data.produtosServicos || []).map((p, i) => {
+                    const subtotal =
+                      (Number(p.quantidade) || 0) * (Number(p.valor) || 0);
                     return (
                       <tr key={i}>
                         <td style={{ border: "1px solid #000", padding: 4 }}>
@@ -857,7 +912,7 @@ function Tela_2_emitir_nota() {
                             textAlign: "right",
                           }}
                         >
-                          R$ {p.valor.toFixed(2)}
+                          R$ {money(p.valor)}
                         </td>
                         <td
                           style={{
@@ -866,7 +921,10 @@ function Tela_2_emitir_nota() {
                             textAlign: "right",
                           }}
                         >
-                          R$ {subtotal}
+                          R$ {money(subtotal)}
+                        </td>
+                        <td style={{ border: "1px solid #000", padding: 4 }}>
+                          {p.info || "-"}
                         </td>
                       </tr>
                     );
@@ -874,7 +932,6 @@ function Tela_2_emitir_nota() {
                 </tbody>
               </table>
 
-              {/* TOTAIS */}
               <div
                 style={{
                   display: "flex",
@@ -882,23 +939,24 @@ function Tela_2_emitir_nota() {
                   marginTop: 6,
                 }}
               >
-                <div style={{ width: 250 }}>
+                <div style={{ width: 280 }}>
                   <div
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
                     <span>Subtotal</span>
-                    <span>R$ {somaProdutos.toFixed(2)}</span>
+                    <span>R$ {money(somaProdutos)}</span>
                   </div>
                   <div
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    <span>Descontos</span>
-                    <span>
-                      R${" "}
-                      {(
-                        Number(data.descIncond) + Number(data.descCond)
-                      ).toFixed(2)}
-                    </span>
+                    <span>Desc. Incond.</span>
+                    <span>R$ {money(calculo.descIncond)}</span>
+                  </div>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <span>Desc. Cond.</span>
+                    <span>R$ {money(calculo.descCond)}</span>
                   </div>
                   <div
                     style={{
@@ -910,34 +968,30 @@ function Tela_2_emitir_nota() {
                       paddingTop: 4,
                     }}
                   >
-                    <span>Valor Total</span>
-                    <span>R$ {total}</span>
+                    <span>Valor Total Nota</span>
+                    <span>R$ {money(calculo.totalNota)}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* DADOS ADICIONAIS (✅ agora mostra observação geral) */}
           <div style={{ padding: "6px 0", fontSize: 9 }}>
             <strong>DADOS ADICIONAIS</strong>
-
             <div style={{ border: "1px solid #000", marginTop: 4 }}>
-              {/* LINHA 1 */}
-              <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
-                <div style={{ width: "30%", padding: "3px 4px" }}>
-                  <p style={{ fontSize: 8, marginBottom: 60 }}>
-                    INFORMAÇÕES COMPLEMENTARES
-                  </p>
-                  {/*<p style={{ fontSize: 12 }}>
-                    {dados.adicionais}
-                  </p>*/}
-                </div>
+              <div style={{ padding: "6px 8px" }}>
+                <p style={{ fontSize: 8, marginBottom: 6 }}>
+                  INFORMAÇÕES COMPLEMENTARES
+                </p>
+                <p style={{ fontSize: 12 }}>{data?.obsGeral || "-"}</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* BOTÕES */}
       <section className="emitir">
         <div className="section-header">
           <span className="icon">
@@ -946,15 +1000,22 @@ function Tela_2_emitir_nota() {
           <h3>Emitir nota</h3>
         </div>
         <hr className="divider" />
-        <div className="botao_geral">
+        <div className="botao_geral" style={{ gap: 10 }}>
           <button className="btn" onClick={gerarPdf}>
-            Emitir Nota Fiscal
+            Baixar PDF
+          </button>
+          <button className="btn" onClick={gerarXml}>
+            Baixar XML
           </button>
         </div>
       </section>
 
       <div className="form-footer-voltar">
-        <Link to="/emitir-nota/Dados" className="previous-step">
+        <Link
+          to="/emitir-nota/Dados"
+          className="previous-step"
+          onClick={() => localStorage.setItem("emitirNotaVoltar", "1")}
+        >
           Voltar <i className="bi bi-chevron-double-left"></i>
           <i className="bi bi-chevron-double-left"></i>
         </Link>

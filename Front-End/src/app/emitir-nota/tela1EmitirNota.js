@@ -2,33 +2,15 @@
 import React, { useEffect, useState } from "react";
 import "./emitir-nota.css";
 import icons from "../../components/Icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiFetch } from "../../utils/api.js";
 
 const ANIM_MS = 320;
 const STORAGE_KEY = "emitirNotaData";
 
-/*function maskCpfCnpj(value) {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length > 11) {
-    return digits
-      .replace(/^(\d{2})(\d)/, "$1.$2")
-      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-      .replace(/(\d{3})(\d)/, "$1/$2")
-      .replace(/(\d{4})(\d{1,2})$/, "$1-$2")
-      .slice(0, 18);
-  } else {
-    return digits
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-      .slice(0, 14);
-  }
-}*/
-
 function Tela_1_emitir_nota() {
   const [incluirFrete, setIncluirFrete] = useState("nao");
-
+  const navigate = useNavigate();
   const [produtosServicos, setProdutosServicos] = useState([
     {
       id: Date.now(),
@@ -61,6 +43,105 @@ function Tela_1_emitir_nota() {
   const [descIncond, setDescIncond] = useState(0);
   const [descCond, setDescCond] = useState(0);
   const [valorTotal, setValorTotal] = useState(0);
+
+  const [obsGeral, setObsGeral] = useState("");
+
+  useEffect(() => {
+    const voltar = localStorage.getItem("emitirNotaVoltar") === "1";
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (voltar && saved) {
+      try {
+        const obj = JSON.parse(saved);
+        if (obj && obj.produtosServicos) {
+          setProdutosServicos(obj.produtosServicos);
+          setTipoNota(obj.tipoNota || "");
+          setClienteNome(obj.clienteNome || "");
+          setClienteCpfCnpj(obj.clienteCpfCnpj || "");
+          setClienteCompleto(obj.clienteCompleto || null);
+
+          setIncluirFrete(obj.incluirFrete || "nao");
+          setTransNome(obj.transNome || "");
+          setTransCpf(obj.transCpf || "");
+          setPlaca(obj.placa || "");
+          setPesoBruto(obj.pesoBruto || "");
+          setPesoLiquido(obj.pesoLiquido || "");
+          setInfoTransporte(obj.infoTransporte || "");
+
+          setDescIncond(obj.descIncond || 0);
+          setDescCond(obj.descCond || 0);
+          setObsGeral(obj.obsGeral || "");
+        }
+      } catch {}
+    } else {
+      // ✅ fluxo novo: limpa tudo
+      localStorage.removeItem(STORAGE_KEY);
+      setTipoNota("");
+      setClienteNome("");
+      setClienteCpfCnpj("");
+      setClienteCompleto(null);
+
+      setIncluirFrete("nao");
+      setTransNome("");
+      setTransCpf("");
+      setPlaca("");
+      setPesoBruto("");
+      setPesoLiquido("");
+      setInfoTransporte("");
+
+      setDescIncond(0);
+      setDescCond(0);
+      setObsGeral("");
+
+      setProdutosServicos([
+        {
+          id: Date.now(),
+          item: "",
+          tipoNotaItem: "",
+          categoriaItem: "",
+          quantidade: 1,
+          valor: 0,
+          info: "",
+          isOpen: true,
+        },
+      ]);
+    }
+
+    // ✅ consome o flag
+    localStorage.removeItem("emitirNotaVoltar");
+  }, []);
+
+  function validarAntesDeAvancar() {
+    if (!clienteCompleto?.id) {
+      alert("Selecione um cliente.");
+      return false;
+    }
+
+    if (!tipoNota) {
+      alert("Selecione o tipo de nota (NF-e / NFC-e / NFS-e).");
+      return false;
+    }
+
+    const itensValidos = (produtosServicos || []).filter((p) => {
+      const qtd = Number(p.quantidade) || 0;
+      const valor = Number(p.valor) || 0;
+      return p.item && qtd > 0 && valor >= 0;
+    });
+
+    if (itensValidos.length === 0) {
+      alert("Adicione pelo menos 1 produto/serviço com quantidade válida.");
+      return false;
+    }
+
+    return true;
+  }
+
+  const avancar = () => {
+    if (!validarAntesDeAvancar()) return;
+
+    salvarEAvancar();
+    navigate("/emitir-nota/Finalizar");
+  };
 
   /* =======================
      AJUSTE PRINCIPAL AQUI
@@ -97,30 +178,6 @@ function Tela_1_emitir_nota() {
     }
 
     carregarClientes();
-  }, []);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const obj = JSON.parse(saved);
-        if (obj && obj.produtosServicos) {
-          setProdutosServicos(obj.produtosServicos);
-          setTipoNota(obj.tipoNota || "");
-          setClienteNome(obj.clienteNome || "");
-          setClienteCpfCnpj(obj.clienteCpfCnpj || "");
-          setIncluirFrete(obj.incluirFrete || "nao");
-          setTransNome(obj.transNome || "");
-          setTransCpf(obj.transCpf || "");
-          setPlaca(obj.placa || "");
-          setPesoBruto(obj.pesoBruto || "");
-          setPesoLiquido(obj.pesoLiquido || "");
-          setInfoTransporte(obj.infoTransporte || "");
-          setDescIncond(obj.descIncond || 0);
-          setDescCond(obj.descCond || 0);
-        }
-      } catch {}
-    }
   }, []);
 
   useEffect(() => {
@@ -242,7 +299,7 @@ function Tela_1_emitir_nota() {
 
     const cliente = listaClientes.find((c) => c.cpf_cnpj === cpf);
     if (cliente) {
-      setClienteNome(cliente.nome);
+      setClienteNome(cliente.nome_social);
       setClienteCompleto(cliente);
     }
   };
@@ -264,6 +321,7 @@ function Tela_1_emitir_nota() {
       descIncond,
       descCond,
       valorTotal,
+      obsGeral,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   };
@@ -475,6 +533,7 @@ function Tela_1_emitir_nota() {
                   readOnly
                   value={p.categoriaItem}
                   placeholder="Categoria do item"
+                  disabled
                 />
               </div>
 
@@ -726,11 +785,32 @@ function Tela_1_emitir_nota() {
         </div>
       </section>
 
+      <section className="form-section">
+        <div className="section-header">
+          <span className="icon">
+            <i className={icons.relatorio}></i>
+          </span>
+          <h3>Observações gerais da nota</h3>
+        </div>
+        <hr className="divider" />
+        <div className="form-row full">
+          <div className="form-group">
+            <label>Observação geral (vai para “Dados Adicionais”)</label>
+            <textarea
+              value={obsGeral}
+              onChange={(e) => setObsGeral(e.target.value)}
+              placeholder="Ex.: Pedido 123, pagamento via PIX, entregue em mãos..."
+              rows={4}
+            />
+          </div>
+        </div>
+      </section>
+
       <div className="form-footer-avancar">
-        <Link to="/emitir-nota/Finalizar" onClick={salvarEAvancar}>
+        <button type="button" onClick={avancar} className="next-step">
           AVANÇAR <i className="bi bi-chevron-double-right"></i>
           <i className="bi bi-chevron-double-right"></i>
-        </Link>
+        </button>
       </div>
     </main>
   );

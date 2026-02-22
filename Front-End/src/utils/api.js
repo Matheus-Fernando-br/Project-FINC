@@ -4,6 +4,13 @@ function getToken() {
   return localStorage.getItem("token"); // ajuste se seu token tiver outro nome
 }
 
+function logoutAndRedirect() {
+  alert("Sua sessão expirou. Faça login novamente.");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "/TelaInicial/Login"; // ✅ funciona em qualquer lugar
+}
+
 export async function apiFetch(path, options = {}) {
   const token = getToken();
 
@@ -22,6 +29,12 @@ export async function apiFetch(path, options = {}) {
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
   const data = isJson ? await res.json().catch(() => null) : await res.text().catch(() => null);
+
+    // ✅ tratamento de expiração
+  if (res.status === 401) {
+    logoutAndRedirect();
+    throw new Error("Sessão expirada");
+  }
 
   if (!res.ok) {
   const msg =
