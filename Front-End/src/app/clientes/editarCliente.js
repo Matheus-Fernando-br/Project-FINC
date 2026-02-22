@@ -20,7 +20,6 @@ function Editar_cliente() {
     const fetchCliente = async () => {
       try {
         const cliente = await apiFetch(`/clientes/${id}`, { method: "GET" });
-        // O banco retorna campos planos, não dentro de um objeto 'endereco'
         const dadosMapeados = {
           ...cliente,
           cep: cliente.cep || "",

@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import "../styles/telaInicial.css";
 
 function HomeTelaInicial() {
+  const API_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
+    // fire-and-forget: só pra "acordar" o Render
+    fetch(`${API_URL}/`, { method: "GET" }).catch(() => {});
+
     const root = document.querySelector(".tela-inicial");
     const scrollTimeout = setTimeout(() => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });

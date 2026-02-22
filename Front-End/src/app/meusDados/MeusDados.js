@@ -6,6 +6,7 @@ import { apiFetch } from "../../utils/api.js";
 function MeusDados() {
   const [editando, setEditando] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   const [userData, setUserData] = useState({
@@ -24,88 +25,99 @@ function MeusDados() {
     complemento: "",
   });
 
-  const [backupData, setBackupData] = useState(null);
+  const [formOriginal, setFormOriginal] = useState({});
+  const [tipoPessoa, setTipoPessoa] = useState("");
 
-  // ✅ Sempre tenta puxar do BD primeiro (garante refletir o banco)
+  // ✅ carrega do backend (fonte da verdade)
   useEffect(() => {
-    const load = async () => {
+    const fetchUsuario = async () => {
       try {
-        const r = await apiFetch("/api/profile/me", { method: "GET" });
-        const profile = r?.profile || {};
+        setFeedback("");
 
-        // mistura com o user do localStorage (normalmente tem email)
+        // ✅ GET /api/profile/me (precisa existir no backend)
+        const profile = await apiFetch("/api/profile/me", { method: "GET" });
+
+        // email geralmente vem do auth; pega do localStorage se você salva lá
         const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
-        const merged = { ...userLocal, ...profile };
 
-        localStorage.setItem("user", JSON.stringify(merged));
+        const dadosMapeados = {
+          ...profile,
+          email: userLocal.email || profile.email || "",
+          cep: profile.cep || "",
+          uf: profile.uf || "",
+          cidade: profile.cidade || "",
+          logradouro: profile.logradouro || "",
+          bairro: profile.bairro || "",
+          numero: profile.numero || "",
+          complemento: profile.complemento || "",
+          inscricao: profile.inscricao || "",
+        };
 
-        setUserData({
-          social_name: merged.social_name || "",
-          email: merged.email || userLocal.email || "",
-          cpf_cnpj: merged.cpf_cnpj || "",
-          inscricao: merged.inscricao || "",
-          telefone: merged.telefone || "",
-          tipo_pessoa: merged.tipo_pessoa || "",
-          cep: merged.cep || "",
-          uf: merged.uf || "",
-          cidade: merged.cidade || "",
-          logradouro: merged.logradouro || "",
-          bairro: merged.bairro || "",
-          numero: merged.numero || "",
-          complemento: merged.complemento || "",
-        });
-      } catch (e) {
-        // fallback: localStorage
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        setUserData((prev) => ({
-          ...prev,
-          social_name: user.social_name || "",
-          email: user.email || "",
-          cpf_cnpj: user.cpf_cnpj || "",
-          inscricao: user.inscricao || "",
-          telefone: user.telefone || "",
-          tipo_pessoa: user.tipo_pessoa || "",
-          cep: user.cep || "",
-          uf: user.uf || "",
-          cidade: user.cidade || "",
-          logradouro: user.logradouro || "",
-          bairro: user.bairro || "",
-          numero: user.numero || "",
-          complemento: user.complemento || "",
-        }));
+        setUserData(dadosMapeados);
+        setFormOriginal(dadosMapeados);
+        setTipoPessoa(dadosMapeados.tipo_pessoa || "");
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+        setFeedback(error.message || "Erro ao carregar dados do usuário.");
       }
     };
 
-    load();
+    fetchUsuario();
   }, []);
+
+  const cancelarAlteracoes = () => {
+    if (!window.confirm("Deseja cancelar todas as alterações?")) return;
+    setLoadingCancel(true);
+    setFeedback("Operação cancelada!");
+    setTimeout(() => {
+      setUserData(formOriginal);
+      setTipoPessoa(formOriginal.tipo_pessoa || "");
+      setEditando(false);
+      setLoadingCancel(false);
+    }, 800);
+  };
 
   const salvarAlteracoes = async () => {
     setFeedback("");
     setLoading(true);
+    setFeedback("Salvando dados do perfil...");
 
     try {
-      setFeedback("Salvando dados do perfil...");
-
-      // ✅ PUT
+      // ✅ PUT /api/profile
       await apiFetch("/api/profile", {
         method: "PUT",
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          social_name: userData.social_name,
+          telefone: userData.telefone,
+          tipo_pessoa: userData.tipo_pessoa,
+          cpf_cnpj: userData.cpf_cnpj,
+          inscricao: userData.inscricao,
+          cep: userData.cep,
+          uf: userData.uf,
+          cidade: userData.cidade,
+          logradouro: userData.logradouro,
+          bairro: userData.bairro,
+          numero: userData.numero,
+          complemento: userData.complemento,
+        }),
       });
 
-      // ✅ GET logo após salvar (estado real do BD)
+      // ✅ refaz GET do perfil pra confirmar que gravou no banco
       const refreshed = await apiFetch("/api/profile/me", { method: "GET" });
-      const profile = refreshed?.profile ?? refreshed;
 
-      // ✅ atualiza localStorage + estado
       const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
-      const merged = { ...userLocal, ...profile };
+      const novoUser = { ...userLocal, ...refreshed };
 
-      localStorage.setItem("user", JSON.stringify(merged));
-      setUserData((prev) => ({
-        ...prev,
-        ...profile,
-        email: prev.email || userLocal.email || "",
-      }));
+      localStorage.setItem("user", JSON.stringify(novoUser));
+
+      setFormOriginal({
+        ...novoUser,
+        email: novoUser.email || userLocal.email || "",
+      });
+      setUserData({
+        ...novoUser,
+        email: novoUser.email || userLocal.email || "",
+      });
 
       setFeedback("Perfil atualizado com sucesso ✅");
       setEditando(false);
@@ -119,10 +131,10 @@ function MeusDados() {
 
   const disabled = !editando || loading;
 
-  const maskCpfCnpj = (value, tipoPessoa) => {
-    let v = value.replace(/\D/g, "");
+  const maskCpfCnpj = (value, tipoPessoaAtual) => {
+    let v = (value || "").replace(/\D/g, "");
 
-    if (tipoPessoa === "PFisica") {
+    if (tipoPessoaAtual === "PFisica") {
       return v
         .slice(0, 11)
         .replace(/(\d{3})(\d)/, "$1.$2")
@@ -130,7 +142,7 @@ function MeusDados() {
         .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
     }
 
-    if (tipoPessoa === "PJuridica") {
+    if (tipoPessoaAtual === "PJuridica") {
       return v
         .slice(0, 14)
         .replace(/^(\d{2})(\d)/, "$1.$2")
@@ -143,13 +155,12 @@ function MeusDados() {
   };
 
   const buscarCEP = async (cep) => {
-    const cepLimpo = cep.replace(/\D/g, "");
+    const cepLimpo = (cep || "").replace(/\D/g, "");
     if (cepLimpo.length !== 8) return;
 
     try {
       const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
       const data = await res.json();
-
       if (!data.erro) {
         setUserData((prev) => ({
           ...prev,
@@ -157,7 +168,7 @@ function MeusDados() {
           uf: data.uf || "",
           cidade: data.localidade || "",
           logradouro: data.logradouro || "",
-          bairro: data.bairro || "", // ✅ agora existe no BD e no formulário
+          bairro: data.bairro || "",
         }));
       }
     } catch (err) {
@@ -178,7 +189,7 @@ function MeusDados() {
         <h2>{userData.social_name}</h2>
       </div>
 
-      {/* Dados pessoais */}
+      {/* ================= DADOS PESSOAIS ================= */}
       <section className="form-section">
         <div className="section-header">
           <span className="icon">
@@ -186,13 +197,13 @@ function MeusDados() {
           </span>
           <h3>Dados pessoais</h3>
         </div>
-        <hr />
+        <hr className="divider" />
 
         <div className="form-row">
           <div className="form-group">
             <label>Nome</label>
             <input
-              value={userData.social_name}
+              value={userData.social_name || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, social_name: e.target.value })
@@ -206,35 +217,33 @@ function MeusDados() {
             <label>Tipo de Pessoa</label>
             {editando ? (
               <select
-                value={userData.tipo_pessoa}
+                value={tipoPessoa}
                 disabled={loading}
-                onChange={(e) =>
-                  setUserData({
-                    ...userData,
-                    tipo_pessoa: e.target.value,
-                    cpf_cnpj: "",
-                  })
-                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setTipoPessoa(v);
+                  setUserData({ ...userData, tipo_pessoa: v, cpf_cnpj: "" });
+                }}
               >
                 <option value="">Selecione</option>
                 <option value="PFisica">Pessoa Física</option>
                 <option value="PJuridica">Pessoa Jurídica</option>
               </select>
             ) : (
-              <input value={userData.tipo_pessoa} disabled />
+              <input value={userData.tipo_pessoa || ""} disabled />
             )}
           </div>
 
           <div className="form-group">
-            <label>CPF / CNPJ</label>
+            <label>{tipoPessoa === "PFisica" ? "CPF" : "CNPJ"}</label>
             <input
-              value={userData.cpf_cnpj}
+              value={userData.cpf_cnpj || ""}
               disabled={disabled}
-              maxLength={userData.tipo_pessoa === "PFisica" ? 14 : 18}
+              maxLength={tipoPessoa === "PFisica" ? 14 : 18}
               onChange={(e) =>
                 setUserData({
                   ...userData,
-                  cpf_cnpj: maskCpfCnpj(e.target.value, userData.tipo_pessoa),
+                  cpf_cnpj: maskCpfCnpj(e.target.value, tipoPessoa),
                 })
               }
             />
@@ -245,7 +254,7 @@ function MeusDados() {
           <div className="form-group">
             <label>Inscrição Estadual</label>
             <input
-              value={userData.inscricao}
+              value={userData.inscricao || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, inscricao: e.target.value })
@@ -255,7 +264,7 @@ function MeusDados() {
         </div>
       </section>
 
-      {/* Contato */}
+      {/* ================= CONTATO ================= */}
       <section className="form-section">
         <div className="section-header">
           <span className="icon">
@@ -263,17 +272,18 @@ function MeusDados() {
           </span>
           <h3>Contato</h3>
         </div>
-        <hr />
+        <hr className="divider" />
+
         <div className="form-row">
           <div className="form-group">
             <label>E-mail</label>
-            <input value={userData.email} disabled />
+            <input value={userData.email || ""} disabled />
           </div>
 
           <div className="form-group">
             <label>Telefone</label>
             <input
-              value={userData.telefone}
+              value={userData.telefone || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, telefone: e.target.value })
@@ -283,7 +293,7 @@ function MeusDados() {
         </div>
       </section>
 
-      {/* Endereço */}
+      {/* ================= ENDEREÇO ================= */}
       <section className="form-section">
         <div className="section-header">
           <span className="icon">
@@ -291,13 +301,12 @@ function MeusDados() {
           </span>
           <h3>Endereço Fiscal</h3>
         </div>
-        <hr />
+        <hr className="divider" />
 
         <div className="form-row">
           <div className="form-group">
             <label>CEP</label>
             <input
-              type="text"
               value={userData.cep || ""}
               disabled={disabled}
               onChange={(e) => {
@@ -307,7 +316,6 @@ function MeusDados() {
                   .slice(0, 9);
 
                 setUserData({ ...userData, cep: valor });
-
                 if (valor.length === 9) buscarCEP(valor);
               }}
             />
@@ -316,7 +324,7 @@ function MeusDados() {
           <div className="form-group">
             <label>UF</label>
             <input
-              value={userData.uf}
+              value={userData.uf || ""}
               disabled={disabled}
               onChange={(e) => setUserData({ ...userData, uf: e.target.value })}
             />
@@ -327,7 +335,7 @@ function MeusDados() {
           <div className="form-group">
             <label>Cidade</label>
             <input
-              value={userData.cidade}
+              value={userData.cidade || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, cidade: e.target.value })
@@ -338,7 +346,7 @@ function MeusDados() {
           <div className="form-group">
             <label>Logradouro</label>
             <input
-              value={userData.logradouro}
+              value={userData.logradouro || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, logradouro: e.target.value })
@@ -351,30 +359,29 @@ function MeusDados() {
           <div className="form-group">
             <label>Bairro</label>
             <input
-              value={userData.bairro}
+              value={userData.bairro || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, bairro: e.target.value })
               }
             />
           </div>
+
           <div className="form-group">
             <label>Número</label>
             <input
-              value={userData.numero}
+              value={userData.numero || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, numero: e.target.value })
               }
             />
           </div>
-        </div>
 
-        <div className="form-row">
           <div className="form-group">
             <label>Complemento</label>
             <input
-              value={userData.complemento}
+              value={userData.complemento || ""}
               disabled={disabled}
               onChange={(e) =>
                 setUserData({ ...userData, complemento: e.target.value })
@@ -383,12 +390,13 @@ function MeusDados() {
           </div>
         </div>
 
+        {feedback && <p className="feedback">{feedback}</p>}
+
         <div className="botao_geral">
           {!editando ? (
             <button
               type="button"
               onClick={() => {
-                setBackupData(userData);
                 setEditando(true);
                 setFeedback("");
               }}
@@ -399,30 +407,24 @@ function MeusDados() {
             <>
               <button
                 type="button"
+                onClick={cancelarAlteracoes}
+                disabled={loading}
+              >
+                {loadingCancel && <span className="spinner"></span>}
+                {loadingCancel ? "" : "Cancelar Alterações"}
+              </button>
+
+              <button
+                type="button"
                 onClick={salvarAlteracoes}
                 disabled={loading}
               >
                 {loading && <span className="spinner"></span>}
                 {loading ? "" : "Salvar Alterações"}
               </button>
-
-              <button
-                type="button"
-                className="btn-vermelho"
-                disabled={loading}
-                onClick={() => {
-                  if (backupData) setUserData(backupData);
-                  setEditando(false);
-                  setFeedback("");
-                }}
-              >
-                Cancelar
-              </button>
             </>
           )}
         </div>
-
-        {feedback && <p className="feedback">{feedback}</p>}
       </section>
     </main>
   );
