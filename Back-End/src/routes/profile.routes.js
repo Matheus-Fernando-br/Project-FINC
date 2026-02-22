@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get("/me", getMyProfile);     // ✅ novo
+router.get("/me", getMyProfile);     
 router.put("/", updateProfile);
 router.put("/password", changePassword);
 

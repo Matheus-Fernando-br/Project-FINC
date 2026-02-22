@@ -41,7 +41,7 @@ export const getMyProfile = async (req, res) => {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, social_name, cpf_cnpj, inscricao, tipo_pessoa, telefone, cep, uf, cidade, logradouro, bairro, numero, complemento, id_plan, created_at")
       .eq("id", userId)
       .maybeSingle();
 
@@ -49,8 +49,7 @@ export const getMyProfile = async (req, res) => {
     if (!data) return res.status(404).json({ error: "Perfil não encontrado" });
 
     return res.json({ profile: data });
-  } catch (err) {
-    console.error("getMyProfile:", err);
+  } catch (e) {
     return res.status(500).json({ error: "Erro interno" });
   }
 };
@@ -73,41 +72,38 @@ export const updateProfile = async (req, res) => {
       bairro,
       numero,
       complemento,
-    } = req.body;
+    } = req.body || {};
 
-    // ✅ select() devolve a linha atualizada (e prova que gravou no BD)
+    // ✅ não envie "undefined" pro banco
+    const payload = {
+      social_name,
+      telefone,
+      tipo_pessoa,
+      cpf_cnpj,
+      inscricao,
+      cep,
+      uf,
+      cidade,
+      logradouro,
+      bairro,
+      numero,
+      complemento,
+    };
+
+    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
     const { data, error } = await supabase
       .from("profiles")
-      .update({
-        social_name,
-        telefone,
-        tipo_pessoa,
-        cpf_cnpj,
-        inscricao,
-        cep,
-        uf,
-        cidade,
-        logradouro,
-        bairro,
-        numero,
-        complemento,
-      })
+      .update(payload)
       .eq("id", userId)
-      .select("*")
+      .select("id, social_name, cpf_cnpj, inscricao, tipo_pessoa, telefone, cep, uf, cidade, logradouro, bairro, numero, complemento, id_plan")
       .maybeSingle();
 
     if (error) return res.status(400).json({ error: error.message });
-    if (!data)
-      return res
-        .status(404)
-        .json({ error: "Perfil não encontrado para atualizar" });
+    if (!data) return res.status(404).json({ error: "Perfil não encontrado para atualização." });
 
-    return res.json({
-      message: "Perfil atualizado com sucesso",
-      profile: data,
-    });
-  } catch (err) {
-    console.error("updateProfile:", err);
+    return res.json({ message: "Perfil atualizado com sucesso", profile: data });
+  } catch (e) {
     return res.status(500).json({ error: "Erro interno" });
   }
 };
