@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import "./emitir-nota.css";
 import icons from "../../components/Icons";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../utils/api.js";
 
 const ANIM_MS = 320;

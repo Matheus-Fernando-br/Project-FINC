@@ -22,13 +22,22 @@ function money(v) {
   return n.toFixed(2);
 }
 
-// ✅ normaliza alíquotas “zoada” (ex: 451020 => 45.1020%)
+// normaliza alíquotas “zoada” (ex: 451020 => 45.1020%)
 function normalizeAliquota(raw) {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 0;
   if (n > 1000) return n / 10000; // 451020 -> 45.102
   if (n > 100) return n / 100; // 1800 -> 18
   return n; // 18 -> 18
+}
+
+function escapeXml(s = "") {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 function downloadBlob(filename, content, mime) {
@@ -60,7 +69,7 @@ function Tela_2_emitir_nota() {
     }
   }, []);
 
-  // ✅ carrega emissor (usuário logado)
+  // carrega emissor (usuário logado)
   useEffect(() => {
     const loadEmissor = async () => {
       try {
@@ -75,6 +84,22 @@ function Tela_2_emitir_nota() {
     loadEmissor();
   }, []);
 
+  // transporte (vem da Tela 1)
+  const transporte = useMemo(() => {
+    return {
+      modalidade_frete:
+        data?.incluirFrete === "sim"
+          ? "0 - Por conta do remetente"
+          : "9 - Sem frete",
+      nome_transportador: data?.transNome || "",
+      cpf_cnpj: data?.transCpf || "",
+      placa: data?.placa || "",
+      peso_bruto: data?.pesoBruto || "",
+      peso_liquido: data?.pesoLiquido || "",
+      info: data?.infoTransporte || "",
+    };
+  }, [data]);
+
   const calculo = useMemo(() => {
     const items = data?.produtosServicos || [];
 
@@ -85,7 +110,6 @@ function Tela_2_emitir_nota() {
     let valorProdutos = 0,
       valorServicos = 0;
 
-    // (opcional) pis/cofins “junto” se existir
     let valorPISCOFINS = 0;
 
     items.forEach((item) => {
@@ -97,7 +121,7 @@ function Tela_2_emitir_nota() {
         valorProdutos += totalItem;
         baseICMS += totalItem;
 
-        const ali = normalizeAliquota(item.icms); // %
+        const ali = normalizeAliquota(item.icms);
         valorICMS += totalItem * (ali / 100);
 
         const aliPisCof = normalizeAliquota(item.pis_cofins);
@@ -140,11 +164,21 @@ function Tela_2_emitir_nota() {
     };
   }, [data]);
 
+  const somaProdutos = useMemo(() => {
+    return (data?.produtosServicos || []).reduce((acc, p) => {
+      const q = Number(p.quantidade) || 0;
+      const v = Number(p.valor) || 0;
+      return acc + q * v;
+    }, 0);
+  }, [data]);
+
   const gerarPdf = () => {
     if (!data) return alert("Nenhum dado salvo para gerar a nota.");
 
     const cpfRaw = onlyDigits(data.clienteCpfCnpj || "semcpf");
-    const filename = `nota-fiscal-${cpfRaw || "semcpf"}-${formatDateYYYYMMDD(new Date())}.pdf`;
+    const filename = `nota-fiscal-${cpfRaw || "semcpf"}-${formatDateYYYYMMDD(
+      new Date(),
+    )}.pdf`;
 
     const element = previewRef.current;
     const opt = {
@@ -200,62 +234,74 @@ function Tela_2_emitir_nota() {
     const itensXml = (data?.produtosServicos || [])
       .map((p, idx) => {
         const total = (Number(p.quantidade) || 0) * (Number(p.valor) || 0);
+
         return `
-      <item n="${idx + 1}">
-        <tipo>${p.tipo || ""}</tipo>
-        <descricao>${(p.nome || "").replaceAll("&", "e")}</descricao>
-        <categoria>${(p.categoriaItem || "").replaceAll("&", "e")}</categoria>
-        <qtd>${Number(p.quantidade) || 0}</qtd>
-        <valorUnit>${money(p.valor)}</valorUnit>
-        <subtotal>${money(total)}</subtotal>
-        <obs>${(p.info || "").replaceAll("&", "e")}</obs>
-        <icmsAliq>${normalizeAliquota(p.icms)}</icmsAliq>
-        <issAliq>${normalizeAliquota(p.aliquota_iss)}</issAliq>
-        <pisCofinsAliq>${normalizeAliquota(p.pis_cofins)}</pisCofinsAliq>
-      </item>`;
+    <item n="${idx + 1}">
+      <tipo>${escapeXml(p.tipo || "")}</tipo>
+      <descricao>${escapeXml(p.nome || "")}</descricao>
+      <categoria>${escapeXml(p.categoriaItem || "")}</categoria>
+      <qtd>${Number(p.quantidade) || 0}</qtd>
+      <valorUnit>${money(p.valor)}</valorUnit>
+      <subtotal>${money(total)}</subtotal>
+      <obs>${escapeXml(p.info || "")}</obs>
+      <icmsAliq>${normalizeAliquota(p.icms)}</icmsAliq>
+      <issAliq>${normalizeAliquota(p.aliquota_iss)}</issAliq>
+      <pisCofinsAliq>${normalizeAliquota(p.pis_cofins)}</pisCofinsAliq>
+    </item>`;
       })
       .join("");
 
+    // ✅ TRANSPORTE NO XML (igual Tela 1)
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <notaFiscal>
   <meta>
-    <tipo>${data?.tipoNota || ""}</tipo>
+    <tipo>${escapeXml(data?.tipoNota || "")}</tipo>
     <serie>${serie}</serie>
     <numero>${numero}</numero>
-    <dataEmissao>${now}</dataEmissao>
+    <dataEmissao>${escapeXml(now)}</dataEmissao>
   </meta>
 
   <emissor>
-    <nome>${emit.nome}</nome>
-    <cpfCnpj>${emit.cpfCnpj}</cpfCnpj>
-    <inscricaoEstadual>${emit.ie}</inscricaoEstadual>
-    <telefone>${emit.tel}</telefone>
+    <nome>${escapeXml(emit.nome)}</nome>
+    <cpfCnpj>${escapeXml(emit.cpfCnpj)}</cpfCnpj>
+    <inscricaoEstadual>${escapeXml(emit.ie)}</inscricaoEstadual>
+    <telefone>${escapeXml(emit.tel)}</telefone>
     <endereco>
-      <cep>${emit.endereco.cep}</cep>
-      <uf>${emit.endereco.uf}</uf>
-      <cidade>${emit.endereco.cidade}</cidade>
-      <logradouro>${emit.endereco.logradouro}</logradouro>
-      <bairro>${emit.endereco.bairro}</bairro>
-      <numero>${emit.endereco.numero}</numero>
-      <complemento>${emit.endereco.complemento}</complemento>
+      <cep>${escapeXml(emit.endereco.cep)}</cep>
+      <uf>${escapeXml(emit.endereco.uf)}</uf>
+      <cidade>${escapeXml(emit.endereco.cidade)}</cidade>
+      <logradouro>${escapeXml(emit.endereco.logradouro)}</logradouro>
+      <bairro>${escapeXml(emit.endereco.bairro)}</bairro>
+      <numero>${escapeXml(emit.endereco.numero)}</numero>
+      <complemento>${escapeXml(emit.endereco.complemento)}</complemento>
     </endereco>
   </emissor>
 
   <destinatario>
-    <nome>${dest.nome}</nome>
-    <cpfCnpj>${dest.cpfCnpj}</cpfCnpj>
-    <telefone>${dest.tel}</telefone>
-    <email>${dest.email}</email>
+    <nome>${escapeXml(dest.nome)}</nome>
+    <cpfCnpj>${escapeXml(dest.cpfCnpj)}</cpfCnpj>
+    <telefone>${escapeXml(dest.tel)}</telefone>
+    <email>${escapeXml(dest.email)}</email>
     <endereco>
-      <cep>${dest.endereco.cep}</cep>
-      <uf>${dest.endereco.uf}</uf>
-      <cidade>${dest.endereco.cidade}</cidade>
-      <logradouro>${dest.endereco.logradouro}</logradouro>
-      <bairro>${dest.endereco.bairro}</bairro>
-      <numero>${dest.endereco.numero}</numero>
-      <complemento>${dest.endereco.complemento}</complemento>
+      <cep>${escapeXml(dest.endereco.cep)}</cep>
+      <uf>${escapeXml(dest.endereco.uf)}</uf>
+      <cidade>${escapeXml(dest.endereco.cidade)}</cidade>
+      <logradouro>${escapeXml(dest.endereco.logradouro)}</logradouro>
+      <bairro>${escapeXml(dest.endereco.bairro)}</bairro>
+      <numero>${escapeXml(dest.endereco.numero)}</numero>
+      <complemento>${escapeXml(dest.endereco.complemento)}</complemento>
     </endereco>
   </destinatario>
+
+  <transporte>
+    <modalidadeFrete>${escapeXml(transporte.modalidade_frete)}</modalidadeFrete>
+    <nomeTransportador>${escapeXml(transporte.nome_transportador)}</nomeTransportador>
+    <cpfCnpj>${escapeXml(transporte.cpf_cnpj)}</cpfCnpj>
+    <placa>${escapeXml(transporte.placa)}</placa>
+    <pesoBruto>${escapeXml(transporte.peso_bruto)}</pesoBruto>
+    <pesoLiquido>${escapeXml(transporte.peso_liquido)}</pesoLiquido>
+    <informacoes>${escapeXml(transporte.info)}</informacoes>
+  </transporte>
 
   <itens>${itensXml}
   </itens>
@@ -273,7 +319,7 @@ function Tela_2_emitir_nota() {
     <totalNota>${money(calculo.totalNota)}</totalNota>
   </totais>
 
-  <observacoesGerais>${(data?.obsGeral || "").replaceAll("&", "e")}</observacoesGerais>
+  <observacoesGerais>${escapeXml(data?.obsGeral || "")}</observacoesGerais>
   <software>FINC</software>
 </notaFiscal>`;
 
@@ -318,25 +364,6 @@ function Tela_2_emitir_nota() {
       </main>
     );
   }
-
-  const transporte = {
-    modalidade_frete:
-      data?.incluirFrete === "sim"
-        ? "0 - Por conta do remetente"
-        : "9 - Sem frete",
-    nome_transportador: data?.transNome || "",
-    cpf_cnpj: data?.transCpf || "",
-    placa: data?.placa || "",
-    peso_bruto: data?.pesoBruto || "",
-    peso_liquido: data?.pesoLiquido || "",
-    info: data?.infoTransporte || "",
-  };
-
-  const somaProdutos = (data.produtosServicos || []).reduce((acc, p) => {
-    const q = Number(p.quantidade) || 0;
-    const v = Number(p.valor) || 0;
-    return acc + q * v;
-  }, 0);
 
   return (
     <main className="content">
@@ -752,6 +779,88 @@ function Tela_2_emitir_nota() {
                     {new Date().toLocaleTimeString("pt-BR")}
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ✅ TRANSPORTADOR / VOLUMES TRANSPORTADOS (voltou) */}
+          <div style={{ padding: "6px 0", fontSize: 9 }}>
+            <strong>TRANSPORTADOR / VOLUMES TRANSPORTADOS</strong>
+
+            <div style={{ border: "1px solid #000", marginTop: 4 }}>
+              <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
+                <div style={{ width: "30%", padding: "3px 4px" }}>
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>
+                    MODALIDADE DO FRETE
+                  </p>
+                  <p style={{ fontSize: 12 }}>{transporte.modalidade_frete}</p>
+                </div>
+
+                <div
+                  style={{
+                    width: "40%",
+                    borderLeft: "1px solid #000",
+                    padding: "3px 4px",
+                  }}
+                >
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>TRANSPORTADOR</p>
+                  <p style={{ fontSize: 12 }}>
+                    {transporte.nome_transportador || "-"}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: "30%",
+                    borderLeft: "1px solid #000",
+                    padding: "3px 4px",
+                  }}
+                >
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>CNPJ / CPF</p>
+                  <p style={{ fontSize: 12 }}>{transporte.cpf_cnpj || "-"}</p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", borderBottom: "1px solid #000" }}>
+                <div style={{ width: "50%", padding: "3px 4px" }}>
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>
+                    PLACA DO VEÍCULO
+                  </p>
+                  <p style={{ fontSize: 12 }}>{transporte.placa || "-"}</p>
+                </div>
+
+                <div
+                  style={{
+                    width: "25%",
+                    borderLeft: "1px solid #000",
+                    padding: "3px 4px",
+                  }}
+                >
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>PESO BRUTO</p>
+                  <p style={{ fontSize: 12 }}>
+                    {transporte.peso_bruto || "0"} Kg
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: "25%",
+                    borderLeft: "1px solid #000",
+                    padding: "3px 4px",
+                  }}
+                >
+                  <p style={{ fontSize: 8, marginBottom: 5 }}>PESO LÍQUIDO</p>
+                  <p style={{ fontSize: 12 }}>
+                    {transporte.peso_liquido || "0"} Kg
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ padding: "3px 4px" }}>
+                <p style={{ fontSize: 8, marginBottom: 5 }}>
+                  INFORMAÇÕES ADICIONAIS
+                </p>
+                <p style={{ fontSize: 12 }}>{transporte.info || "-"}</p>
               </div>
             </div>
           </div>
