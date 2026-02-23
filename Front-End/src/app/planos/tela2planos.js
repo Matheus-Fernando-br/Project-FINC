@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PlanoPadrao from "../../components/planos/planoPadrao";
 import icons from "../../components/Icons";
 import { apiFetch } from "../../utils/api.js";
@@ -10,7 +10,9 @@ function Tela_2_planos() {
   const [ativo, setAtivo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingTroca, setLoadingTroca] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const navigate = useNavigate();
 
   const formatBRL = (v) =>
     (v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -49,7 +51,7 @@ function Tela_2_planos() {
     setFeedback("");
 
     if (!planoSelecionado?.id) {
-      setFeedback("Selecione um plano disponível.");
+      window.confirm("Selecione um plano disponível.");
       return;
     }
 
@@ -67,12 +69,25 @@ function Tela_2_planos() {
       setAtivo(null);
 
       setFeedback("✅ Plano alterado com sucesso!");
+      setTimeout(() => {
+      navigate("/planos");
+    }, 2000);
     } catch (e) {
       console.error(e);
       setFeedback(e.message || "Erro ao trocar plano.");
     } finally {
       setLoadingTroca(false);
     }
+  };
+
+    const cancelarAlteracoes = () => {
+      setLoadingCancel(true);
+    if (!window.confirm("Deseja cancelar a troca de Plano?")) return;
+    setFeedback("Operação cancelada!");
+    setTimeout(() => {
+      setLoadingCancel(false);
+      navigate("/planos");
+    }, 2000);
   };
 
   return (
@@ -84,7 +99,7 @@ function Tela_2_planos() {
       </section>
 
       <div className="form-footer voltar">
-        <Link to="/configuracao/planos" className="previous-step">
+        <Link to="/planos" className="previous-step">
           Voltar <i className="bi bi-chevron-double-left"></i>
         </Link>
       </div>
@@ -133,32 +148,62 @@ function Tela_2_planos() {
             </div>
             <hr className="divider" />
 
-            {disponiveis.map((p) => (
-              <PlanoPadrao
-                key={p.id}
-                titulo={p.nome}
-                preco={formatBRL(p.valor)}
-                descricao={
-                  p.limites?.notas == null
-                    ? "emissões ilimitadas"
-                    : `até ${p.limites?.notas} notas/boletos mensais`
-                }
-                detalhes={p.detalhes || []}
-                ativo={ativo === p.id}
-                onClick={() => setAtivo(p.id)}
-              />
-            ))}
+            <div className="planos-list">
+              {disponiveis.map((p) => {
+                const checked = ativo === p.id;
 
-            {disponiveis.length === 0 && <p>Não há outros planos disponíveis.</p>}
+                return (
+                  <div key={p.id} className={`plano-row ${checked ? "selecionado" : ""}`}>
+                    {/* ESQUERDA: card intacto */}
+                    <div className="plano-row-card">
+                      <PlanoPadrao
+                        titulo={p.nome}
+                        preco={formatBRL(p.valor)}
+                        descricao={
+                          p.limites?.notas == null
+                            ? "emissões ilimitadas"
+                            : `até ${p.limites?.notas} notas/boletos mensais`
+                        }
+                        detalhes={p.detalhes || []}
+                      />
+                    </div>
+
+                    {/* DIREITA: seletor */}
+                    <div className="plano-row-select">
+                      <label className="radio-pill">
+                        <input
+                          type="radio"
+                          name="plano"
+                          checked={checked}
+                          onChange={() => setAtivo(p.id)}
+                        />
+                        <span className="radio-ui" />
+                        <span className="radio-text">{checked ? "Selecionado" : "Selecionar"}</span>
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {disponiveis.length === 0 && <p>Não há outros planos disponíveis.</p>}
+            </div>
           </section>
 
           {feedback && <p className="feedback">{feedback}</p>}
 
           <div className="botao_geral">
-            <button className="btn-cadastrar" onClick={trocarPlano} disabled={!ativo || loadingTroca}>
-              {loadingTroca && <span className="spinner"></span>}
-              {loadingTroca ? "" : "Confirmar troca"}
+            <button className="btn btn-cancelar" onClick={cancelarAlteracoes}>
+              {loadingCancel && <span className="spinner"></span>}
+              {loadingCancel ? "" : "Cancelar troca"}
             </button>
+          <button
+            className="btn btn-cadastrar"
+            onClick={trocarPlano}
+            disabled={!ativo || loadingTroca || loadingCancel}
+          >
+            {loadingTroca && <span className="spinner"></span>}
+            {loadingTroca ? "" : "Confirmar troca"}
+          </button>
           </div>
         </>
       )}
