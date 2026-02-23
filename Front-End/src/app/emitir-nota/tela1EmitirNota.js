@@ -802,6 +802,7 @@ function Tela_1_emitir_nota() {
               onChange={(e) => setObsGeral(e.target.value)}
               placeholder="Ex.: Pedido 123, pagamento via PIX, entregue em mãos..."
               rows={4}
+              className="zonaTexto"
             />
           </div>
         </div>

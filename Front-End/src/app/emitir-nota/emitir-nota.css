@@ -140,3 +140,10 @@
 .dropdown-sugestoes li:hover {
   background-color: #f0f7ff;
 }
+
+.zonaTexto {
+  padding: 1vh 1vw;
+  border-radius: 15px;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}

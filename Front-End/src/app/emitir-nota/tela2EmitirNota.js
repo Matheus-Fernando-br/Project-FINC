@@ -999,10 +999,10 @@ function Tela_2_emitir_nota() {
                       (Number(p.quantidade) || 0) * (Number(p.valor) || 0);
                     return (
                       <tr key={i}>
-                        <td style={{ border: "1px solid #000", padding: 4 }}>
+                        <td style={{ border: "1px solid #000", padding: 4, width: "10%", }}>
                           {p.nome}
                         </td>
-                        <td style={{ border: "1px solid #000", padding: 4 }}>
+                        <td style={{ border: "1px solid #000", padding: 4, width: "10%", }}>
                           {p.categoriaItem}
                         </td>
                         <td
@@ -1010,6 +1010,7 @@ function Tela_2_emitir_nota() {
                             border: "1px solid #000",
                             padding: 4,
                             textAlign: "right",
+                            width: "2%",
                           }}
                         >
                           {p.quantidade}
@@ -1019,6 +1020,7 @@ function Tela_2_emitir_nota() {
                             border: "1px solid #000",
                             padding: 4,
                             textAlign: "right",
+                            width: "10%",
                           }}
                         >
                           R$ {money(p.valor)}
@@ -1028,6 +1030,7 @@ function Tela_2_emitir_nota() {
                             border: "1px solid #000",
                             padding: 4,
                             textAlign: "right",
+                            width: "10%",
                           }}
                         >
                           R$ {money(subtotal)}
