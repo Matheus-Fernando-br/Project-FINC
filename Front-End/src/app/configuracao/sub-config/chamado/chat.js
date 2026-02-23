@@ -1,5 +1,5 @@
 import "../../config.css";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate  } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 export default function Chat() {
@@ -9,6 +9,9 @@ export default function Chat() {
   const [mensagens, setMensagens] = useState([]);
   const [mensagem, setMensagem] = useState("");
   const [chamado, setChamado] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
+  const navigate = useNavigate();
 
   const chatRef = useRef(null);
 
@@ -39,6 +42,7 @@ export default function Chat() {
   /* ================= ENVIAR MSG ================= */
 
   async function enviarMsg() {
+    setLoading(true);
 
     if (!mensagem.trim()) return;
 
@@ -57,6 +61,7 @@ export default function Chat() {
 
       setMensagem("");
       buscar();
+      setLoading(false);
 
     } catch (err) {
       console.error("Erro ao enviar mensagem:", err);
@@ -104,6 +109,7 @@ export default function Chat() {
   /* ================= ENCERRAR CHAMADO ================= */
 
   async function encerrarChamado() {
+    setLoadingCancel(true)
     try {
 
       await fetch(
@@ -112,6 +118,9 @@ export default function Chat() {
       );
 
       buscar();
+      setTimeout(() => {
+        navigate("/configuracao/chamado");
+      }, 4000);
 
     } catch (err) {
       console.error("Erro ao encerrar chamado:", err);
@@ -139,7 +148,8 @@ export default function Chat() {
               className="btn btn-cancelar"
               onClick={encerrarChamado}
             >
-              Encerrar Chamado
+              {loadingCancel && <span className="spinner"></span>}
+              {loadingCancel ? "" : "Encerrar chamado"}
             </button>
           )}
         </div>
@@ -185,7 +195,8 @@ export default function Chat() {
             />
 
             <button onClick={enviarMsg}>
-              Enviar
+              {loading && <span className="spinner"></span>}
+              {loading ? "" : "Enviar"}
             </button>
 
           </div>
