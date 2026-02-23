@@ -69,42 +69,56 @@ export default function ResetPassword() {
   if (!ready) return null;
 
   return (
-    <div className="wrapper">
-      <form onSubmit={trocarSenha}>
-        <h1>Nova senha</h1>
-
-        {feedback && <p className="feedback">{feedback}</p>}
-
-        <div className="input-box">
-          <div className="label">Nova senha:</div>
-          <input
-            type="password"
-            value={novaSenha}
-            onChange={(e) => setNovaSenha(e.target.value)}
-            disabled={loading}
-            autoComplete="new-password"
-          />
+    <main>
+      <section className="Login">
+        <div className="Fundo">
+          <img src="/Images/Fundo-Login-teste.png" alt="Fundo" />
         </div>
 
-        <div className="input-box">
-          <div className="label">Confirmar senha:</div>
-          <input
-            type="password"
-            value={confirmar}
-            onChange={(e) => setConfirmar(e.target.value)}
-            disabled={loading}
-            autoComplete="new-password"
-          />
+        <div className="rodape form-footer voltar">
+          <Link to="/TelaInicial/Login">
+            Voltar para Tela de Login{" "}
+            <i className="bi bi-chevron-double-left"></i>
+            <i className="bi bi-chevron-double-left"></i>
+          </Link>
         </div>
+    
+        <div className="wrapper">
+          <form onSubmit={trocarSenha}>
+            <h1>Nova senha</h1>
 
-        <button className="btn" type="submit" disabled={loading}>
-          {loading ? "Salvando..." : "Salvar nova senha"}
-        </button>
+            {feedback && <p className="feedback">{feedback}</p>}
 
-        <div style={{ marginTop: 12 }}>
-          <Link to="/TelaInicial/Login">Voltar ao login</Link>
+            <div className="input-box">
+              <div className="label">Nova senha:</div>
+              <input
+                type="password"
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value)}
+                disabled={loading}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="input-box">
+              <div className="label">Confirmar senha:</div>
+              <input
+                type="password"
+                value={confirmar}
+                onChange={(e) => setConfirmar(e.target.value)}
+                disabled={loading}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? "Salvando..." : "Salvar nova senha"}
+            </button>
+
+          </form>
         </div>
-      </form>
-    </div>
+      </section>
+    </main>
+
   );
 }
