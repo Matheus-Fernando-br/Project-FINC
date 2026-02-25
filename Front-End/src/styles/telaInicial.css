@@ -1,6 +1,6 @@
-/* -------------------- */
-/* 🔹 Header */
-/* -------------------- */
+/* ===================================================== */
+/* 🔹 HEADER BASE */
+/* ===================================================== */
 
 .cabecalho header {
   position: fixed;
@@ -9,41 +9,56 @@
   width: 100%;
   z-index: 1000;
 }
+
 .cabecalho .navbar {
-  backdrop-filter: blur(7px);
-  background: var(--cor-preto-transparente);
-  border-bottom: 1px solid var(--cor-texto-claro);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2vw;
+
+  backdrop-filter: blur(7px);
+  background: var(--cor-preto-transparente);
+  border-bottom: 1px solid var(--cor-texto-claro);
 }
+
+/* Logo */
 .cabecalho .navbar img {
   height: 12vh;
   margin-left: 1vw;
-  transition: transform 0.3s;
+  transition: transform 0.3s ease;
 }
+
 .cabecalho .navbar img:hover {
   transform: scale(0.98);
 }
 
-.cabecalho .subpage{
+.cabecalho .subpage {
   height: 15vh;
 }
+
+/* ===================================================== */
+/* 🔹 MENU DESKTOP */
+/* ===================================================== */
 
 .cabecalho .menu {
   display: flex;
   gap: 4vw;
   margin-right: 4vw;
 }
+
+/* Links base */
 .cabecalho .navbar a {
-  color: var(--cor-texto-claro);
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
   position: relative;
   padding: 8px 0;
+
+  color: var(--cor-texto-claro);
+  text-decoration: none;
+  font-weight: 600;
+
+  transition: color 0.3s ease;
 }
+
+/* Linhas decorativas */
 .cabecalho .menu a::before,
 .cabecalho .menu a::after {
   content: "";
@@ -54,25 +69,56 @@
   background-color: var(--cor-texto-claro);
   transition: all 0.3s ease;
 }
-.cabecalho .menu a::before {
-  top: 0;
-}
-.cabecalho .menu a::after {
-  bottom: 0;
-}
-.cabecalho .menu a:hover {
-  color: var(--cor-hover);
-}
-.cabecalho .menu a:hover::before {
-  top: -6px;
-  background-color: var(--cor-hover);
-}
-.cabecalho .menu a:hover::after {
-  bottom: -6px;
-  background-color: var(--cor-hover);
+
+.cabecalho .menu a::before { top: 0; }
+.cabecalho .menu a::after { bottom: 0; }
+
+/* ===================================================== */
+/* 🔹 ESTADO ATIVO (FUNCIONA EM TODOS) */
+/* ===================================================== */
+
+.cabecalho .menu a.ativo {
+  color: var(--cor-primaria);
 }
 
-.cabecalho .hamburger, .cabecalho .close-menux {
+.cabecalho .menu a.ativo::before {
+  top: -6px;
+  background-color: var(--cor-primaria);
+}
+
+.cabecalho .menu a.ativo::after {
+  bottom: -6px;
+  background-color: var(--cor-primaria);
+}
+
+/* ===================================================== */
+/* 🔹 HOVER (SOMENTE EM DISPOSITIVOS COM MOUSE) */
+/* ===================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+
+  .cabecalho .menu a:hover {
+    color: var(--cor-hover);
+  }
+
+  .cabecalho .menu a:hover::before {
+    top: -6px;
+    background-color: var(--cor-hover);
+  }
+
+  .cabecalho .menu a:hover::after {
+    bottom: -6px;
+    background-color: var(--cor-hover);
+  }
+
+}
+
+/* ===================================================== */
+/* 🔹 HAMBURGER */
+/* ===================================================== */
+
+.cabecalho .hamburger,
+.cabecalho .close-menux {
   display: none;
   font-size: 3rem;
   cursor: pointer;
@@ -80,43 +126,56 @@
   z-index: 2100;
 }
 
+/* ===================================================== */
+/* 🔹 MOBILE */
+/* ===================================================== */
 
-/* Mobile menu for landing (scoped) */
 @media (max-width: 900px) {
-  
-  .cabecalho .navbar img { height: 8vh; }
-  
-  .cabecalho header .menu {
+
+  /* Logo menor */
+  .cabecalho .navbar img {
+    height: 8vh;
+  }
+
+  /* Menu lateral */
+  .cabecalho .menu {
     position: fixed;
     top: 0;
-    right: -100%; /* escondido fora da tela */
-    width: 60%;   /* metade da tela */
-    height: 60vh; /* altura total da tela */
+    right: -100%;
+    width: 60%;
+    height: 70vh;
+
+    display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 3rem;
     padding: 4.5rem 2rem;
+
     backdrop-filter: blur(20px);
     background-color: var(--cor-preto-transparente-forte);
     border-radius: 20px;
+
     transition: right 0.4s ease-in-out;
-    z-index: 2000; /* sempre acima do conteúdo */
+    z-index: 2000;
   }
 
+  /* Menu aberto */
   .cabecalho .menu.active {
-    right: -5%; /* aparece pela direita */
+    right: -5%;
   }
 
+  /* Remove qualquer efeito hover no mobile */
+  .cabecalho .menu a:hover,
+  .cabecalho .menu a:hover::before,
+  .cabecalho .menu a:hover::after {
+    color: var(--cor-texto-claro);
+    background-color: none;
+    top: 0;
+    bottom: 0;
+  }
+
+  /* Mostrar hamburger */
   .cabecalho .hamburger {
     display: block;
-  }
-
-  /* Quando ativo, esconde o hamburger e mostra o X */
-  .cabecalho .close-menux.show {
-    display: block;
-  }
-
-  .cabecalho .hamburger .hide {
-    display: none;
   }
 
 }
@@ -186,6 +245,7 @@
   .tela-inicial .fundo img {
     width: 100vw;
     height: 100vh;
+    filter: brightness(0.7);
     object-fit: cover; /* mantém proporção e cobre toda a área */
   }
 

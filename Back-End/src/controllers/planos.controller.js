@@ -5,7 +5,6 @@ function mapPlano(p) {
   return {
     id: p.id,
     nome: p.Nome,
-    tipo: p.tipo_plano,
     valor: p.valor,
     limites: {
       notas: p.limite_notas,

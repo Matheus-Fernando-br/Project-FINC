@@ -39,11 +39,15 @@ export async function apiFetch(path, options = {}) {
     ? await res.json().catch(() => null)
     : await res.text().catch(() => null);
 
-  // ✅ tratamento de expiração
   if (res.status === 401) {
-    logoutAndRedirect();
-    throw new Error("Sessão expirada");
+    if (path === "/auth/login") {
+      throw new Error("Usuário ou senha incorretos");
+    } else {
+      logoutAndRedirect();
+      throw new Error("Sessão expirada");
+    }
   }
+
 
   if (!res.ok) {
     const msg =

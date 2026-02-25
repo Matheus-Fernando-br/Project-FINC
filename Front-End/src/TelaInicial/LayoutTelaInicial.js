@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import icons from "../components/Icons";
 import "../styles/telaInicial.css";
 
 function LayoutTelaInicial({ children }) {
+  const location = useLocation();
 
   useEffect(() => {
     // Seletores
@@ -63,17 +64,42 @@ useEffect(() => {
 
           {/* Menu */}
           <div className={`menu ${active ? "active" : ""}`}>
-            <Link to="/">
-              <i className={icons.casa}></i> Home</Link>
-            <Link to="/TelaInicial/Planos">
-               <i className={icons.cash}></i> Planos</Link>
-            <Link to="/TelaInicial/Duvidas">
-              <i className={icons.duvidas}></i> Dúvidas</Link>
-            <Link to="/TelaInicial/QuemSomos">
-              <i className={icons.clientes}></i> Quem Somos</Link>
-            <Link to="/TelaInicial/Login">
+
+            <Link 
+              to="/" 
+              className={location.pathname === "/" ? "ativo" : ""}
+            >
+              <i className={icons.casa}></i> Home
+            </Link>
+
+            <Link 
+              to="/TelaInicial/Planos"
+              className={location.pathname.includes("/TelaInicial/Planos") ? "ativo" : ""}
+            >
+              <i className={icons.cash}></i> Planos
+            </Link>
+
+            <Link 
+              to="/TelaInicial/Duvidas"
+              className={location.pathname.includes("/TelaInicial/Duvidas") ? "ativo" : ""}
+            >
+              <i className={icons.duvidas}></i> Dúvidas
+            </Link>
+
+            <Link 
+              to="/TelaInicial/QuemSomos"
+              className={location.pathname.includes("/TelaInicial/QuemSomos") ? "ativo" : ""}
+            >
+              <i className={icons.clientes}></i> Quem Somos
+            </Link>
+
+            <Link 
+              to="/TelaInicial/Login"
+              className={location.pathname.includes("/TelaInicial/Login") ? "ativo" : ""}
+            >
               <i className={icons.clientePerson}></i> Login
             </Link>
+
           </div>
 
         </nav>
