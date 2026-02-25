@@ -82,12 +82,10 @@
 }
 
 .cabecalho .menu a.ativo::before {
-  top: -6px;
-  background-color: var(--cor-primaria);
+  display: none;
 }
 
 .cabecalho .menu a.ativo::after {
-  bottom: -6px;
   background-color: var(--cor-primaria);
 }
 

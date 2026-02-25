@@ -1,3 +1,4 @@
+// Back-End/src/telegram/chamados.js
 import { supabase } from "../services/supabase.js";
 import { enviarTelegram } from "./telegram.js";
 
@@ -6,7 +7,6 @@ import { enviarTelegram } from "./telegram.js";
 /* ================= */
 export async function criarChamado(req, res) {
   try {
-
     const { categoria, assunto, mensagem, user } = req.body;
 
     /* ===== GERAR PROTOCOLO ===== */
@@ -19,7 +19,7 @@ export async function criarChamado(req, res) {
         protocolo,
         user_id: user.id,
         categoria,
-        assunto
+        assunto,
       })
       .select()
       .single();
@@ -30,14 +30,11 @@ export async function criarChamado(req, res) {
     }
 
     /* ===== CRIAR PRIMEIRA MENSAGEM ===== */
-
-    const { error: erroMsg } = await supabase
-      .from("mensagens")
-      .insert({
-        chamado_id: chamado.id,
-        autor: "cliente",
-        mensagem
-      });
+    const { error: erroMsg } = await supabase.from("mensagens").insert({
+      chamado_id: chamado.id,
+      autor: "cliente",
+      mensagem,
+    });
 
     if (erroMsg) {
       console.error(erroMsg);
@@ -45,7 +42,6 @@ export async function criarChamado(req, res) {
     }
 
     res.json(chamado);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: err.message });
@@ -57,7 +53,6 @@ export async function criarChamado(req, res) {
 /* ================= */
 export async function enviarMensagem(req, res) {
   try {
-
     const { chamado_id, mensagem } = req.body;
 
     const { data: chamado } = await supabase
@@ -66,23 +61,19 @@ export async function enviarMensagem(req, res) {
       .eq("id", chamado_id)
       .single();
 
-    if (!chamado)
-      return res.status(404).json({ erro: "Chamado não encontrado" });
+    if (!chamado) return res.status(404).json({ erro: "Chamado não encontrado" });
 
     if (chamado.status === "fechado")
       return res.status(400).json({ erro: "Chamado encerrado" });
 
     /* SALVAR */
-    const { error } = await supabase
-      .from("mensagens")
-      .insert({
-        chamado_id,
-        autor: "cliente",
-        mensagem
-      });
+    const { error } = await supabase.from("mensagens").insert({
+      chamado_id,
+      autor: "cliente",
+      mensagem,
+    });
 
-    if (error)
-      return res.status(500).json(error);
+    if (error) return res.status(500).json(error);
 
     /* BUSCAR USER */
     const { data: usuario } = await supabase
@@ -91,9 +82,9 @@ export async function enviarMensagem(req, res) {
       .eq("id", chamado.user_id)
       .single();
 
-    /* TELEGRAM */
+    /* TELEGRAM (COM BOTÕES) */
     try {
-      await enviarTelegram(`📩 Nova mensagem no chamado ${chamado.protocolo}
+      const textoTelegram = `📩 Nova mensagem no chamado #${chamado.protocolo}
 
 👤 Usuário: ${usuario?.nome || "Desconhecido"}
 📧 Email: ${usuario?.email || "-"}
@@ -102,13 +93,23 @@ export async function enviarMensagem(req, res) {
 📌 Assunto: ${chamado.assunto}
 
 💬 Mensagem:
-${mensagem}`);
+${mensagem}`;
+
+      await enviarTelegram(textoTelegram, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
+              { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
+            ],
+          ],
+        },
+      });
     } catch (e) {
       console.error("Telegram erro:", e);
     }
 
     res.sendStatus(200);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao enviar mensagem" });
@@ -119,7 +120,6 @@ ${mensagem}`);
 /* LISTAR MENSAGENS */
 /* ================= */
 export async function listarMensagens(req, res) {
-
   const { chamado_id } = req.params;
 
   const { data } = await supabase
@@ -133,7 +133,6 @@ export async function listarMensagens(req, res) {
 
 export async function buscarChamado(req, res) {
   try {
-
     const { id } = req.params;
 
     const { data, error } = await supabase
@@ -147,7 +146,6 @@ export async function buscarChamado(req, res) {
     }
 
     res.json(data);
-
   } catch {
     res.status(500).json({ erro: "Erro ao buscar chamado" });
   }
@@ -158,7 +156,6 @@ export async function buscarChamado(req, res) {
 /* ================= */
 export async function encerrarChamado(req, res) {
   try {
-
     const { id } = req.params;
 
     const { data } = await supabase
@@ -175,16 +172,11 @@ export async function encerrarChamado(req, res) {
       return res.json({ ok: true });
     }
 
-    await supabase
-      .from("chamados")
-      .update({ status: "fechado" })
-      .eq("id", id);
+    await supabase.from("chamados").update({ status: "fechado" }).eq("id", id);
 
     res.json({ ok: true });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao encerrar chamado" });
   }
 }
-
