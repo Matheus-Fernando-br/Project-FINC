@@ -1,6 +1,6 @@
 # Plataforma FINC - Emissão de Notas Fiscais e Gestão Financeira
 
-![FINC Logo](https://i.imgur.com/link-para-sua-logo.png )
+![FINC Logo](https://raw.githubusercontent.com/Matheus-Fernando-br/Project-FINC/main/Front-End/public/Images/FINC.png)
 
 ##  Visão Geral do Projeto
 

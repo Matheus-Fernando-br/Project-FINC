@@ -1,10 +1,9 @@
 import "../../config.css";
 import icons from "../../../../components/Icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Chamado() {
-
   const navigate = useNavigate();
 
   const [modal, setModal] = useState(false);
@@ -15,6 +14,10 @@ export default function Chamado() {
   const [assunto, setAssunto] = useState("");
   const [mensagem, setMensagem] = useState("");
 
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [chamados, setChamados] = useState([]);
+  const [loadingChamados, setLoadingChamados] = useState(false);
+
   const user = JSON.parse(localStorage.getItem("user"));
 
   /* ===== BLOQUEAR SCROLL QUANDO MODAL ABRIR ===== */
@@ -22,10 +25,34 @@ export default function Chamado() {
     document.body.style.overflow = modal ? "hidden" : "auto";
   }, [modal]);
 
+  /* ================= LISTAR CHAMADOS DO USUÁRIO ================= */
+  const buscarChamados = useCallback(async () => {
+    if (!user?.id) return;
+
+    setLoadingChamados(true);
+    try {
+      const res = await fetch(
+        `https://project-finc.onrender.com/chamados/user/${user.id}`
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.erro || "Erro ao buscar chamados");
+
+      setChamados(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setChamados([]);
+    } finally {
+      setLoadingChamados(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    buscarChamados();
+  }, [buscarChamados]);
+
   /* ================= CRIAR CHAMADO ================= */
-
   async function criarChamado() {
-
     if (!user) {
       setFeedback("Usuário não identificado.");
       return;
@@ -40,33 +67,30 @@ export default function Chamado() {
     setFeedback("Abrindo chamado...");
 
     try {
-
-      const res = await fetch(
-        "https://project-finc.onrender.com/chamados",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            categoria,
-            assunto,
-            mensagem,
-            user
-          })
-        }
-      );
+      const res = await fetch("https://project-finc.onrender.com/chamados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoria,
+          assunto,
+          mensagem,
+          user,
+        }),
+      });
 
       if (!res.ok) throw new Error();
 
       const data = await res.json();
 
       setModal(false);
-
       setCategoria("");
       setAssunto("");
       setMensagem("");
 
-      navigate(`/configuracao/chat/${data.id}`);
+      // Atualiza lista de chamados
+      buscarChamados();
 
+      navigate(`/configuracao/chat/${data.id}`);
     } catch (err) {
       console.error(err);
       setFeedback("Erro ao abrir chamado.");
@@ -77,7 +101,6 @@ export default function Chamado() {
 
   return (
     <main className="content configuracao">
-
       <section className="titulo-secao">
         <h1>
           <i className={icons.suporte}></i> Suporte Técnico
@@ -105,10 +128,8 @@ export default function Chamado() {
 
       {/* CARDS */}
       <div className="config-options-2">
-
         {/* ===== ABRIR CHAMADO ===== */}
         <div className="config-item">
-
           <div className="menu-esquerda">
             <i className={icons.suporte}></i>
 
@@ -125,66 +146,79 @@ export default function Chamado() {
               </button>
             )}
           </div>
-
         </div>
 
-        {/* ===== OUTROS CARDS ===== */}
-
+        {/* ===== CHAMADOS ANTERIORES ===== */}
         <div className="config-item">
           <div className="menu-esquerda">
             <i className="bi bi-info-circle-fill"></i>
             <div>
-              <h3>Esqueceu sua senha?</h3>
-              <p>Tente relembrar com nossa ajuda sua senha</p>
+              <h3>Chamados anteriores</h3>
+              <p>Visualize seus chamados anteriores</p>
             </div>
           </div>
 
           <div className="menu-direita">
-            <button className="btn btn-clicar">Enviar</button>
+            <button
+              className="btn btn-clicar"
+              onClick={() => setOpenDropdown((v) => !v)}
+            >
+              {openDropdown ? "Fechar" : "Acessar"}
+            </button>
           </div>
         </div>
 
-        <div className="config-item">
-          <div className="menu-esquerda">
-            <i className={icons.clientePerson}></i>
-            <div>
-              <h3>Recuperar sua conta</h3>
-              <p>Perdeu acesso de uma conta antiga, faça sua solicitação!</p>
+        {/* ===== DROPDOWN (logo abaixo do card) ===== */}
+        {openDropdown && (
+          <div className="config-item" style={{ marginTop: "-10px" }}>
+            <div className="menu-esquerda" style={{ width: "100%" }}>
+              <div style={{ width: "100%" }}>
+                {loadingChamados ? (
+                  <p style={{ margin: 0 }}>Carregando chamados...</p>
+                ) : chamados.length === 0 ? (
+                  <p style={{ margin: 0 }}>
+                    Você não possui chamados anteriores no momento.
+                  </p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {chamados.map((c) => (
+                      <div
+                        key={c.id}
+                        className="config-item"
+                        style={{ margin: 0 }}
+                      >
+                        <div className="menu-esquerda">
+                          <div>
+                            <h3 style={{ marginBottom: 2 }}>
+                              Chamado #{c.protocolo || c.id}
+                            </h3>
+                            <p style={{ margin: 0 }}>{c.assunto || "Sem assunto"}</p>
+                          </div>
+                        </div>
+
+                        <div className="menu-direita">
+                          <button
+                            className="btn"
+                            onClick={() => navigate(`/configuracao/chat/${c.id}`)}
+                          >
+                            Acessar chat
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-
-          <div className="menu-direita">
-            <button className="btn btn-clicar">Enviar</button>
-          </div>
-        </div>
-
-        <div className="config-item">
-          <div className="menu-esquerda">
-            <i className="bi bi-info-circle-fill"></i>
-            <div>
-              <h3>Relatar um problema</h3>
-              <p>Informe um problema para melhorarmos sua experiência.</p>
-            </div>
-          </div>
-
-          <div className="menu-direita">
-            <button className="btn btn-clicar">Enviar</button>
-          </div>
-        </div>
-
+        )}
       </div>
 
       {/* ================= MODAL ================= */}
-
       {modal && (
         <div className="modal-overlay">
-
           <div className="modal-container chamado-modal">
-
-            <button
-              className="modal-close"
-              onClick={() => setModal(false)}
-            >
+            <button className="modal-close" onClick={() => setModal(false)}>
               ✕
             </button>
 
@@ -193,13 +227,12 @@ export default function Chamado() {
             <hr className="divider" />
 
             <div className="inputs">
-
               <div className="input-solo">
                 <label>Categoria:</label>
 
                 <select
                   value={categoria}
-                  onChange={e => setCategoria(e.target.value)}
+                  onChange={(e) => setCategoria(e.target.value)}
                 >
                   <option value="">Selecione categoria</option>
                   <option>Emitir Nota</option>
@@ -216,7 +249,7 @@ export default function Chamado() {
                 <input
                   maxLength={30}
                   value={assunto}
-                  onChange={e => setAssunto(e.target.value)}
+                  onChange={(e) => setAssunto(e.target.value)}
                   placeholder="Informe o assunto"
                 />
               </div>
@@ -226,22 +259,16 @@ export default function Chamado() {
 
                 <textarea
                   value={mensagem}
-                  onChange={e => setMensagem(e.target.value)}
+                  onChange={(e) => setMensagem(e.target.value)}
                   placeholder="Descreva o problema com detalhes"
                 />
               </div>
-
             </div>
 
             <div className="botao_geral modal-actions">
-
-              <button
-                className="btn"
-                disabled={loading}
-                onClick={criarChamado}
-              >
+              <button className="btn" disabled={loading} onClick={criarChamado}>
                 {loading && <span className="spinner"></span>}
-                {loading ? "Abrindo..." : "Abrir Chamado"}
+                {loading ? "" : "Abrir Chamado"}
               </button>
 
               <button
@@ -251,15 +278,12 @@ export default function Chamado() {
               >
                 Cancelar
               </button>
-
             </div>
 
             {feedback && <p className="feedback">{feedback}</p>}
-
           </div>
         </div>
       )}
-
     </main>
   );
 }

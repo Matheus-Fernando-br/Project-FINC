@@ -5,38 +5,33 @@ export default function AnimatedRoutes({ children }) {
   const location = useLocation();
   const direction = location.state?.direction || "none";
 
-  const variants = {
-    enter: (dir) => ({
-      rotateY: dir === "right" ? 90 : dir === "left" ? -90 : 0,
-      opacity: 0
-    }),
-    center: {
-      rotateY: 0,
-      opacity: 1
-    },
-    exit: (dir) => ({
-      rotateY: dir === "right" ? -90 : dir === "left" ? 90 : 0,
-      opacity: 0
-    })
-  };
+const variants = {
+  enter: {
+    opacity: 0,
+    y: 10
+  },
+  center: {
+    opacity: 1,
+    y: 0
+  },
+  exit: {
+    opacity: 0,
+    y: -10
+  }
+};
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        custom={direction}
-        variants={variants}
-        initial="enter"
-        animate="center"
-        exit="exit"
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-        style={{
-          transformStyle: "preserve-3d",
-          perspective: 1200
-        }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+  <AnimatePresence>
+    <motion.div
+      key={location.pathname}
+      variants={variants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{ duration: 0.25 }}
+    >
+      {children}
+    </motion.div>
+  </AnimatePresence>
   );
 }

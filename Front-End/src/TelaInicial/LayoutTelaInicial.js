@@ -51,10 +51,12 @@ useEffect(() => {
     <div className="cabecalho">
       <header>
         <nav className="navbar" ref={sidebarRef}>
-          {/* Logo */}
+        {/* Logo */}
+        <div className="logo">
           <Link to="/">
             <img src="/Images/FINC.png" alt="Logo" />
           </Link>
+        </div>
 
           {/* Ícones Mobile */}
           <i 
@@ -106,7 +108,9 @@ useEffect(() => {
       </header>
 
       {/* Conteúdo das páginas que usarem esse layout */}
-      <main>{children}</main>
+      <main className="page-transition">
+        {children}
+      </main>
     </div>
   );
 }

@@ -10,6 +10,11 @@
   z-index: 1000;
 }
 
+.cabecalho .logo {
+  display: flex;
+  align-items: center;
+}
+
 .cabecalho .navbar {
   display: flex;
   align-items: center;
@@ -36,14 +41,16 @@
   height: 15vh;
 }
 
+
+
 /* ===================================================== */
 /* 🔹 MENU DESKTOP */
 /* ===================================================== */
 
 .cabecalho .menu {
   display: flex;
-  gap: 4vw;
-  margin-right: 4vw;
+  gap: 2vw;
+  margin-left: 0;
 }
 
 /* Links base */
@@ -58,21 +65,6 @@
   transition: color 0.3s ease;
 }
 
-/* Linhas decorativas */
-.cabecalho .menu a::before,
-.cabecalho .menu a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 110%;
-  height: 1px;
-  background-color: var(--cor-texto-claro);
-  transition: all 0.3s ease;
-}
-
-.cabecalho .menu a::before { top: 0; }
-.cabecalho .menu a::after { bottom: 0; }
-
 /* ===================================================== */
 /* 🔹 ESTADO ATIVO (FUNCIONA EM TODOS) */
 /* ===================================================== */
@@ -81,11 +73,19 @@
   color: var(--cor-primaria);
 }
 
-.cabecalho .menu a.ativo::before {
-  display: none;
+.cabecalho .menu a {
+  padding: .7rem;
+  border-radius: 10px;
 }
 
+.cabecalho .menu a::after { bottom: 0; }
 .cabecalho .menu a.ativo::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 110%;
+  height: 1px;
+  transition: all 0.3s ease;
   background-color: var(--cor-primaria);
 }
 
@@ -95,17 +95,21 @@
 
 @media (hover: hover) and (pointer: fine) {
 
-  .cabecalho .menu a:hover {
-    color: var(--cor-hover);
+  .cabecalho .menu a {
+    transition: all 0.3s ease;
   }
 
-  .cabecalho .menu a:hover::before {
-    top: -6px;
+  .cabecalho .menu a:hover {
+    transform: scale(0.98);
     background-color: var(--cor-hover);
   }
 
+  .cabecalho .menu a:hover.ativo {
+    background-color: transparent;
+  }
+
   .cabecalho .menu a:hover::after {
-    bottom: -6px;
+    bottom: -4px;
     background-color: var(--cor-hover);
   }
 
@@ -141,7 +145,7 @@
     top: 0;
     right: -100%;
     width: 60%;
-    height: 70vh;
+    height: 75vh;
 
     display: flex;
     flex-direction: column;
@@ -149,7 +153,7 @@
     padding: 4.5rem 2rem;
 
     backdrop-filter: blur(20px);
-    background-color: var(--cor-preto-transparente-forte);
+    background-color: var(--cor-fundo-escuro);
     border-radius: 20px;
 
     transition: right 0.4s ease-in-out;
@@ -163,7 +167,6 @@
 
   /* Remove qualquer efeito hover no mobile */
   .cabecalho .menu a:hover,
-  .cabecalho .menu a:hover::before,
   .cabecalho .menu a:hover::after {
     color: var(--cor-texto-claro);
     background-color: none;
