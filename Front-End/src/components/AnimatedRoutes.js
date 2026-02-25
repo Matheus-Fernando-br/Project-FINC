@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function AnimatedRoutes({ children }) {
   const location = useLocation();
-  const direction = location.state?.direction || "none";
 
 const variants = {
   enter: {

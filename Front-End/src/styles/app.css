@@ -12,17 +12,22 @@ body {
 }
 
 /* ================= HEADER ================= */
+:root {
+  --header-height: 100px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(
     to top,
-    var(--cor-terciaria) 30%,
+    var(--cor-terciaria) 20%,
     var(--cor-secundaria)
   );
   color: var(--cor-texto-claro);
-  padding: 3vh 2vw;
+  height: var(--header-height);
+  padding: 0 2vw;
   position: fixed;
   top: 0;
   left: 0;
@@ -284,12 +289,12 @@ body {
     var(--cor-terciaria)
   );
   color: var(--cor-texto-claro);
-  height: 100vh;
+  top: var(--header-height);
+  left: 0;
+  height: calc(100vh - var(--header-height));
   padding: 1rem 0;
   padding-bottom: 7rem;
   position: fixed;
-  top: 16.7vh;
-  left: 0;
   z-index: 4000;
   overflow-y: auto;
   transition:
@@ -345,14 +350,15 @@ body {
 .sidebar-hamburguer {
   position: fixed;
   z-index: 5001;
-  top: 5vh;
-  left: 0.8vw;
+  top: calc(var(--header-height) / 2);
+  left: 20px;
+  transform: translateY(-50%);
   cursor: pointer;
 }
 
 .hamburger-icon {
-  width: 2.5vw;
-  height: 4vh;
+  width: 40px;
+  height: 25px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1060,7 +1066,6 @@ button:hover {
   }
 
   .sidebar-hamburguer {
-    top: 2.5vh;
     left: 0.8vw;
   }
 
