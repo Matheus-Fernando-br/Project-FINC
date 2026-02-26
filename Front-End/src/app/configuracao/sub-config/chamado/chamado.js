@@ -51,6 +51,8 @@ export default function Chamado() {
     buscarChamados();
   }, [buscarChamados]);
 
+
+
   /* ================= CRIAR CHAMADO ================= */
   async function criarChamado() {
     if (!user) {

@@ -18,6 +18,13 @@ export async function telegramWebhook(req, res) {
 
       if (acao === "ACEITAR") {
         await supabase.from("chamados").update({ status: "aceito" }).eq("id", chamadoId);
+
+        await supabase.from("mensagens").insert({
+          chamado_id: chamadoId,
+          autor: "admin",
+          mensagem: "✅ Chamado aceito pelo atendente.",
+        });
+
         await enviarTelegram(`✅ Chamado aceito (ID: ${chamadoId})`);
       }
 
@@ -29,6 +36,13 @@ export async function telegramWebhook(req, res) {
           .single();
 
         await supabase.from("chamados").update({ status: "fechado" }).eq("id", chamadoId);
+
+        await supabase.from("mensagens").insert({
+          chamado_id: chamadoId,
+          autor: "admin",
+          mensagem: "🔒 Chamado encerrado pelo atendente.",
+        });
+
         await enviarTelegram(`🔒 Chamado ${ch?.protocolo || chamadoId} encerrado`);
       }
 

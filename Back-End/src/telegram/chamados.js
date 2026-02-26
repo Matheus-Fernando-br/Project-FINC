@@ -46,6 +46,44 @@ export async function criarChamado(req, res) {
     console.error(err);
     res.status(500).json({ erro: err.message });
   }
+
+  /* ===== BUSCAR USER (pra mostrar nome/email) ===== */
+const { data: usuario } = await supabase
+  .from("users")
+  .select("*")
+  .eq("id", user.id)
+  .single();
+
+/* ===== TELEGRAM: NOVO CHAMADO (COM BOTÕES) ===== */
+try {
+  const textoTelegram = `🆕 Novo chamado aberto!
+
+🧾 Protocolo: ${chamado.protocolo}
+👤 Usuário: ${usuario?.nome || "Desconhecido"}
+📧 Email: ${usuario?.email || "-"}
+
+📂 Categoria: ${categoria}
+📌 Assunto: ${assunto}
+
+💬 Primeira mensagem:
+${mensagem}
+
+➡️ Para responder pelo Telegram:
+ /responder ${chamado.protocolo} sua resposta aqui`;
+
+  await enviarTelegram(textoTelegram, {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
+          { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
+        ],
+      ],
+    },
+  });
+} catch (e) {
+  console.error("Telegram erro (novo chamado):", e);
+}
 }
 
 /* ================= */

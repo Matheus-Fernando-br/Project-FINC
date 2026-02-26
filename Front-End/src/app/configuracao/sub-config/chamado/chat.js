@@ -106,6 +106,17 @@ export default function Chat() {
 
   }, []);
 
+  useEffect(() => {
+  if (chamado?.status === "fechado") {
+    // mostra o alerta que você já tem e redireciona
+    const t = setTimeout(() => {
+      navigate("/configuracao/chamado");
+    }, 3500);
+
+    return () => clearTimeout(t);
+  }
+}, [chamado?.status, navigate]);
+
   /* ================= ENCERRAR CHAMADO ================= */
 
   async function encerrarChamado() {
