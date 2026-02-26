@@ -793,3 +793,14 @@
 .ajudafeed .btn {
   width: 15vw;
 }
+
+.aguardando-atendente {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(44, 123, 229, 0.10);
+  border: 1px solid rgba(44, 123, 229, 0.18);
+  color: #0b2a4a;
+  font-size: 13px;
+  text-align: center;
+}

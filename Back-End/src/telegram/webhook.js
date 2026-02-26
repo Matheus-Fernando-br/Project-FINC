@@ -1,23 +1,58 @@
 // Back-End/src/telegram/webhook.js
 import { supabase } from "../services/supabase.js";
-import { enviarTelegram } from "./telegram.js";
+import {
+  editarTecladoTelegram,
+  responderCallbackQuery,
+} from "./telegram.js";
+
+/**
+ * Guarda "modo responder" por usuário do Telegram:
+ * - clicou RESPONDER em um chamado → próximo texto que ele digitar vai para esse chamado
+ */
+const responderPendenciaPorUsuario = new Map(); // key: telegram_user_id, value: chamadoId
 
 export async function telegramWebhook(req, res) {
   try {
     const update = req.body;
 
     /* =========================================================
-       ✅ 1) CLIQUE EM BOTÕES (callback_query)
+       1) CLIQUE EM BOTÕES (callback_query)
     ========================================================= */
     if (update.callback_query) {
       const cq = update.callback_query;
-      const data = cq.data || ""; // "ACEITAR:<id>" | "FECHAR:<id>"
+      const data = cq.data || "";
       const [acao, chamadoId] = data.split(":");
 
       if (!chamadoId) return res.sendStatus(200);
 
+      const chatId = cq.message?.chat?.id;
+      const messageId = cq.message?.message_id;
+      const tgUserId = cq.from?.id;
+
+      // Teclados
+      const tecladoAguardando = {
+        inline_keyboard: [
+          [
+            { text: "✅ Aceitar", callback_data: `ACEITAR:${chamadoId}` },
+            { text: "🔒 Encerrar", callback_data: `FECHAR:${chamadoId}` },
+          ],
+        ],
+      };
+
+      const tecladoAceito = {
+        inline_keyboard: [
+          [
+            { text: "📝 Responder", callback_data: `RESPONDER:${chamadoId}` },
+            { text: "🔒 Encerrar", callback_data: `FECHAR:${chamadoId}` },
+          ],
+        ],
+      };
+
       if (acao === "ACEITAR") {
-        await supabase.from("chamados").update({ status: "aceito" }).eq("id", chamadoId);
+        await supabase
+          .from("chamados")
+          .update({ status: "aceito" })
+          .eq("id", chamadoId);
 
         await supabase.from("mensagens").insert({
           chamado_id: chamadoId,
@@ -25,17 +60,21 @@ export async function telegramWebhook(req, res) {
           mensagem: "✅ Chamado aceito pelo atendente.",
         });
 
-        await enviarTelegram(`✅ Chamado aceito (ID: ${chamadoId})`);
+        // Troca teclado do card (sem mandar mensagem)
+        if (chatId && messageId) {
+          await editarTecladoTelegram(chatId, messageId, tecladoAceito);
+        }
+
+        // Toast
+        await responderCallbackQuery(cq.id, "Chamado aceito ✅");
+        return res.sendStatus(200);
       }
 
       if (acao === "FECHAR") {
-        const { data: ch } = await supabase
+        await supabase
           .from("chamados")
-          .select("protocolo")
-          .eq("id", chamadoId)
-          .single();
-
-        await supabase.from("chamados").update({ status: "fechado" }).eq("id", chamadoId);
+          .update({ status: "fechado" })
+          .eq("id", chamadoId);
 
         await supabase.from("mensagens").insert({
           chamado_id: chamadoId,
@@ -43,65 +82,69 @@ export async function telegramWebhook(req, res) {
           mensagem: "🔒 Chamado encerrado pelo atendente.",
         });
 
-        await enviarTelegram(`🔒 Chamado ${ch?.protocolo || chamadoId} encerrado`);
+        // Remove teclado do card (opcional)
+        if (chatId && messageId) {
+          await editarTecladoTelegram(chatId, messageId, { inline_keyboard: [] });
+        }
+
+        // limpa pendência caso estivesse respondendo esse chamado
+        if (tgUserId && responderPendenciaPorUsuario.get(tgUserId) === chamadoId) {
+          responderPendenciaPorUsuario.delete(tgUserId);
+        }
+
+        await responderCallbackQuery(cq.id, "Chamado encerrado 🔒");
+        return res.sendStatus(200);
       }
 
       if (acao === "RESPONDER") {
-        const { data: ch } = await supabase
-          .from("chamados")
-          .select("protocolo")
-          .eq("id", chamadoId)
-          .single();
+        // ativa modo resposta: próximo texto vira resposta no chamado
+        if (tgUserId) responderPendenciaPorUsuario.set(tgUserId, chamadoId);
 
-        await enviarTelegram(
-          `✍️ Responda este chamado (ID: ${chamadoId} | PROTOCOLO: ${ch?.protocolo || "?"})...`
-          ,{
-            reply_markup: { force_reply: true },
-          }
-        );
+        // Toast curto, sem mensagem brega
+        await responderCallbackQuery(cq.id, "Digite sua resposta agora 😉");
+        return res.sendStatus(200);
       }
 
+      // default
+      await responderCallbackQuery(cq.id, "");
       return res.sendStatus(200);
     }
 
     /* =========================================================
-       ✅ 2) MENSAGEM DIGITADA NO CHAT DO BOT (message.text)
-       formatos:
-       /aceitar 123456
-       /fechar 123456
-       /responder 123456 texto aqui
+       2) MENSAGEM DIGITADA NO CHAT DO BOT (message.text)
+       - se estiver em modo responder: salva como resposta do chamado
+       - senão: mantém comandos /aceitar /fechar /responder (opcional)
     ========================================================= */
     const msg = update.message;
     if (!msg?.text) return res.sendStatus(200);
 
     const texto = msg.text.trim();
-    // ✅ Resposta via "Force Reply" (clicou RESPONDER e respondeu a msg do bot)
-    if (msg.reply_to_message?.text) {
-      const base = msg.reply_to_message.text;
+    const tgUserId = msg.from?.id;
 
-      const match = base.match(/PROTOCOLO:\s*(\d{4,10})/i);
-      const protocoloReply = match?.[1];
+    // ✅ Se está em modo "responder", o texto vai pro chamado pendente
+    const chamadoIdPend = tgUserId ? responderPendenciaPorUsuario.get(tgUserId) : null;
 
-      if (protocoloReply) {
-        const { data: chamado } = await supabase
-          .from("chamados")
-          .select("*")
-          .eq("protocolo", protocoloReply)
-          .single();
+    if (chamadoIdPend) {
+      const { data: chamado } = await supabase
+        .from("chamados")
+        .select("*")
+        .eq("id", chamadoIdPend)
+        .single();
 
-        if (chamado && chamado.status !== "fechado") {
-          await supabase.from("mensagens").insert({
-            chamado_id: chamado.id,
-            autor: "admin",
-            mensagem: texto,
-          });
-
-          await enviarTelegram(`✅ Resposta enviada no chamado ${protocoloReply}`);
-        }
-
-        return res.sendStatus(200);
+      if (chamado && chamado.status !== "fechado") {
+        await supabase.from("mensagens").insert({
+          chamado_id: chamadoIdPend,
+          autor: "admin",
+          mensagem: texto,
+        });
       }
+
+      // limpa após 1 envio
+      if (tgUserId) responderPendenciaPorUsuario.delete(tgUserId);
+      return res.sendStatus(200);
     }
+
+    // ====== (Opcional) comandos clássicos ainda funcionam ======
     const parts = texto.split(" ");
     const cmd = parts[0];
     const protocolo = parts[1];
@@ -125,7 +168,7 @@ export async function telegramWebhook(req, res) {
         mensagem: "✅ Chamado aceito pelo atendente.",
       });
 
-      await enviarTelegram(`✅ Chamado ${protocolo} aceito`);
+      return res.sendStatus(200);
     }
 
     if (cmd === "/fechar") {
@@ -137,7 +180,7 @@ export async function telegramWebhook(req, res) {
         mensagem: "🔒 Chamado encerrado pelo atendente.",
       });
 
-      await enviarTelegram(`🔒 Chamado ${protocolo} encerrado`);
+      return res.sendStatus(200);
     }
 
     if (cmd === "/responder") {
@@ -150,7 +193,7 @@ export async function telegramWebhook(req, res) {
         mensagem: resposta,
       });
 
-      await enviarTelegram(`💬 Resposta enviada no chamado ${protocolo}`);
+      return res.sendStatus(200);
     }
 
     return res.sendStatus(200);

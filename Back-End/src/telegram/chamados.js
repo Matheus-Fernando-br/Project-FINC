@@ -2,6 +2,33 @@
 import { supabase } from "../services/supabase.js";
 import { enviarTelegram } from "./telegram.js";
 
+/* =========================================================
+   Teclado do Telegram por status
+   - não aceito: Aceitar / Encerrar
+   - aceito: Responder / Encerrar
+========================================================= */
+function tecladoTelegramParaStatus(chamado) {
+  if (chamado?.status === "aceito") {
+    return {
+      inline_keyboard: [
+        [
+          { text: "📝 Responder", callback_data: `RESPONDER:${chamado.id}` },
+          { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
+        ],
+      ],
+    };
+  }
+
+  return {
+    inline_keyboard: [
+      [
+        { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
+        { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
+      ],
+    ],
+  };
+}
+
 /* ================= */
 /* CRIAR CHAMADO */
 /* ================= */
@@ -45,13 +72,17 @@ export async function criarChamado(req, res) {
       .eq("id", user.id)
       .single();
 
+    // fallback caso a tabela users falhe / não tenha registro
+    const nome = usuario?.nome || user?.nome || "Desconhecido";
+    const email = usuario?.email || user?.email || "-";
+
     // ===== TELEGRAM: NOVO CHAMADO (COM BOTÕES) =====
     try {
       const textoTelegram = `🆕 Novo chamado aberto!
 
 🧾 Protocolo: ${chamado.protocolo}
-👤 Usuário: ${usuario?.nome || "Desconhecido"}
-📧 Email: ${usuario?.email || "-"}
+👤 Usuário: ${nome}
+📧 Email: ${email}
 
 📂 Categoria: ${categoria}
 📌 Assunto: ${assunto}
@@ -60,15 +91,7 @@ export async function criarChamado(req, res) {
 ${mensagem}`;
 
       await enviarTelegram(textoTelegram, {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
-              { text: "📝 Responder", callback_data: `RESPONDER:${chamado.id}` },
-              { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
-            ],
-          ],
-        },
+        reply_markup: tecladoTelegramParaStatus(chamado),
       });
     } catch (e) {
       console.error("Telegram erro (novo chamado):", e);
@@ -115,12 +138,15 @@ export async function enviarMensagem(req, res) {
       .eq("id", chamado.user_id)
       .single();
 
-    /* TELEGRAM (COM BOTÕES) */
+    const nome = usuario?.nome || "Desconhecido";
+    const email = usuario?.email || "-";
+
+    /* TELEGRAM (COM BOTÕES por status) */
     try {
       const textoTelegram = `📩 Nova mensagem no chamado #${chamado.protocolo}
 
-👤 Usuário: ${usuario?.nome || "Desconhecido"}
-📧 Email: ${usuario?.email || "-"}
+👤 Usuário: ${nome}
+📧 Email: ${email}
 
 📂 Categoria: ${chamado.categoria}
 📌 Assunto: ${chamado.assunto}
@@ -129,24 +155,16 @@ export async function enviarMensagem(req, res) {
 ${mensagem}`;
 
       await enviarTelegram(textoTelegram, {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
-              { text: "📝 Responder", callback_data: `RESPONDER:${chamado.id}` },
-              { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
-            ],
-          ],
-        },
+        reply_markup: tecladoTelegramParaStatus(chamado),
       });
     } catch (e) {
       console.error("Telegram erro:", e);
     }
 
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao enviar mensagem" });
+    return res.status(500).json({ erro: "Erro ao enviar mensagem" });
   }
 }
 
@@ -162,7 +180,7 @@ export async function listarMensagens(req, res) {
     .eq("chamado_id", chamado_id)
     .order("criado_em", { ascending: true });
 
-  res.json(data || []);
+  return res.json(data || []);
 }
 
 export async function buscarChamado(req, res) {
@@ -179,9 +197,9 @@ export async function buscarChamado(req, res) {
       return res.status(404).json({ erro: "Chamado não encontrado" });
     }
 
-    res.json(data);
+    return res.json(data);
   } catch {
-    res.status(500).json({ erro: "Erro ao buscar chamado" });
+    return res.status(500).json({ erro: "Erro ao buscar chamado" });
   }
 }
 
@@ -208,9 +226,17 @@ export async function encerrarChamado(req, res) {
 
     await supabase.from("chamados").update({ status: "fechado" }).eq("id", id);
 
-    res.json({ ok: true });
+    // ✅ Feedback no Telegram quando fecha pelo site
+    try {
+      const protocolo = data?.protocolo || id;
+      await enviarTelegram(`🔒 Chamado ${protocolo} encerrado pelo cliente no site.`);
+    } catch (e) {
+      console.error("Telegram erro (encerrar pelo site):", e);
+    }
+
+    return res.json({ ok: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ erro: "Erro ao encerrar chamado" });
+    return res.status(500).json({ erro: "Erro ao encerrar chamado" });
   }
 }

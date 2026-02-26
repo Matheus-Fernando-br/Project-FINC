@@ -171,7 +171,6 @@ async function enviarMsg() {
       )}
 
       {/* ===== CHAT ===== */}
-
       <div className="chat-container">
 
         {/* MENSAGENS */}
@@ -179,15 +178,20 @@ async function enviarMsg() {
           {mensagens.map((m) => (
             <div key={m.id} className={`bubble ${m.autor}`}>
               {m.mensagem}
-              <span className="msg-status">✓ entregue</span>
             </div>
           ))}
         </div>
 
-        {/* INPUT */}
-        {chamado?.status !== "fechado" && (
-          <div className="chat-input">
+        {/* ESTADO: AGUARDANDO ATENDENTE */}
+        {chamado?.status !== "fechado" && chamado?.status !== "aceito" && (
+          <div className="aguardando-atendente">
+            ⏳ Aguardando um atendente aceitar seu chamado...
+          </div>
+        )}
 
+        {/* INPUT: SOMENTE QUANDO ACEITO */}
+        {chamado?.status === "aceito" && (
+          <div className="chat-input">
             <input
               placeholder="Digite sua mensagem..."
               value={mensagem}
@@ -198,12 +202,10 @@ async function enviarMsg() {
               {loading && <span className="spinner"></span>}
               {loading ? "" : "Enviar"}
             </button>
-
           </div>
         )}
 
       </div>
-
     </main>
   );
 }
