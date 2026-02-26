@@ -9,10 +9,8 @@ export async function criarChamado(req, res) {
   try {
     const { categoria, assunto, mensagem, user } = req.body;
 
-    /* ===== GERAR PROTOCOLO ===== */
     const protocolo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    /* ===== CRIAR CHAMADO ===== */
     const { data: chamado, error: erroChamado } = await supabase
       .from("chamados")
       .insert({
@@ -29,7 +27,6 @@ export async function criarChamado(req, res) {
       return res.status(500).json(erroChamado);
     }
 
-    /* ===== CRIAR PRIMEIRA MENSAGEM ===== */
     const { error: erroMsg } = await supabase.from("mensagens").insert({
       chamado_id: chamado.id,
       autor: "cliente",
@@ -41,22 +38,16 @@ export async function criarChamado(req, res) {
       return res.status(500).json(erroMsg);
     }
 
-    res.json(chamado);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ erro: err.message });
-  }
+    // ===== BUSCAR USER (pra mostrar nome/email) =====
+    const { data: usuario } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-  /* ===== BUSCAR USER (pra mostrar nome/email) ===== */
-const { data: usuario } = await supabase
-  .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .single();
-
-/* ===== TELEGRAM: NOVO CHAMADO (COM BOTÕES) ===== */
-try {
-  const textoTelegram = `🆕 Novo chamado aberto!
+    // ===== TELEGRAM: NOVO CHAMADO (COM BOTÕES) =====
+    try {
+      const textoTelegram = `🆕 Novo chamado aberto!
 
 🧾 Protocolo: ${chamado.protocolo}
 👤 Usuário: ${usuario?.nome || "Desconhecido"}
@@ -66,24 +57,28 @@ try {
 📌 Assunto: ${assunto}
 
 💬 Primeira mensagem:
-${mensagem}
+${mensagem}`;
 
-➡️ Para responder pelo Telegram:
- /responder ${chamado.protocolo} sua resposta aqui`;
+      await enviarTelegram(textoTelegram, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
+              { text: "📝 Responder", callback_data: `RESPONDER:${chamado.id}` },
+              { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
+            ],
+          ],
+        },
+      });
+    } catch (e) {
+      console.error("Telegram erro (novo chamado):", e);
+    }
 
-  await enviarTelegram(textoTelegram, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
-          { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
-        ],
-      ],
-    },
-  });
-} catch (e) {
-  console.error("Telegram erro (novo chamado):", e);
-}
+    return res.json(chamado);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ erro: err.message });
+  }
 }
 
 /* ================= */
@@ -138,6 +133,7 @@ ${mensagem}`;
           inline_keyboard: [
             [
               { text: "✅ Aceitar", callback_data: `ACEITAR:${chamado.id}` },
+              { text: "📝 Responder", callback_data: `RESPONDER:${chamado.id}` },
               { text: "🔒 Encerrar", callback_data: `FECHAR:${chamado.id}` },
             ],
           ],

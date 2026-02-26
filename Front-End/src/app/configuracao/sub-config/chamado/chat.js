@@ -41,32 +41,26 @@ export default function Chat() {
 
   /* ================= ENVIAR MSG ================= */
 
-  async function enviarMsg() {
-    setLoading(true);
+async function enviarMsg() {
+  if (!mensagem.trim()) return;
+  if (chamado?.status === "fechado") return;
 
-    if (!mensagem.trim()) return;
+  setLoading(true);
+  try {
+    await fetch("https://project-finc.onrender.com/mensagem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chamado_id: id, mensagem }),
+    });
 
-    if (chamado?.status === "fechado") return;
-
-    try {
-
-      await fetch("https://project-finc.onrender.com/mensagem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chamado_id: id,
-          mensagem
-        })
-      });
-
-      setMensagem("");
-      buscar();
-      setLoading(false);
-
-    } catch (err) {
-      console.error("Erro ao enviar mensagem:", err);
-    }
+    setMensagem("");
+    buscar();
+  } catch (err) {
+    console.error("Erro ao enviar mensagem:", err);
+  } finally {
+    setLoading(false);
   }
+}
 
   /* ================= AUTO REFRESH ================= */
 
@@ -120,21 +114,16 @@ export default function Chat() {
   /* ================= ENCERRAR CHAMADO ================= */
 
   async function encerrarChamado() {
-    setLoadingCancel(true)
+    setLoadingCancel(true);
     try {
-
-      await fetch(
-        `https://project-finc.onrender.com/chamados/${id}/encerrar`,
-        { method: "PUT" }
-      );
-
+      await fetch(`https://project-finc.onrender.com/chamados/${id}/encerrar`, {
+        method: "PUT",
+      });
       buscar();
-      setTimeout(() => {
-        navigate("/configuracao/chamado");
-      }, 4000);
-
     } catch (err) {
       console.error("Erro ao encerrar chamado:", err);
+    } finally {
+      setLoadingCancel(false);
     }
   }
 

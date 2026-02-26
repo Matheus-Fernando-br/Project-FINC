@@ -46,6 +46,21 @@ export async function telegramWebhook(req, res) {
         await enviarTelegram(`🔒 Chamado ${ch?.protocolo || chamadoId} encerrado`);
       }
 
+      if (acao === "RESPONDER") {
+        const { data: ch } = await supabase
+          .from("chamados")
+          .select("protocolo")
+          .eq("id", chamadoId)
+          .single();
+
+        await enviarTelegram(
+          `✍️ Responda este chamado (ID: ${chamadoId} | PROTOCOLO: ${ch?.protocolo || "?"})...`
+          ,{
+            reply_markup: { force_reply: true },
+          }
+        );
+      }
+
       return res.sendStatus(200);
     }
 
@@ -60,6 +75,33 @@ export async function telegramWebhook(req, res) {
     if (!msg?.text) return res.sendStatus(200);
 
     const texto = msg.text.trim();
+    // ✅ Resposta via "Force Reply" (clicou RESPONDER e respondeu a msg do bot)
+    if (msg.reply_to_message?.text) {
+      const base = msg.reply_to_message.text;
+
+      const match = base.match(/PROTOCOLO:\s*(\d{4,10})/i);
+      const protocoloReply = match?.[1];
+
+      if (protocoloReply) {
+        const { data: chamado } = await supabase
+          .from("chamados")
+          .select("*")
+          .eq("protocolo", protocoloReply)
+          .single();
+
+        if (chamado && chamado.status !== "fechado") {
+          await supabase.from("mensagens").insert({
+            chamado_id: chamado.id,
+            autor: "admin",
+            mensagem: texto,
+          });
+
+          await enviarTelegram(`✅ Resposta enviada no chamado ${protocoloReply}`);
+        }
+
+        return res.sendStatus(200);
+      }
+    }
     const parts = texto.split(" ");
     const cmd = parts[0];
     const protocolo = parts[1];
@@ -76,11 +118,25 @@ export async function telegramWebhook(req, res) {
 
     if (cmd === "/aceitar") {
       await supabase.from("chamados").update({ status: "aceito" }).eq("id", chamado.id);
+
+      await supabase.from("mensagens").insert({
+        chamado_id: chamado.id,
+        autor: "admin",
+        mensagem: "✅ Chamado aceito pelo atendente.",
+      });
+
       await enviarTelegram(`✅ Chamado ${protocolo} aceito`);
     }
 
     if (cmd === "/fechar") {
       await supabase.from("chamados").update({ status: "fechado" }).eq("id", chamado.id);
+
+      await supabase.from("mensagens").insert({
+        chamado_id: chamado.id,
+        autor: "admin",
+        mensagem: "🔒 Chamado encerrado pelo atendente.",
+      });
+
       await enviarTelegram(`🔒 Chamado ${protocolo} encerrado`);
     }
 
