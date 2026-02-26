@@ -97,11 +97,31 @@ export async function telegramWebhook(req, res) {
       }
 
       if (acao === "RESPONDER") {
-        // ativa modo resposta: próximo texto vira resposta no chamado
         if (tgUserId) responderPendenciaPorUsuario.set(tgUserId, chamadoId);
 
-        // Toast curto, sem mensagem brega
-        await responderCallbackQuery(cq.id, "Digite sua resposta agora 😉");
+        // troca o teclado pra indicar "modo responder" (fica até você mandar a msg)
+        const tecladoRespondendo = {
+          inline_keyboard: [
+            [
+              { text: "✍️ Aguardando sua resposta...", callback_data: `NOOP:${chamadoId}` },
+            ],
+            [
+              { text: "🔒 Encerrar", callback_data: `FECHAR:${chamadoId}` },
+            ],
+          ],
+        };
+
+        if (chatId && messageId) {
+          await editarTecladoTelegram(chatId, messageId, tecladoRespondendo);
+        }
+
+        // toast curto só pra confirmar clique
+        await responderCallbackQuery(cq.id, "Modo resposta ativado");
+        return res.sendStatus(200);
+      }
+
+      if (acao === "NOOP") {
+        await responderCallbackQuery(cq.id, "Digite a resposta no chat 😊");
         return res.sendStatus(200);
       }
 
