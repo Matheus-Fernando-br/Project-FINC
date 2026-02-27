@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import AnimatedRoutes from "./components/AnimatedRoutes";
-
+import BackToTop from "./components/BackToTop";
 import "./styles/global.css";
 
 // Landing / Pré-login
@@ -82,6 +82,7 @@ export default function App() {
             <LayoutTelaInicial>
               <HomeTelaInicial />
             </LayoutTelaInicial>
+            <BackToTop />
           </AnimatedRoutes>
         }
       />
@@ -93,6 +94,7 @@ export default function App() {
             <LayoutTelaInicial>
               <Planos />
             </LayoutTelaInicial>
+            <BackToTop />
           </AnimatedRoutes>
         }
       />
@@ -104,6 +106,7 @@ export default function App() {
             <LayoutTelaInicial>
               <QuemSomos />
             </LayoutTelaInicial>
+            <BackToTop />
           </AnimatedRoutes>
         }
       />
@@ -115,6 +118,7 @@ export default function App() {
             <LayoutTelaInicial>
               <Duvidas />
             </LayoutTelaInicial>
+            <BackToTop />
           </AnimatedRoutes>
         }
       />
