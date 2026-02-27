@@ -137,6 +137,16 @@ body,
   box-shadow: 0 0 10px var(--cor-primaria);
 }
 
+@media (max-width: 900px) {
+  .back-to-top {
+  bottom: 20px;
+  right: 10px;
+
+  width: 65px;
+  height: 65px;
+  }
+}
+
 .spinner {
   width: 16px;
   height: 16px;
