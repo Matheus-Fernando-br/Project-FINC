@@ -1,6 +1,23 @@
 // controllers/planos.controller.js
 import { supabase } from "../services/supabase.js";
 
+function parseDetalhes(v) {
+  // Seu Supabase hoje está salvando "detalhes" como string JSON.
+  // Esta função garante que sempre retornamos um array.
+  if (Array.isArray(v)) return v;
+
+  if (typeof v === "string") {
+    try {
+      const parsed = JSON.parse(v);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
 function mapPlano(p) {
   return {
     id: p.id,
@@ -13,7 +30,7 @@ function mapPlano(p) {
       servicos: p.limite_servicos,
       contadores: p.limite_contadores,
     },
-    detalhes: Array.isArray(p.detalhes) ? p.detalhes : [],
+    detalhes: parseDetalhes(p.detalhes),
     criado_em: p.criado_em,
   };
 }
@@ -40,15 +57,16 @@ export async function meuPlano(req, res) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ erro: "Não autenticado." });
 
-    // 1) pega id_plan do profile
+    // 1) pega id_plan do profile (vinculado ao auth via profiles.user_id)
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id_plan")
-      .eq("id", userId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (profileError)
       return res.status(500).json({ erro: profileError.message });
+
     if (!profile?.id_plan)
       return res.status(404).json({ erro: "Usuário sem plano definido." });
 
@@ -60,6 +78,7 @@ export async function meuPlano(req, res) {
       .maybeSingle();
 
     if (planoError) return res.status(500).json({ erro: planoError.message });
+
     if (!plano)
       return res.status(404).json({ erro: "Plano do usuário não encontrado." });
 
@@ -89,11 +108,12 @@ export async function planosDisponiveis(req, res) {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id_plan")
-      .eq("id", userId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (profileError)
       return res.status(500).json({ erro: profileError.message });
+
     if (!profile?.id_plan)
       return res.status(404).json({ erro: "Usuário sem plano definido." });
 
@@ -112,42 +132,38 @@ export async function planosDisponiveis(req, res) {
   }
 }
 
+// ✅ PUT /planos/meu (privado)
 export async function atualizarMeuPlano(req, res) {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ erro: "Não autenticado." });
 
     const { id_plan } = req.body;
-    if (!id_plan)
-      return res.status(400).json({ erro: "id_plan é obrigatório." });
+    if (!id_plan) return res.status(400).json({ erro: "id_plan é obrigatório." });
 
     // ✅ valida se o plano existe
     const { data: plano, error: planoError } = await supabase
       .from("planos")
       .select("id")
-      .eq("id", id_plan)
+      .eq("id", id_plan) // ✅ correto: validar pelo id do plano
       .maybeSingle();
 
     if (planoError) return res.status(500).json({ erro: planoError.message });
-    if (!plano)
-      return res.status(404).json({ erro: "Plano informado não existe." });
+    if (!plano) return res.status(404).json({ erro: "Plano informado não existe." });
 
-    // ✅ atualiza o profile
+    // ✅ atualiza o profile pelo vínculo com auth (profiles.user_id)
     const { data: updated, error: updateError } = await supabase
       .from("profiles")
       .update({ id_plan })
-      .eq("id", userId)
+      .eq("user_id", userId) // ✅ correto: userId é auth uid
       .select("id_plan")
       .maybeSingle();
 
     if (updateError) return res.status(500).json({ erro: updateError.message });
-    if (!updated)
-      return res.status(404).json({ erro: "Profile não encontrado." });
+    if (!updated) return res.status(404).json({ erro: "Profile não encontrado." });
 
     return res.status(200).json({ ok: true, id_plan: updated.id_plan });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ erro: "Erro inesperado ao atualizar plano." });
+  } catch {
+    return res.status(500).json({ erro: "Erro inesperado ao atualizar plano." });
   }
 }

@@ -16,7 +16,6 @@ O projeto é construído sobre uma stack de tecnologias modernas e robustas, gar
 
 **Front-end:**
 *   **React:** Biblioteca para construção de interfaces de usuário reativas e componentizadas.
-*   **Vite:** Ferramenta de build extremamente rápida para desenvolvimento front-end.
 *   **CSS Modules:** Para estilização escopada e modular, evitando conflitos de CSS.
 *   **React Router:** Para gerenciamento de rotas na aplicação.
 
@@ -43,7 +42,7 @@ A arquitetura do FINC é desacoplada, separando as responsabilidades entre o cli
 ```
 ┌────────────────┐      ┌────────────────┐      ┌────────────────┐
 │   Usuário      │──────│   Front-end    │──────│    Back-end    │
-│  (Browser)     │      │ (React/Vite)   │      │ (Node/Render)  │
+│  (Browser)     │      │  (React/Vite)  │      | (Node/Render)  │
 └────────────────┘      └───────┬────────┘      └───────┬────────┘
                                 │                       │
                                 │      API RESTful      │
@@ -52,7 +51,7 @@ A arquitetura do FINC é desacoplada, separando as responsabilidades entre o cli
                                             │
                                   ┌─────────▼─────────┐
                                   │     Supabase      │
-                                  │ (DB, Auth, Storage)│
+                                  │(DB, Auth, Storage)│
                                   └───────────────────┘
 ```
 
@@ -102,7 +101,7 @@ VITE_SUPABASE_ANON_KEY=sua-chave-anonima-publica
 SUPABASE_URL=https://seu-projeto.supabase.co
 
 # Chave de serviço (secreta ) do Supabase
-SUPABASE_SERVICE_KEY=sua-chave-de-servico-secreta
+SUPABASE_SERVICE_ROLE_KEY=sua-chave-de-servico-secreta
 
 # Porta em que o servidor irá rodar
 PORT=3001
