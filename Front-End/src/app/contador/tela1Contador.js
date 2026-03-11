@@ -91,7 +91,9 @@ function Tela_1_Contador() {
         });
 
         setContadores((prev) =>
-          prev.map((item) => (item.id === contadorEditando ? atualizado : item))
+          prev.map((item) =>
+            item.id === contadorEditando ? atualizado : item,
+          ),
         );
 
         setFeedback("Contador atualizado com sucesso.");
@@ -117,7 +119,9 @@ function Tela_1_Contador() {
 
   async function excluirContador(id) {
     try {
-      const confirmar = window.confirm("Deseja realmente excluir este contador?");
+      const confirmar = window.confirm(
+        "Deseja realmente excluir este contador?",
+      );
       if (!confirmar) return;
 
       await apiFetch(`/contadores/${id}`, {
@@ -142,7 +146,10 @@ function Tela_1_Contador() {
       </section>
 
       {loading && (
-        <div className="loading-box" style={{ maxWidth: 520, margin: "12px auto" }}>
+        <div
+          className="loading-box"
+          style={{ maxWidth: 520, margin: "12px auto" }}
+        >
           <span className="spinner"></span>
           <div className="loading-text">
             <h3>Carregando contadores...</h3>
@@ -170,14 +177,15 @@ function Tela_1_Contador() {
                 <div className="contador-card-topo">
                   <div>
                     <h4>{contador.nome}</h4>
-                    <p>{contador.email}</p>
                   </div>
 
                   <div className="dropdown-wrapper">
                     <button
                       className="btn-menu"
                       onClick={() =>
-                        setDropdownAberto(dropdownAberto === contador.id ? null : contador.id)
+                        setDropdownAberto(
+                          dropdownAberto === contador.id ? null : contador.id,
+                        )
                       }
                     >
                       ⋮
@@ -185,7 +193,10 @@ function Tela_1_Contador() {
 
                     {dropdownAberto === contador.id && (
                       <div className="dropdown-card">
-                        <button onClick={() => abrirEdicao(contador)}>
+                        <button
+                          onClick={() => abrirEdicao(contador)}
+                          className="btn-edit"
+                        >
                           Editar contador
                         </button>
                         <button
@@ -200,8 +211,16 @@ function Tela_1_Contador() {
                 </div>
 
                 <div className="contador-detalhes">
-                  <p><strong>CPF:</strong> {contador.cpf || "Não informado"}</p>
-                  <p><strong>Telefone:</strong> {contador.telefone || "Não informado"}</p>
+                  <p>
+                    <strong>E-mail:</strong> {contador.email || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>CPF:</strong> {contador.cpf || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>Telefone:</strong>{" "}
+                    {contador.telefone || "Não informado"}
+                  </p>
                 </div>
               </div>
             ))}
@@ -292,8 +311,12 @@ function Tela_1_Contador() {
             </div>
           </div>
 
-          <div className="acoes-form">
-            <button type="button" className="btn btn-secundario" onClick={fecharFormulario}>
+          <div className="botao_geral">
+            <button
+              type="button"
+              className="btn btn-cancelar"
+              onClick={fecharFormulario}
+            >
               Cancelar
             </button>
 
@@ -307,8 +330,8 @@ function Tela_1_Contador() {
               {loadingSalvar
                 ? ""
                 : contadorEditando
-                ? "Salvar Alterações"
-                : "Salvar Contador"}
+                  ? "Salvar Alterações"
+                  : "Salvar Contador"}
             </button>
           </div>
         </section>
@@ -316,7 +339,9 @@ function Tela_1_Contador() {
 
       <section className="form-section">
         <div className="section-header">
-          <span className="icon"><i className={icons.feedback}></i></span>
+          <span className="icon">
+            <i className={icons.feedback}></i>
+          </span>
           <h3>Gerenciar Permissões & Acessos</h3>
         </div>
 

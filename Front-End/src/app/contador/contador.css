@@ -40,7 +40,7 @@
 
 .btn-menu {
   border: none;
-  background: #f3f3f3;
+  background: var(--cor-primaria);
   width: 38px;
   height: 38px;
   border-radius: 10px;
@@ -52,7 +52,7 @@
   position: absolute;
   right: 0;
   top: 45px;
-  background: #fff;
+  background: var(--bg-blur);
   border: 1px solid #ddd;
   border-radius: 12px;
   min-width: 180px;
@@ -71,11 +71,14 @@
 }
 
 .dropdown-card button:hover {
-  background: #f7f7f7;
+  background: var(--cor-cinza);
 }
 
 .btn-excluir {
   color: #c62828;
+}
+.btn-edit {
+  color: var(--cor-primaria);
 }
 
 .feedback-box {
@@ -93,9 +96,4 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 20px;
-}
-
-.btn-secundario {
-  background: #ececec;
-  color: #222;
 }
