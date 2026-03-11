@@ -5,7 +5,7 @@ import {
   editarContador,
   excluirContador,
 } from "../controllers/contador.controller.js";
-import { authMiddleware } from "../middlewares/authMiddleware.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = Router();
 

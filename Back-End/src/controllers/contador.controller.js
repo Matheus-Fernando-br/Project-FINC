@@ -16,7 +16,6 @@ export async function listarContadores(req, res) {
 
     return res.json(data || []);
   } catch (err) {
-    console.error("Erro listarContadores:", err);
     return res.status(500).json({ error: "Erro ao listar contadores" });
   }
 }
@@ -26,7 +25,7 @@ export async function criarContador(req, res) {
     const profileId = req.user?.id;
     const { nome, email, cpf, telefone } = req.body;
 
-    if (!nome?.trim() || !email?.trim()) {
+    if (!nome || !email) {
       return res.status(400).json({
         error: "Nome e e-mail são obrigatórios",
       });
@@ -37,10 +36,10 @@ export async function criarContador(req, res) {
       .insert([
         {
           profile_id: profileId,
-          nome: nome.trim(),
-          email: email.trim(),
-          cpf: cpf?.trim() || null,
-          telefone: telefone?.trim() || null,
+          nome,
+          email,
+          cpf,
+          telefone,
         },
       ])
       .select()
@@ -52,7 +51,6 @@ export async function criarContador(req, res) {
 
     return res.status(201).json(data);
   } catch (err) {
-    console.error("Erro criarContador:", err);
     return res.status(500).json({ error: "Erro ao criar contador" });
   }
 }
@@ -63,19 +61,13 @@ export async function editarContador(req, res) {
     const { id } = req.params;
     const { nome, email, cpf, telefone } = req.body;
 
-    if (!nome?.trim() || !email?.trim()) {
-      return res.status(400).json({
-        error: "Nome e e-mail são obrigatórios",
-      });
-    }
-
     const { data, error } = await supabase
       .from("contadores")
       .update({
-        nome: nome.trim(),
-        email: email.trim(),
-        cpf: cpf?.trim() || null,
-        telefone: telefone?.trim() || null,
+        nome,
+        email,
+        cpf,
+        telefone,
       })
       .eq("id", id)
       .eq("profile_id", profileId)
@@ -88,7 +80,6 @@ export async function editarContador(req, res) {
 
     return res.json(data);
   } catch (err) {
-    console.error("Erro editarContador:", err);
     return res.status(500).json({ error: "Erro ao editar contador" });
   }
 }
@@ -110,7 +101,6 @@ export async function excluirContador(req, res) {
 
     return res.json({ message: "Contador excluído com sucesso" });
   } catch (err) {
-    console.error("Erro excluirContador:", err);
     return res.status(500).json({ error: "Erro ao excluir contador" });
   }
 }
