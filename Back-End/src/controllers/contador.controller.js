@@ -1,72 +1,116 @@
-import { supabase } from "../services/supabase";
+import { supabase } from "../services/supabase.js";
 
-export async function listarPlanos(req, res) {
-  const { data, error } = await supabase
-    .from("planos")
-    .select("*")
-    .order("valor", { ascending: true });
+export async function listarContadores(req, res) {
+  try {
+    const profileId = req.user?.id;
 
-  if (error) return res.status(400).json({ error });
+    const { data, error } = await supabase
+      .from("contadores")
+      .select("*")
+      .eq("profile_id", profileId)
+      .order("criado_em", { ascending: false });
 
-  res.json(data);
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.json(data || []);
+  } catch (err) {
+    console.error("Erro listarContadores:", err);
+    return res.status(500).json({ error: "Erro ao listar contadores" });
+  }
 }
 
-export async function criarPlano(req, res) {
-  const {
-    tipo_plano,
-    limite_contadores,
-    limite_clientes,
-    limite_produtos,
-    limite_servicos,
-    limite_notas,
-    valor,
-    detalhes
-  } = req.body;
+export async function criarContador(req, res) {
+  try {
+    const profileId = req.user?.id;
+    const { nome, email, cpf, telefone } = req.body;
 
-  const { data, error } = await supabase
-    .from("planos")
-    .insert([{
-      tipo_plano,
-      limite_contadores,
-      limite_clientes,
-      limite_produtos,
-      limite_servicos,
-      limite_notas,
-      valor,
-      detalhes
-    }])
-    .select()
-    .single();
+    if (!nome?.trim() || !email?.trim()) {
+      return res.status(400).json({
+        error: "Nome e e-mail são obrigatórios",
+      });
+    }
 
-  if (error) return res.status(400).json({ error });
+    const { data, error } = await supabase
+      .from("contadores")
+      .insert([
+        {
+          profile_id: profileId,
+          nome: nome.trim(),
+          email: email.trim(),
+          cpf: cpf?.trim() || null,
+          telefone: telefone?.trim() || null,
+        },
+      ])
+      .select()
+      .single();
 
-  res.status(201).json(data);
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(201).json(data);
+  } catch (err) {
+    console.error("Erro criarContador:", err);
+    return res.status(500).json({ error: "Erro ao criar contador" });
+  }
 }
 
-export async function atualizarPlano(req, res) {
-  const { id } = req.params;
+export async function editarContador(req, res) {
+  try {
+    const profileId = req.user?.id;
+    const { id } = req.params;
+    const { nome, email, cpf, telefone } = req.body;
 
-  const { data, error } = await supabase
-    .from("planos")
-    .update(req.body)
-    .eq("id", id)
-    .select()
-    .single();
+    if (!nome?.trim() || !email?.trim()) {
+      return res.status(400).json({
+        error: "Nome e e-mail são obrigatórios",
+      });
+    }
 
-  if (error) return res.status(400).json({ error });
+    const { data, error } = await supabase
+      .from("contadores")
+      .update({
+        nome: nome.trim(),
+        email: email.trim(),
+        cpf: cpf?.trim() || null,
+        telefone: telefone?.trim() || null,
+      })
+      .eq("id", id)
+      .eq("profile_id", profileId)
+      .select()
+      .single();
 
-  res.json(data);
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro editarContador:", err);
+    return res.status(500).json({ error: "Erro ao editar contador" });
+  }
 }
 
-export async function deletarPlano(req, res) {
-  const { id } = req.params;
+export async function excluirContador(req, res) {
+  try {
+    const profileId = req.user?.id;
+    const { id } = req.params;
 
-  const { error } = await supabase
-    .from("planos")
-    .delete()
-    .eq("id", id);
+    const { error } = await supabase
+      .from("contadores")
+      .delete()
+      .eq("id", id)
+      .eq("profile_id", profileId);
 
-  if (error) return res.status(400).json({ error });
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
 
-  res.json({ message: "Plano deletado com sucesso" });
+    return res.json({ message: "Contador excluído com sucesso" });
+  } catch (err) {
+    console.error("Erro excluirContador:", err);
+    return res.status(500).json({ error: "Erro ao excluir contador" });
+  }
 }

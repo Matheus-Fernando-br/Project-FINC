@@ -1,4 +1,7 @@
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3333" || "http://localhost:3000";
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  "http://localhost:3333" ||
+  "http://localhost:3000";
 
 function getToken() {
   // ✅ prioridade: sessão (não lembrar) -> persistente (lembrar)
@@ -47,7 +50,6 @@ export async function apiFetch(path, options = {}) {
       throw new Error("Sessão expirada");
     }
   }
-
 
   if (!res.ok) {
     const msg =

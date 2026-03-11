@@ -2,7 +2,6 @@
 import { supabase } from "../services/supabase.js";
 
 function parseDetalhes(v) {
-  // Seu Supabase hoje está salvando "detalhes" como string JSON.
   // Esta função garante que sempre retornamos um array.
   if (Array.isArray(v)) return v;
 
