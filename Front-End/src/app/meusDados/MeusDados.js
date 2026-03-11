@@ -75,6 +75,9 @@ function MeusDados() {
       setEditando(false);
       setLoadingCancel(false);
     }, 800);
+    setTimeout(() => {
+      setFeedback("");
+    },2000);
   };
 
   const salvarAlteracoes = async () => {
@@ -406,7 +409,7 @@ function MeusDados() {
             <>
               <button
                 type="button"
-                className="btn-vermelho"
+                className="btn-cancelar"
                 onClick={cancelarAlteracoes}
                 disabled={loading}
               >
