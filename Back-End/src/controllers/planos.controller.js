@@ -54,32 +54,31 @@ export async function listarPlanosPublico(req, res) {
 export async function meuPlano(req, res) {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ erro: "Não autenticado." });
+    console.log("USER ID:", userId);
 
-    // 1) pega id_plan do profile (vinculado ao auth via profiles.user_id)
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id_plan")
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (profileError)
-      return res.status(500).json({ erro: profileError.message });
+    console.log("PROFILE:", profile);
+    console.log("PROFILE ERROR:", profileError);
 
-    if (!profile?.id_plan)
-      return res.status(404).json({ erro: "Usuário sem plano definido." });
-
-    // 2) busca plano pelo id
     const { data: plano, error: planoError } = await supabase
       .from("planos")
       .select("*")
-      .eq("id", profile.id_plan)
+      .eq("id", profile?.id_plan)
       .maybeSingle();
 
-    if (planoError) return res.status(500).json({ erro: planoError.message });
+    console.log("ID_PLAN:", profile?.id_plan);
+    console.log("PLANO:", plano);
+    console.log("PLANO ERROR:", planoError);
 
-    if (!plano)
-      return res.status(404).json({ erro: "Plano do usuário não encontrado." });
+    if (profileError) return res.status(500).json({ erro: profileError.message });
+    if (!profile?.id_plan) return res.status(404).json({ erro: "Usuário sem plano definido." });
+    if (planoError) return res.status(500).json({ erro: planoError.message });
+    if (!plano) return res.status(404).json({ erro: "Plano do usuário não encontrado." });
 
     const mapped = mapPlano(plano);
 
@@ -92,7 +91,8 @@ export async function meuPlano(req, res) {
             : `até ${mapped.limites.notas} notas/boletos mensais`,
       },
     });
-  } catch {
+  } catch (err) {
+    console.error("ERRO meuPlano:", err);
     return res.status(500).json({ erro: "Erro ao buscar plano do usuário." });
   }
 }
