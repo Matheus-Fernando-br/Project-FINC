@@ -1,13 +1,62 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/telaInicial.css";
 import { apiFetch } from "../utils/api.js";
 
 function HomeTelaInicial() {
+  const [planoBasico, setPlanoBasico] = useState(null);
+  const [loadingPlano, setLoadingPlano] = useState(true);
+  const [erroPlano, setErroPlano] = useState("");
+
+  const formatBRL = (v) =>
+    Number(v ?? 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
   useEffect(() => {
-    // fire-and-forget: só pra "acordar" o Render
-    apiFetch("/", { method: "GET" }).catch(() => {});
     const root = document.querySelector(".tela-inicial");
+
+    const init = async () => {
+      try {
+        setErroPlano("");
+        setLoadingPlano(true);
+
+        // "Acorda" o Render
+        apiFetch("/", { method: "GET" }).catch(() => {});
+
+        // Busca os planos
+        const json = await apiFetch("/planos", { method: "GET" });
+        console.log("Resposta /planos:", json);
+
+        const planos = Array.isArray(json?.planos) ? json.planos : [];
+
+        const basico = planos.find((p) => {
+          const tipo = String(p?.tipo || "")
+            .trim()
+            .toLowerCase();
+          const nome = String(p?.nome || "")
+            .trim()
+            .toLowerCase();
+
+          return tipo === "basico" || nome.includes("básico") || nome.includes("basico");
+        });
+
+        if (!basico) {
+          throw new Error("Plano básico não encontrado na resposta da API.");
+        }
+
+        setPlanoBasico(basico);
+      } catch (e) {
+        console.error("Erro ao carregar plano básico:", e);
+        setErroPlano(e.message || "Erro ao carregar o valor do plano.");
+      } finally {
+        setLoadingPlano(false);
+      }
+    };
+
+    init();
+
     const scrollTimeout = setTimeout(() => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }, 0);
@@ -15,7 +64,9 @@ function HomeTelaInicial() {
     // Splash
     const splash = root?.querySelector("#splash");
     const splashTimeout = splash
-      ? setTimeout(() => (splash.style.display = "none"), 2000)
+      ? setTimeout(() => {
+          splash.style.display = "none";
+        }, 2000)
       : null;
 
     // Scroll Animations
@@ -25,7 +76,7 @@ function HomeTelaInicial() {
           if (entry.isIntersecting) entry.target.classList.add("show");
         });
       },
-      { threshold: 0.3 },
+      { threshold: 0.3 }
     );
 
     const scrollFadeEls = root
@@ -38,7 +89,7 @@ function HomeTelaInicial() {
     const onLogoClick = (e) => {
       e.preventDefault();
       root
-        .querySelector("#secao-hero-texto")
+        ?.querySelector("#secao-hero-texto")
         ?.scrollIntoView({ behavior: "smooth" });
     };
     if (logo) logo.addEventListener("click", onLogoClick);
@@ -52,15 +103,15 @@ function HomeTelaInicial() {
     let currentIndex = 0;
 
     function showSlide(index) {
-      if (!items || items.length === 0) return;
+      if (!items.length) return;
+
       items.forEach((item, i) => {
         item.classList.remove("active");
         if (i === index) item.classList.add("active");
       });
 
       if (prevBtn) prevBtn.classList.toggle("disabled", index === 0);
-      if (nextBtn)
-        nextBtn.classList.toggle("disabled", index === items.length - 1);
+      if (nextBtn) nextBtn.classList.toggle("disabled", index === items.length - 1);
     }
 
     const onPrevClick = () => {
@@ -69,6 +120,7 @@ function HomeTelaInicial() {
         showSlide(currentIndex);
       }
     };
+
     const onNextClick = () => {
       if (currentIndex < items.length - 1) {
         currentIndex++;
@@ -123,9 +175,25 @@ function HomeTelaInicial() {
 
           <div className="plano fade-in delay-4">
             <p>planos a partir de</p>
-            <Link to="/TelaInicial/Planos">
-              <h2>R$ 19,90</h2>
-            </Link>
+
+            {loadingPlano ? (
+              <div
+                className="loading-box"
+                style={{ maxWidth: 320, margin: "12px auto" }}
+              >
+                <span className="spinner"></span>
+                <div className="loading-text">
+                  <h3>Carregando plano...</h3>
+                  <p>Aguarde um instante 👇</p>
+                </div>
+              </div>
+            ) : erroPlano ? (
+              <p style={{ textAlign: "center" }}>{erroPlano}</p>
+            ) : (
+              <Link to="/TelaInicial/Planos">
+                <h2>{formatBRL(planoBasico?.valor)}</h2>
+              </Link>
+            )}
           </div>
         </div>
       </section>

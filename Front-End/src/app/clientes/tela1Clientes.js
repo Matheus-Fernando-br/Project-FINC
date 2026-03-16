@@ -9,6 +9,8 @@ function Tela_1_clientes() {
   const [pesquisa, setPesquisa] = useState("");
   const [abaAtual, setAbaAtual] = useState("todos");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
   const navigate = useNavigate();
 
   const itensPorPagina = 5;
@@ -16,9 +18,12 @@ function Tela_1_clientes() {
   useEffect(() => {
     async function buscarClientes() {
       try {
+        setLoading(true);
+        setErro("");
+
         const data = await apiFetch("/clientes", { method: "GET" });
 
-        const formatados = data.map((c) => ({
+        const formatados = (data || []).map((c) => ({
           id: c.id,
           nome: c.nome_social || "Nome não informado",
           categoria: c.tipo_pessoa === "PJuridica" ? "PJ" : "PF",
@@ -27,23 +32,23 @@ function Tela_1_clientes() {
         setClientes(formatados);
       } catch (error) {
         console.error("Erro de conexão ao buscar clientes:", error);
+        setErro(error.message || "Erro ao carregar clientes.");
+      } finally {
+        setLoading(false);
       }
     }
 
     buscarClientes();
   }, []);
 
-  // FILTRO DE ABA
   const filtradosPorAba = clientes.filter((item) =>
     abaAtual === "todos" ? true : item.categoria === abaAtual
   );
 
-  // APLICAR PESQUISA
   const filtrados = filtradosPorAba.filter((item) =>
     item.nome.toLowerCase().includes(pesquisa.toLowerCase())
   );
 
-  // PAGINAÇÃO
   const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
 
   const itensExibidos = filtrados.slice(
@@ -51,7 +56,6 @@ function Tela_1_clientes() {
     paginaAtual * itensPorPagina
   );
 
-  // HANDLERS
   const handlePesquisa = (e) => {
     setPesquisa(e.target.value);
     setPaginaAtual(1);
@@ -70,18 +74,17 @@ function Tela_1_clientes() {
   const excluirCliente = async (id) => {
     if (!window.confirm("Deseja realmente excluir este cliente?")) return;
 
-  try {
-    await apiFetch(`/clientes/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      await apiFetch(`/clientes/${id}`, {
+        method: "DELETE",
+      });
 
-    setClientes(clientes.filter((c) => c.id !== id));
-    alert("Cliente excluído com sucesso!");
-
-  } catch (error) {
-    console.error("Erro ao excluir:", error);
-    alert(error.message || "Erro ao excluir cliente");
-  }
+      setClientes((prev) => prev.filter((c) => c.id !== id));
+      alert("Cliente excluído com sucesso!");
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+      alert(error.message || "Erro ao excluir cliente");
+    }
   };
 
   const editarCliente = (id) => {
@@ -125,85 +128,112 @@ function Tela_1_clientes() {
         </div>
         <hr className="divider" />
 
-        <div className="abas-container">
-          <button
-            className={abaAtual === "todos" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("todos")}
-          >
-            Todos
-          </button>
+        {loading && (
+          <div className="loading-box" style={{ maxWidth: 520, margin: "12px auto" }}>
+            <span className="spinner"></span>
+            <div className="loading-text">
+              <h3>Carregando clientes...</h3>
+              <p>Aguarde um instante 👇</p>
+            </div>
+          </div>
+        )}
 
-          <button
-            className={abaAtual === "PJ" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("PJ")}
-          >
-            Pessoa Jurídica
-          </button>
+        {!loading && erro && (
+          <p style={{ textAlign: "center" }}>{erro}</p>
+        )}
 
-          <button
-            className={abaAtual === "PF" ? "aba ativa" : "aba"}
-            onClick={() => trocarAba("PF")}
-          >
-            Pessoa Física
-          </button>
-        </div>
+        {!loading && !erro && (
+          <>
+            <div className="abas-container">
+              <button
+                className={abaAtual === "todos" ? "aba ativa" : "aba"}
+                onClick={() => trocarAba("todos")}
+              >
+                Todos
+              </button>
 
-        <div className="form-row">
-          <input
-            type="text"
-            value={pesquisa}
-            onChange={handlePesquisa}
-            placeholder="Pesquisar cliente..."
-          />
+              <button
+                className={abaAtual === "PJ" ? "aba ativa" : "aba"}
+                onClick={() => trocarAba("PJ")}
+              >
+                Pessoa Jurídica
+              </button>
 
-          {pesquisa !== "" && (
-            <button onClick={limparPesquisa} className="btn-limpar">
-              Limpar
-            </button>
-          )}
-        </div>
+              <button
+                className={abaAtual === "PF" ? "aba ativa" : "aba"}
+                onClick={() => trocarAba("PF")}
+              >
+                Pessoa Física
+              </button>
+            </div>
 
-        <div className="cards animar-lista">
-          {itensExibidos.map((item) => (
-            <React.Fragment key={item.id}>
-              <hr className="divider" />
+            <div className="form-row">
+              <input
+                type="text"
+                value={pesquisa}
+                onChange={handlePesquisa}
+                placeholder="Pesquisar cliente..."
+              />
 
-              <div className="card-cliente animar-card">
-                <div>
-                  <h4>{item.nome}</h4>
-                </div>
+              {pesquisa !== "" && (
+                <button onClick={limparPesquisa} className="btn-limpar">
+                  Limpar
+                </button>
+              )}
+            </div>
 
-                <div className="editar-acao">
-                  <div className="editar-cliente-item" onClick={() => editarCliente(item.id)}>
-                    <i className={icons.edit}></i>
-                    <p>Editar</p>
-                  </div>
-                    <div className="excluir-cliente-item" onClick={() => excluirCliente(item.id)}>
-                      <i className="bi bi-trash"></i>
-                      <p>Excluir</p>
+            <div className="cards animar-lista">
+              {itensExibidos.map((item) => (
+                <React.Fragment key={item.id}>
+                  <hr className="divider" />
+
+                  <div className="card-cliente animar-card">
+                    <div>
+                      <h4>{item.nome}</h4>
                     </div>
-                </div>
+
+                    <div className="editar-acao">
+                      <div
+                        className="editar-cliente-item"
+                        onClick={() => editarCliente(item.id)}
+                      >
+                        <i className={icons.edit}></i>
+                        <p>Editar</p>
+                      </div>
+
+                      <div
+                        className="excluir-cliente-item"
+                        onClick={() => excluirCliente(item.id)}
+                      >
+                        <i className="bi bi-trash"></i>
+                        <p>Excluir</p>
+                      </div>
+                    </div>
+                  </div>
+                </React.Fragment>
+              ))}
+
+              <hr className="divider" />
+            </div>
+
+            {totalPaginas > 1 && (
+              <div className="paginacao">
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    className={num === paginaAtual ? "pagina ativa" : "pagina"}
+                    onClick={() => setPaginaAtual(num)}
+                  >
+                    {num}
+                  </button>
+                ))}
               </div>
-            </React.Fragment>
-          ))}
+            )}
 
-          <hr className="divider" />
-        </div>
-
-        <div className="paginacao">
-          {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
-            <button
-              key={num}
-              className={num === paginaAtual ? "pagina ativa" : "pagina"}
-              onClick={() => setPaginaAtual(num)}
-            >
-              {num}
-            </button>
-          ))}
-        </div>
-
-        {filtrados.length === 0 && (
-          <p className="nenhum">Nenhum item encontrado.</p>
+            {filtrados.length === 0 && (
+              <p className="nenhum">Nenhum item encontrado.</p>
+            )}
+          </>
         )}
       </section>
     </main>
