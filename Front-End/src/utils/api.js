@@ -23,7 +23,6 @@ function logoutAndRedirect() {
 
 export async function apiFetch(path, options = {}) {
   const token = getToken();
-  console.log("API_URL:", API_URL);
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),

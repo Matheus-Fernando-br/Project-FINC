@@ -135,34 +135,90 @@ export async function planosDisponiveis(req, res) {
 export async function atualizarMeuPlano(req, res) {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ erro: "Não autenticado." });
+    console.log("REQ.USER.ID:", userId);
+    console.log("BODY:", req.body);
+
+    if (!userId) {
+      return res.status(401).json({ erro: "Não autenticado." });
+    }
 
     const { id_plan } = req.body;
-    if (!id_plan) return res.status(400).json({ erro: "id_plan é obrigatório." });
 
-    // ✅ valida se o plano existe
+    if (!id_plan) {
+      return res.status(400).json({ erro: "id_plan é obrigatório." });
+    }
+
+    // 1) validar se o plano existe
     const { data: plano, error: planoError } = await supabase
       .from("planos")
       .select("id")
-      .eq("id", id_plan) // ✅ correto: validar pelo id do plano
+      .eq("id", id_plan)
       .maybeSingle();
 
-    if (planoError) return res.status(500).json({ erro: planoError.message });
-    if (!plano) return res.status(404).json({ erro: "Plano informado não existe." });
+    console.log("PLANO ENCONTRADO:", plano);
+    console.log("PLANO ERROR:", planoError);
 
-    // ✅ atualiza o profile pelo vínculo com auth (profiles.user_id)
-    const { data: updated, error: updateError } = await supabase
+    if (planoError) {
+      return res.status(500).json({ erro: planoError.message });
+    }
+
+    if (!plano) {
+      return res.status(404).json({ erro: "Plano informado não existe." });
+    }
+
+    // 2) procurar profile pelo user_id
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, user_id, id_plan")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    console.log("PROFILE ENCONTRADO:", profile);
+    console.log("PROFILE ERROR:", profileError);
+
+    if (profileError) {
+      return res.status(500).json({ erro: profileError.message });
+    }
+
+    if (!profile) {
+      return res.status(404).json({
+        erro: "Profile não encontrado. O req.user.id não bate com profiles.user_id.",
+      });
+    }
+
+    // 3) atualizar profile
+    const { error: updateError } = await supabase
       .from("profiles")
       .update({ id_plan })
-      .eq("user_id", userId) // ✅ correto: userId é auth uid
-      .select("id_plan")
+      .eq("user_id", userId);
+
+    console.log("UPDATE ERROR:", updateError);
+
+    if (updateError) {
+      return res.status(500).json({ erro: updateError.message });
+    }
+
+    // 4) confirmar alteração
+    const { data: atualizado, error: confirmError } = await supabase
+      .from("profiles")
+      .select("id, user_id, id_plan")
+      .eq("user_id", userId)
       .maybeSingle();
 
-    if (updateError) return res.status(500).json({ erro: updateError.message });
-    if (!updated) return res.status(404).json({ erro: "Profile não encontrado." });
+    console.log("PROFILE ATUALIZADO:", atualizado);
+    console.log("CONFIRM ERROR:", confirmError);
 
-    return res.status(200).json({ ok: true, id_plan: updated.id_plan });
-  } catch {
+    if (confirmError) {
+      return res.status(500).json({ erro: confirmError.message });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      id_plan: atualizado?.id_plan,
+      mensagem: "Plano atualizado com sucesso.",
+    });
+  } catch (err) {
+    console.error("ERRO atualizarMeuPlano:", err);
     return res.status(500).json({ erro: "Erro inesperado ao atualizar plano." });
   }
 }
