@@ -39,7 +39,11 @@ function HomeTelaInicial() {
             .trim()
             .toLowerCase();
 
-          return tipo === "basico" || nome.includes("básico") || nome.includes("basico");
+          return (
+            tipo === "basico" ||
+            nome.includes("básico") ||
+            nome.includes("basico")
+          );
         });
 
         if (!basico) {
@@ -76,7 +80,7 @@ function HomeTelaInicial() {
           if (entry.isIntersecting) entry.target.classList.add("show");
         });
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
 
     const scrollFadeEls = root
@@ -111,7 +115,8 @@ function HomeTelaInicial() {
       });
 
       if (prevBtn) prevBtn.classList.toggle("disabled", index === 0);
-      if (nextBtn) nextBtn.classList.toggle("disabled", index === items.length - 1);
+      if (nextBtn)
+        nextBtn.classList.toggle("disabled", index === items.length - 1);
     }
 
     const onPrevClick = () => {
@@ -179,13 +184,12 @@ function HomeTelaInicial() {
             {loadingPlano ? (
               <div
                 className="loading-box"
-                style={{ maxWidth: 320, margin: "12px auto" }}
+                style={{
+                  maxWidth: 320,
+                  margin: "10px auto",
+                }}
               >
                 <span className="spinner"></span>
-                <div className="loading-text">
-                  <h3>Carregando plano...</h3>
-                  <p>Aguarde um instante 👇</p>
-                </div>
               </div>
             ) : erroPlano ? (
               <p style={{ textAlign: "center" }}>{erroPlano}</p>

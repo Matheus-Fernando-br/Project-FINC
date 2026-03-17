@@ -29,10 +29,10 @@ function Duvidas() {
 
             {/* Botão de Email */}
             <a
-              href={`mailto:r2m.tec.adm@gmail.com?subject=Duvidas%20sobre%20a%20plataforma%20Finc&body=Prezada%20FINC,%0D%0A%0D%0AEstou%20com%20a%20seguinte%20d%C3%BAvida%20sobre%20a%20plataforma:%0D%0A%0D%0A`}
+              href={`mailto:plataforma.finc@gmail.com?subject=Duvidas%20sobre%20a%20plataforma%20Finc&body=Prezada%20FINC,%0D%0A%0D%0AEstou%20com%20a%20seguinte%20d%C3%BAvida%20sobre%20a%20plataforma:%0D%0A%0D%0A`}
               className="Duvidas-btn"
             >
-              <i className="bi bi-envelope-at"></i>r2m.tec.adm@gmail.com
+              <i className="bi bi-envelope-at"></i>plataforma.finc@gmail.com
             </a>
 
             {/* Botão de WhatsApp */}
@@ -45,7 +45,6 @@ function Duvidas() {
               <i className="bi bi-whatsapp"></i>Whatsapp
             </a>
           </div>
-
         </div>
 
         {/* Lado Direito */}
@@ -172,8 +171,7 @@ function Duvidas() {
       {/* Rodapé fixado no centro inferior */}
       <div className="rodape form-footer voltar">
         <Link to="/">
-          Voltar para Tela Inicial{" "}
-          <i className="bi bi-chevron-double-left"></i>
+          Voltar para Tela Inicial <i className="bi bi-chevron-double-left"></i>
           <i className="bi bi-chevron-double-left"></i>
         </Link>
       </div>

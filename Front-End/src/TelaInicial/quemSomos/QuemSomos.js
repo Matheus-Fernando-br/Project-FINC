@@ -22,6 +22,11 @@ function QuemSomos() {
                             mais organização, agilidade e eficiência.
                         </p>
                     </div>
+                    <div className="social-media">
+                        <a href="https://www.instagram.com/plataforma.finc/" target="_blank" rel="noopener noreferrer">
+                            <i className="bi bi-instagram"></i>
+                        </a>
+                    </div>
                         <div className="rodape form-footer voltar">
                             <Link to="/">
                                 Voltar para Tela Inicial <i className="bi bi-chevron-double-left"></i><i className="bi bi-chevron-double-left"></i>
