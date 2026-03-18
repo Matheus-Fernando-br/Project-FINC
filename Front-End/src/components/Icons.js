@@ -1,4 +1,3 @@
-
 const icons = {
   casa: "bi bi-house",
   emitirNota: "bi bi-file-earmark-plus",
@@ -32,9 +31,10 @@ const icons = {
   cadeado: "bi bi-lock",
   chave: "bi bi-key",
   suporte: "bi bi-headset",
-  seguranca:"bi bi-shield-lock",
+  seguranca: "bi bi-shield-lock",
   cartao: "bi bi-credit-card",
-  aparencia: "bi bi-palette"
+  aparencia: "bi bi-palette",
+  email: "bi bi-envelope",
 };
 
 export default icons;

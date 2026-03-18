@@ -1,39 +1,151 @@
-.botoes {
+.texto-canal {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--cor-texto-escuro);
+  margin-bottom: 1rem;
+}
+
+.status-topo {
   display: flex;
-  gap: 5rem;
-  margin-top: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.status-tag {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.status-tag.ativo {
+  background: rgba(8, 145, 57, 0.14);
+  color: #0b6e2d;
+  border: 1px solid rgba(8, 145, 57, 0.3);
+}
+
+.status-tag.inativo {
+  background: rgba(220, 38, 38, 0.12);
+  color: #a11616;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.status-tag.configurado {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.status-tag.pendente {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.notificacao-card {
+  transition: all 0.25s ease-in-out;
+}
+
+.notificacao-toggle-area {
+  padding: 0;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.btn-toggle-notificacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.notificacao-acoes {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
   justify-content: center;
 }
 
-.btn-verde {
-  background-color: green;
+.notificacao-dropdown {
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+  animation: fadeNotificacao 0.25s ease-in-out;
+}
+
+@keyframes fadeNotificacao {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.textarea-notificacao {
+  width: 100%;
+  min-height: 130px;
+  padding: 0.9rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: Arial, sans-serif;
+  resize: vertical;
+}
+
+.acoes-notificacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-status-ativar {
+  background: green;
   color: white;
 }
 
-.btn-vermelho {
-  background-color: red;
+.btn-status-desativar {
+  background: red;
   color: white;
 }
 
-.msg-sistema {
-  margin-top: 10px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 14px;
+.btn-excluir-notificacao {
+  background: #9f1239;
+  color: white;
 }
 
-.msg-sistema:contains("sucesso") {
-  color: #0f0;
+.btn-excluir-notificacao:hover {
+  background: #7f1d1d;
 }
 
-.msg-sistema:contains("Preencha") {
-  color: #f33;
+body.dark-mode .texto-canal {
+  color: #f1f1f1;
+}
+
+body.dark-mode .textarea-notificacao {
+  background: #222;
+  color: #f1f1f1;
+  border-color: #444;
 }
 
 @media (max-width: 1150px) {
-  .botoes {
-    margin-top: 2rem;
+  .status-topo {
     flex-direction: column;
-    gap: 3rem;
-}
+    gap: 0.8rem;
+  }
+
+  .acoes-notificacao {
+    flex-direction: column;
+  }
+
+  .acoes-notificacao button {
+    width: 100%;
+  }
+
+  .btn-toggle-notificacao {
+    width: 100%;
+    justify-content: center;
+  }
 }

@@ -1992,6 +1992,7 @@
   color: white;
   gap: 20px;
   border: 2px solid rgba(255, 255, 255, 0.61);
+  text-align: center;
 }
 
 .tela-planos .loading-text h3 {
