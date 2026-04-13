@@ -87,11 +87,13 @@
   width: 100%;
   min-height: 130px;
   padding: 0.9rem 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--cor-cinza);
   border-radius: 6px;
   font-size: 0.95rem;
   font-family: Arial, sans-serif;
   resize: vertical;
+  background: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
 }
 
 .acoes-notificacao {
@@ -120,14 +122,10 @@
   background: #7f1d1d;
 }
 
-body.dark-mode .texto-canal {
-  color: #f1f1f1;
-}
-
 body.dark-mode .textarea-notificacao {
-  background: #222;
-  color: #f1f1f1;
-  border-color: #444;
+  background: var(--cor-card);
+  color: var(--cor-texto-escuro);
+  border-color: var(--cor-cinza);
 }
 
 @media (max-width: 1150px) {

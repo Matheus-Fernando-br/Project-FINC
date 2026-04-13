@@ -1,3 +1,8 @@
+/* =============================================================================
+   APP (área logada) — layout, componentes, tema claro/escuro
+   Variáveis de cor: global.css (:root + body.dark-mode)
+   ============================================================================= */
+
 /* ================= RESET ================= */
 * {
   margin: 0;
@@ -6,14 +11,17 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: var(--cor-fundo-claro);
   color: var(--cor-texto-escuro);
 }
 
-/* ================= HEADER ================= */
+/* ================= TOKENS LOCAIS ================= */
 :root {
   --header-height: 100px;
+  --app-shadow-content: 0 4px 24px var(--cor-preto-transparente);
+  --app-radius: 10px;
+  --app-radius-sm: 8px;
 }
 
 .header {
@@ -106,8 +114,14 @@ body {
   width: 50%;
   padding: 0.6rem 1rem;
   border-radius: 20px;
-  border: none;
+  border: 1px solid var(--cor-cinza);
   outline: none;
+  background: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
+}
+
+.search-bar input::placeholder {
+  color: var(--cor-cinza-escuro);
 }
 
 .search-bar i {
@@ -127,11 +141,12 @@ body {
   left: 0;
   width: 100%;
   height: 75vh;
-  background: rgba(20, 20, 20, 0.8);
+  background: var(--cor-preto-transparente-forte);
   backdrop-filter: blur(20px);
   border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0.8rem 0;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 40px var(--cor-preto-transparente-forte);
   animation: dropdownOpen 0.25s ease-out;
   z-index: 2000;
   opacity: 1;
@@ -397,13 +412,13 @@ body {
   z-index: 3500;
 }
 
-/* Divider */
+/* Divider (sidebar) */
 .divider {
   width: 80%;
   margin: 1rem auto;
   border: 0;
   height: 2px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.35);
 }
 
 /* ================= HOME ================= */
@@ -486,9 +501,9 @@ body {
 .btn-outline-secondary {
   padding: 0.4rem 1rem;
   font-size: 0.8rem;
-  background-color: #757171a4;
-  border: var(--cor-primaria) 1px solid;
-  color: white;
+  background-color: var(--cor-cinza-escuro);
+  border: 1px solid var(--cor-primaria);
+  color: var(--cor-texto-claro);
 }
 
 .btn-outline-secondary i {
@@ -497,7 +512,9 @@ body {
 
 .btn-outline-danger {
   border: 1px solid var(--cor-danger);
-  background: #ee3333a4;
+  background: rgba(192, 57, 43, 0.22);
+  background: color-mix(in srgb, var(--cor-danger) 32%, transparent);
+  color: var(--cor-texto-claro);
 }
 
 .btn-outline-sucess {
@@ -506,9 +523,9 @@ body {
 }
 
 .btn-success {
-  background-color: #757171a4;
-  border: var(--cor-primaria) 1px solid;
-  color: white;
+  background-color: var(--cor-cinza-escuro);
+  border: 1px solid var(--cor-primaria);
+  color: var(--cor-texto-claro);
   font-size: 0.8rem;
 }
 
@@ -534,7 +551,7 @@ body {
   padding: 0.35rem 0.5rem;
   font-size: 0.8rem;
   text-decoration: none;
-  color: #fff;
+  color: var(--cor-texto-claro);
   border-radius: 10px;
   background: var(--cor-primaria);
   transition: all 0.2s ease-in-out;
@@ -572,13 +589,13 @@ body {
   gap: 0.4rem;
   text-align: left;
   cursor: pointer;
-  background: #f1f1f1;
+  background: var(--cor-fundo-claro);
   border-radius: 0;
-  color: black;
+  color: var(--cor-texto-escuro);
 }
 
 .atalhos-dropdown button:hover {
-  background: rgba(11, 158, 6, 0.671);
+  background: color-mix(in srgb, var(--cor-primaria) 28%, var(--cor-fundo-claro));
 }
 
 /* ================= LOGO EMBAIXO ================= */
@@ -611,31 +628,10 @@ body {
   padding-left: 3rem;
   padding-right: 3rem;
   padding-bottom: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
-}
-
-/* ================= DARK MODE ================= */
-
-body.dark-mode .form-section,
-body.dark-mode .form-section h3,
-body.dark-mode .form-section input,
-body.dark-mode .form-section .icon,
-body.dark-mode .form-section .bi {
-  color: #f1f1f1;
-  border-color: #444;
-}
-
-body.dark-mode .form-section input {
-  background: #222;
-  color: #f1f1f1;
-  border-color: #444;
-}
-
-body.dark-mode .form-footer i,
-body.dark-mode .form-footer a {
-  color: #f1f1f1;
+  border-radius: var(--app-radius);
+  border: 1px solid color-mix(in srgb, var(--cor-cinza) 55%, transparent);
+  box-shadow: var(--app-shadow-content);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* ================= Título da Seção ================= */
@@ -715,7 +711,7 @@ button {
 }
 
 button:hover {
-  background: #058831;
+  background: var(--cor-secundaria);
   transform: scale(1.05);
   transition: all 0.2s ease-in-out;
 }
@@ -767,10 +763,11 @@ button:hover {
 .form-group select {
   flex: 1;
   padding: 0.7rem 3rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid var(--cor-cinza);
+  border-radius: var(--app-radius-sm);
   font-size: 0.9rem;
-  background: #fff;
+  background: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
   cursor: pointer;
 }
 
@@ -821,9 +818,11 @@ button:hover {
 .form-row input {
   flex: 1;
   padding: 0.7rem 2rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid var(--cor-cinza);
+  border-radius: var(--app-radius-sm);
   font-size: 0.9rem;
+  background: var(--cor-texto-claro);
+  color: var(--cor-texto-escuro);
 }
 
 /* ================= Label do conteúdo ================= */
@@ -840,7 +839,7 @@ button:hover {
   margin-bottom: 0.8rem;
   font-weight: bold;
   font-style: italic;
-  color: var(--cor-fundo-escuro);
+  color: var(--cor-texto-escuro);
 }
 
 .radio-group .label-radio {
@@ -935,7 +934,7 @@ button:hover {
 .import-sheet .tabela-planilha {
   width: 100%;
   height: 70vh;
-  background: #2a7efc0c;
+  background: color-mix(in srgb, var(--cor-primaria) 6%, var(--cor-fundo-claro));
   border: 5px dashed var(--cor-cinza);
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -946,8 +945,8 @@ button:hover {
   width: 100%;
   max-height: 100%;
   overflow: auto; /* rolagem em ambos sentidos */
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid var(--cor-cinza);
+  border-radius: var(--app-radius-sm);
 }
 
 /* Estilo básico */
@@ -960,7 +959,7 @@ button:hover {
 /* Linhas e colunas separadas */
 .import-sheet .preview-table th,
 .import-sheet .preview-table td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--cor-cinza);
   padding: 8px 12px;
   white-space: nowrap; /* evita quebra feia */
 }
@@ -969,19 +968,20 @@ button:hover {
 .import-sheet .preview-table thead th {
   position: sticky;
   top: 0;
-  background: #f1f1f1;
+  background: color-mix(in srgb, var(--cor-cinza) 35%, var(--cor-texto-claro));
+  color: var(--cor-texto-escuro);
   font-weight: bold;
   z-index: 2;
 }
 
 /* Alternância de linhas (zebra) */
 .import-sheet .preview-table tbody tr:nth-child(even) {
-  background: #fafafa;
+  background: color-mix(in srgb, var(--cor-fundo-claro) 92%, var(--cor-cinza));
 }
 
 /* Hover */
 .import-sheet .preview-table tbody tr:hover {
-  background: #f0f7ff;
+  background: color-mix(in srgb, var(--cor-primaria) 12%, var(--cor-fundo-claro));
 }
 
 /* ================= RESPONSIVO ================= */
@@ -1055,7 +1055,7 @@ button:hover {
     overflow-y: auto; /* rolagem vertical */
     border-radius: 15px;
     transition: left 0.4s ease-in-out;
-    padding-top: 10vh;
+    padding-top: 12vh;
     padding-bottom: 10vh;
     top: 0;
   }
@@ -1140,22 +1140,21 @@ button:hover {
   grid-template-columns: 1fr 160px;
   gap: 12px;
   align-items: stretch;
-
   padding: 10px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  transition: border-color .12s ease, background .12s ease;
+  border: 1px solid var(--cor-cinza);
+  background: color-mix(in srgb, var(--cor-texto-claro) 88%, var(--cor-cinza));
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
 .plano-row:hover {
-  border-color: rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.05);
+  border-color: color-mix(in srgb, var(--cor-primaria) 45%, var(--cor-cinza));
+  background: color-mix(in srgb, var(--cor-primaria) 8%, var(--cor-texto-claro));
 }
 
 .plano-row.selecionado {
-  border-color: rgba(0, 200, 120, 0.45);
-  background: rgba(0, 200, 120, 0.07);
+  border-color: color-mix(in srgb, var(--cor-primaria) 55%, var(--cor-cinza));
+  background: color-mix(in srgb, var(--cor-primaria) 14%, var(--cor-fundo-claro));
 }
 
 /* Mantém card “como está” */
@@ -1168,7 +1167,7 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-left: 1px solid rgba(255,255,255,0.08);
+  border-left: 1px solid var(--cor-cinza);
   padding-left: 12px;
 }
 
@@ -1179,18 +1178,17 @@ button:hover {
   gap: 10px;
   cursor: pointer;
   user-select: none;
-
   padding: 10px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  border: 1px solid var(--cor-cinza);
+  background: color-mix(in srgb, var(--cor-fundo-claro) 75%, var(--cor-texto-claro));
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
 }
 
 .radio-pill:hover {
   transform: translateY(-1px);
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.18);
+  background: color-mix(in srgb, var(--cor-primaria) 10%, var(--cor-fundo-claro));
+  border-color: color-mix(in srgb, var(--cor-primaria) 35%, var(--cor-cinza));
 }
 
 .radio-pill input {
@@ -1201,13 +1199,13 @@ button:hover {
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  border: 2px solid rgba(255,255,255,0.35);
+  border: 2px solid var(--cor-cinza-escuro);
   display: inline-block;
   position: relative;
 }
 
 .radio-pill input:checked + .radio-ui {
-  border-color: rgba(0, 200, 120, 0.9);
+  border-color: var(--cor-primaria);
 }
 
 .radio-pill input:checked + .radio-ui::after {
@@ -1215,13 +1213,14 @@ button:hover {
   position: absolute;
   inset: 3px;
   border-radius: 999px;
-  background: rgba(0, 200, 120, 0.9);
+  background: var(--cor-primaria);
 }
 
 .radio-text {
   font-weight: 700;
   font-size: 14px;
-  opacity: 0.92;
+  color: var(--cor-texto-escuro);
+  opacity: 0.95;
 }
 
 /* Botões ações: cancelar + confirmar */
@@ -1239,16 +1238,17 @@ button:hover {
   justify-content: center;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--cor-cinza);
+  background: color-mix(in srgb, var(--cor-fundo-claro) 90%, var(--cor-cinza));
+  color: var(--cor-texto-escuro);
   text-decoration: none;
   font-weight: 700;
-  transition: transform .12s ease, background .12s ease;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
 }
 
 .btn-cancelar:hover {
   transform: translateY(-1px);
-  background: rgba(255,255,255,0.08);
+  background: color-mix(in srgb, var(--cor-cinza) 22%, var(--cor-texto-claro));
 }
 
 /* Responsivo: seletor vai pra baixo */
@@ -1258,9 +1258,137 @@ button:hover {
   }
   .plano-row-select {
     border-left: none;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid var(--cor-cinza);
     padding-left: 0;
     padding-top: 10px;
     justify-content: flex-end;
   }
+
+  body.dark-mode .plano-row-select {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ================= DARK MODE — complemento (app / componentes) ================= */
+
+body.dark-mode .search-dropdown {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-mode .search-bar input {
+  background: rgba(255, 255, 255, 0.96);
+  color: #1a1d21;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .search-bar input::placeholder {
+  color: #5c6370;
+}
+
+body.dark-mode .home-content .form-section {
+  background: var(--bg-color);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .home-content .titulo-secao {
+  color: var(--cor-primaria);
+}
+
+body.dark-mode .btn-outline-secondary,
+body.dark-mode .btn-success {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+}
+
+body.dark-mode .btn-outline-secondary:hover,
+body.dark-mode .btn-success:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .content .titulo-secao {
+  color: var(--cor-primaria);
+}
+
+body.dark-mode .form-footer a,
+body.dark-mode .form-footer-avancar a,
+body.dark-mode .form-footer-voltar a,
+body.dark-mode .form-footer i,
+body.dark-mode .form-footer-avancar i,
+body.dark-mode .form-footer-voltar i {
+  color: var(--cor-primaria);
+}
+
+body.dark-mode .form-footer a:hover,
+body.dark-mode .form-footer-avancar a:hover,
+body.dark-mode .form-footer-voltar a:hover {
+  color: var(--cor-primaria-escura);
+}
+
+body.dark-mode .editar-acao {
+  color: var(--cor-primaria);
+}
+
+body.dark-mode .plano-row {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-mode .plano-row:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .plano-row.selecionado {
+  border-color: color-mix(in srgb, var(--cor-primaria) 65%, transparent);
+  background: color-mix(in srgb, var(--cor-primaria) 16%, transparent);
+}
+
+body.dark-mode .plano-row-select {
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .radio-pill {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .radio-pill:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .radio-ui {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+body.dark-mode .radio-text {
+  color: var(--cor-texto-escuro);
+}
+
+body.dark-mode .btn-cancelar {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cor-texto-escuro);
+}
+
+body.dark-mode .btn-cancelar:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .import-sheet .preview-table thead th {
+  background: var(--cor-card-hover);
+  color: var(--cor-texto-escuro);
+}
+
+body.dark-mode .import-sheet .preview-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-mode .import-sheet .preview-table tbody tr:hover {
+  background: color-mix(in srgb, var(--cor-primaria) 14%, var(--cor-card));
+}
+
+body.dark-mode .import-sheet .tabela-planilha {
+  background: color-mix(in srgb, var(--cor-primaria) 8%, var(--cor-card));
 }

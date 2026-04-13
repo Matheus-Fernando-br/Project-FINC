@@ -72,6 +72,26 @@ export default function App() {
     loadPreferences();
   }, []);
 
+  useEffect(() => {
+    const overlay = document.getElementById("orientation-lock-overlay");
+    if (!overlay) return;
+
+    const mq = window.matchMedia("(max-width: 900px) and (orientation: landscape)");
+
+    const syncAria = () => {
+      overlay.setAttribute("aria-hidden", mq.matches ? "false" : "true");
+    };
+
+    syncAria();
+    mq.addEventListener("change", syncAria);
+    window.addEventListener("orientationchange", syncAria);
+
+    return () => {
+      mq.removeEventListener("change", syncAria);
+      window.removeEventListener("orientationchange", syncAria);
+    };
+  }, []);
+
   return (
     <Routes location={location} key={location.pathname}>
       {/* 🔥 PRÉ-LOGIN COM ANIMAÇÃO */}

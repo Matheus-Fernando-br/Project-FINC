@@ -141,17 +141,17 @@
     position: fixed;
     top: 0;
     right: -100%;
-    width: 60%;
-    height: 75vh;
+    width: 50%;
+    height: 65vh;
 
     display: flex;
     flex-direction: column;
     gap: 3rem;
-    padding: 4.5rem 2rem;
+    padding: 4rem 2rem;
 
     backdrop-filter: blur(20px);
     background-color: var(--cor-fundo-escuro);
-    border-radius: 20px;
+    border-radius: 20px 0 0 20px;
 
     transition: right 0.4s ease-in-out;
     z-index: 2000;
@@ -159,7 +159,7 @@
 
   /* Menu aberto */
   .cabecalho .menu.active {
-    right: -5%;
+    right: -7%;
   }
 
   /* Remove qualquer efeito hover no mobile */
