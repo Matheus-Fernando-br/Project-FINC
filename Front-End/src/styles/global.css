@@ -172,11 +172,11 @@ button {
 /* BOTÃO */
 .back-to-top {
   position: fixed;
-  bottom: 40px;
-  right: 40px;
+  bottom: 30px;
+  right: 30px;
 
-  width: 55px;
-  height: 55px;
+  width: 20px;
+  height: 45px;
 
   border: 1px solid #918989b4;
   border-radius: 50%;

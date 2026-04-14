@@ -184,7 +184,9 @@ function CadastroLogin() {
           to="/TelaInicial/Login"
           state={{ direction: "left" }}
         >
-          Voltar para Tela de Login
+          Voltar para Tela de Login {" "}
+          <i className="bi bi-chevron-double-left"></i>
+          <i className="bi bi-chevron-double-left"></i>
         </Link>
       </div>
 

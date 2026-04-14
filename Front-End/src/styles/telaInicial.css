@@ -442,11 +442,11 @@
 /* -------------------- */
 .tela-inicial .secao-carrossel {
   padding: 1vh 0;
-  background: var(--cor-texto-claro);
+  background: var(--gradiente-base);
   text-align: center;
 }
 .tela-inicial .form-section {
-  margin-bottom: 3rem;
+  margin-bottom: .2rem;
   text-align: center;
 }
 .tela-inicial .section-header {
@@ -1477,7 +1477,8 @@
   border: 2px solid var(--cor-texto-claro);
   backdrop-filter: blur(10px);
   padding: 1.5rem;
-  margin-top: 15vh;
+  margin-top: 18vh;
+  margin-bottom: 2vh;
   width: 100%;
   max-width: 480px;
 }
@@ -1728,7 +1729,8 @@
   backdrop-filter: blur(10px);
   color: var(--cor-texto-escuro);
   padding: 2rem;
-  margin-top: 15vh;
+  margin-top: 18vh;
+  margin-bottom: 2vh;
   width: 100%;
   max-width: 40vw;
 }
@@ -1795,7 +1797,8 @@
   justify-content: space-between;
   font-size: 0.9rem;
   margin-top: 1rem;
-  max-width: 45%;
+  width: fit-content;
+  gap: .5vw;
 }
 
 .CadastroLogin .wrapper .acept label input {

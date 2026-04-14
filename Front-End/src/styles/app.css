@@ -909,21 +909,9 @@ button:hover {
 .form-footer-avancar a:hover,
 .form-footer-voltar a:hover {
   cursor: pointer;
-  transform: scale(1.1);
-  transition: transform 0.2s ease-in-out;
-  animation: pulse 2s ease-in-out infinite;
-}
+  transform: scale(0.98);
+  transition: transform 0.3s ease-in-out;
 
-@keyframes pulse {
-  0% {
-    transform: scaleX(1);
-  }
-  50% {
-    transform: scaleX(1.095);
-  }
-  100% {
-    transform: scaleX(1);
-  }
 }
 
 /* ImportSheet */
