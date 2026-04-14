@@ -1,4 +1,9 @@
+import { createClient } from "@supabase/supabase-js";
 import { supabase } from "../services/supabase.js";
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 export const changePassword = async (req, res) => {
   const { senhaAtual, novaSenha } = req.body;
@@ -7,9 +12,16 @@ export const changePassword = async (req, res) => {
     return res.status(400).json({ error: "Dados inválidos" });
   }
 
+  if (novaSenha.length < 8) {
+    return res.status(400).json({
+      error: "A nova senha deve ter pelo menos 8 caracteres",
+    });
+  }
+
   try {
-    // 🔐 valida senha atual
-    const { error: signError } = await supabase.auth.signInWithPassword({
+    // Cliente efêmero evita corrida de sessão no singleton `supabase` entre requisições concorrentes.
+    const ephemeral = createClient(supabaseUrl, supabaseServiceKey);
+    const { error: signError } = await ephemeral.auth.signInWithPassword({
       email: req.user.email,
       password: senhaAtual,
     });
@@ -18,8 +30,7 @@ export const changePassword = async (req, res) => {
       return res.status(401).json({ error: "Senha atual incorreta" });
     }
 
-    // 🔁 atualiza senha
-    const { error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.admin.updateUserById(req.user.id, {
       password: novaSenha,
     });
 

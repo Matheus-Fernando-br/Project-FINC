@@ -1517,6 +1517,7 @@
   outline: none;
   padding: 0.75rem 3rem 0.75rem 1rem;
   font-size: 1rem;
+  color: white;
   font-weight: 400;
   letter-spacing: 0.6px;
 }
@@ -1727,7 +1728,7 @@
   background: var(--cor-texto-claro);
   border: 2px solid var(--cor-texto-escuro);
   backdrop-filter: blur(10px);
-  color: var(--cor-texto-escuro);
+  font-family: 'Poppins', sans-serif;
   padding: 2rem;
   margin-top: 18vh;
   margin-bottom: 2vh;
@@ -1739,6 +1740,7 @@
   font-size: 2.5rem;
   margin-bottom: 3rem;
   text-align: center;
+  color: black;
 }
 
 .CadastroLogin .wrapper .formulario {
@@ -1753,7 +1755,7 @@
 .formulario .input-box .label {
   font-size: 1rem;
   margin-bottom: 0.3rem;
-  color: var(--cor-texto-escuro);
+  color: #1a1d21;
   font-weight: bold;
   display: block;
 }
@@ -1769,15 +1771,15 @@
 .CadastroLogin .input-box select {
   width: 100%;
   height: 50px;
-  color: var(--cor-texto-escuro);
+  color: #1a1d21;
   background: transparent;
-  border: 1px solid var(--cor-texto-escuro);
+  border: 1px solid #1a1d21;
   outline: none;
   padding: 0.75rem 3rem 0.75rem 1rem;
 }
 
 .CadastroLogin .input-box input::placeholder {
-  color: var(--cor-preta-apagada);
+  color: #000000d2;
 }
 
 .CadastroLogin .input-box i {
@@ -1785,7 +1787,7 @@
   right: 1rem;
   bottom: 2vh;
   font-size: 18px;
-  color: var(--cor-texto-escuro);
+  color: #1a1d21;
   pointer-events: none;
 }
 
@@ -1795,10 +1797,12 @@
 .CadastroLogin .wrapper .acept {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.9rem;
   margin-top: 1rem;
   width: fit-content;
-  gap: .5vw;
+  color: #1a1d21;
+  gap: .2vw;
 }
 
 .CadastroLogin .wrapper .acept label input {

@@ -6,6 +6,10 @@ function MenuSair() {
     const navigate = useNavigate();
 
     function logout() {
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("user_name");
         alert("Usuário Desconectado com Sucesso!");
         navigate('/');
     }
