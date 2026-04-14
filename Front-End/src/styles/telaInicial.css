@@ -1499,6 +1499,10 @@
   font-weight: bold;
 }
 
+.Login .feedback {
+  color: var(--cor-texto-claro);
+}
+
 /* ==============================
    INPUTS
 ================================= */

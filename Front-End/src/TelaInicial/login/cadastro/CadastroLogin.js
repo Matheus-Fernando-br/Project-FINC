@@ -311,7 +311,7 @@ function CadastroLogin() {
           <hr className="divider" />
 
           {feedback && (
-          <p style={{ textAlign: "center", marginTop: "10px" }}>
+          <p style={{ textAlign: "center", marginTop: "10px" }} className="feedback">
             {feedback}
           </p>
           )}

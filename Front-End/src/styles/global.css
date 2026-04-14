@@ -236,15 +236,16 @@ button {
 
 .feedback {
   font-size: 14px;
-  color: var(--cor-texto-escuro);
+  margin-bottom: 10px;
+  color: #0d1117;
   text-align: center;
   animation: feedRed 3s ease-in-out;
 }
 
 @keyframes feedRed {
-  0% { color: var(--cor-texto-escuro); }
+  0% { color: #0d1117; }
   50% { color: var(--cor-pending); }
-  100% { color: var(--cor-texto-escuro); }
+  100% { color: #0d1117; }
 }
 
 .bold-text {
