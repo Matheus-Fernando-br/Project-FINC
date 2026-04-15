@@ -2,6 +2,7 @@ import "../config.css";
 import icons from "../../../components/Icons";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { apiFetch } from "../../../utils/api.js";
 
 export default function Seguranca() {
   const navigate = useNavigate();
@@ -25,27 +26,13 @@ export default function Seguranca() {
     setLoading(true);
     setFeedback("Alterando senha...");
     try {
-      const res = await fetch(
-        "https://project-finc.onrender.com/api/profile/password",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          },
-          body: JSON.stringify({
-            senhaAtual,
-            novaSenha
-          })
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setFeedback(data.error || "Erro ao alterar senha");
-        return;
-      }
+      await apiFetch("/api/profile/password", {
+        method: "PUT",
+        body: JSON.stringify({
+          senhaAtual,
+          novaSenha,
+        }),
+      });
 
       setFeedback("Senha alterada com sucesso ✅");
       setTimeout(() => {
@@ -57,8 +44,8 @@ export default function Seguranca() {
       setNovaSenha("");
       setConfirmarSenha("");
       setAbrirSenha(false);
-    } catch {
-      setFeedback("Erro de conexão com servidor");
+    } catch (err) {
+      setFeedback(err?.message || "Erro de conexão com servidor");
     } finally {
       setLoading(false);
     }

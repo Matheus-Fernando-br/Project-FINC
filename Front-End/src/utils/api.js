@@ -1,40 +1,46 @@
-const API_URL =
-  process.env.REACT_APP_API_URL ||
-  "http://localhost:3333" ||
-  "http://localhost:3000";
+export const API_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:3333";
 
-function getToken() {
-  // ✅ prioridade: sessão (não lembrar) -> persistente (lembrar)
-  return sessionStorage.getItem("token") || localStorage.getItem("token");
-}
-
-function logoutAndRedirect() {
-  alert("Sua sessão expirou. Faça login novamente.");
-
-  // ✅ limpa token em ambos
+async function clearSessionClientSide() {
+  try {
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch {
+    /* ignora falha de rede */
+  }
   localStorage.removeItem("token");
   sessionStorage.removeItem("token");
-
   localStorage.removeItem("user");
   localStorage.removeItem("user_name");
+}
 
+async function logoutAndRedirect() {
+  alert("Sua sessão expirou. Faça login novamente.");
+  await clearSessionClientSide();
   window.location.href = "/TelaInicial/Login";
 }
 
+/**
+ * @param {string} path
+ * @param {RequestInit & { skipLogoutOn401?: boolean }} options
+ */
 export async function apiFetch(path, options = {}) {
-  const token = getToken();
+  const { skipLogoutOn401 = false, ...fetchOptions } = options;
+
   const headers = {
     "Content-Type": "application/json",
-    ...(options.headers || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(fetchOptions.headers || {}),
   };
 
   const res = await fetch(`${API_URL}${path}`, {
-    ...options,
+    ...fetchOptions,
+    credentials: "include",
     headers,
   });
 
-  // tenta parsear json; se não for json, retorna texto
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
   const data = isJson
@@ -43,11 +49,18 @@ export async function apiFetch(path, options = {}) {
 
   if (res.status === 401) {
     if (path === "/auth/login") {
-      throw new Error("Usuário ou senha incorretos");
-    } else {
-      logoutAndRedirect();
+      const msg =
+        (data && (data.error || data.erro || data.message)) ||
+        "Usuário ou senha inválidos";
+      throw new Error(msg);
+    }
+    if (!skipLogoutOn401) {
+      await logoutAndRedirect();
       throw new Error("Sessão expirada");
     }
+    throw new Error(
+      (data && (data.error || data.message)) || "Não autenticado",
+    );
   }
 
   if (!res.ok) {

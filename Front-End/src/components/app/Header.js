@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import suggestions from "./Suggestions";
 import { applyTheme, getTheme } from "../../utils/scripts";
-
+import { apiFetch } from "../../utils/api.js";
 
 function Header() {
   const [theme, setTheme] = useState(getTheme());
@@ -13,7 +13,6 @@ function Header() {
     applyTheme(newTheme);
   }
 
-
   const [searchTerm, setSearchTerm] = useState("");
   const [openDropdown, setOpenDropdown] = useState(false);
   const [animateClose, setAnimateClose] = useState(false);
@@ -21,8 +20,10 @@ function Header() {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
+  const [nomeCompleto, setNomeCompleto] = useState("Usuário");
+
   const filteredSuggestions = suggestions.filter((item) =>
-    item.label.toLowerCase().includes(searchTerm.toLowerCase())
+    item.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   function executeSearch() {
@@ -49,7 +50,6 @@ function Header() {
       }
     }
 
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -66,6 +66,25 @@ function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const profile = await apiFetch("/api/profile/me", {
+          method: "GET",
+          skipLogoutOn401: true,
+        });
+        if (!cancelled && profile?.social_name) {
+          setNomeCompleto(profile.social_name);
+        }
+      } catch {
+        if (!cancelled) setNomeCompleto("Usuário");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleKeyDown(e) {
     if (e.key === "Enter") {
@@ -73,13 +92,10 @@ function Header() {
     }
   }
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const nomeCompleto = user.social_name || "Usuário";
-
   return (
     <header className="header">
       <div className="logo">
-        <img src="/Images/FINC.png" alt="Logo Finc"/>
+        <img src="/Images/FINC.png" alt="Logo Finc" />
       </div>
 
       <div className="search-wrapper">
@@ -98,50 +114,49 @@ function Header() {
           <i className="bi bi-search"></i>
         </div>
 
-       {openDropdown && (
-        <div
-          className={`search-dropdown ${animateClose ? "closing" : ""}`}
-          ref={dropdownRef}
-        >
-          <div className="dropdown-header">
-            <span>Informe o conteúdo que deseja localizar</span>
+        {openDropdown && (
+          <div
+            className={`search-dropdown ${animateClose ? "closing" : ""}`}
+            ref={dropdownRef}
+          >
+            <div className="dropdown-header">
+              <span>Informe o conteúdo que deseja localizar</span>
 
-            <p className="close-btn" onClick={closeDropdown}>
-              <span>Fechar</span>
-              <i className="bi bi-x-lg"></i>
-            </p>
+              <p className="close-btn" onClick={closeDropdown}>
+                <span>Fechar</span>
+                <i className="bi bi-x-lg"></i>
+              </p>
+            </div>
+
+            {filteredSuggestions.map((item, index) => (
+              <Link
+                key={index}
+                className="dropdown-item"
+                to={item.to}
+                onClick={() => {
+                  executeSearch();
+                  closeDropdown();
+                }}
+              >
+                <i className={item.icon}></i>
+                {item.label}
+              </Link>
+            ))}
           </div>
-
-          {filteredSuggestions.map((item, index) => (
-            <Link
-              key={index}
-              className="dropdown-item"
-              to={item.to}
-              onClick={() => {
-                executeSearch();   // executa pesquisa
-                closeDropdown();   // fecha automaticamente
-              }}
-            >
-              <i className={item.icon}></i>
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      )}
+        )}
       </div>
-
 
       <div className="header-right">
         <div className="meuperfil">
-        <Link to="/MeusDados">
-          <span className="user-name">{nomeCompleto}</span>
-        </Link>
-
-        <div className="profile">
           <Link to="/MeusDados">
-            <i className="bi bi-person-circle"></i>
+            <span className="user-name">{nomeCompleto}</span>
           </Link>
-        </div>
+
+          <div className="profile">
+            <Link to="/MeusDados">
+              <i className="bi bi-person-circle"></i>
+            </Link>
+          </div>
         </div>
 
         <div className="icons">

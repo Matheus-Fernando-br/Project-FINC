@@ -2,6 +2,7 @@ import "../../config.css";
 import icons from "../../../../components/Icons";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch, API_URL } from "../../../../utils/api.js";
 
 export default function Chamado() {
   const navigate = useNavigate();
@@ -18,7 +19,31 @@ export default function Chamado() {
   const [chamados, setChamados] = useState([]);
   const [loadingChamados, setLoadingChamados] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const profile = await apiFetch("/api/profile/me", {
+          method: "GET",
+          skipLogoutOn401: true,
+        });
+        if (!cancelled && profile?.id) {
+          setUser({
+            id: profile.id,
+            email: profile.email || "",
+            nome: profile.social_name || "Usuário",
+          });
+        }
+      } catch {
+        if (!cancelled) setUser(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* ===== BLOQUEAR SCROLL QUANDO MODAL ABRIR ===== */
   useEffect(() => {
@@ -31,9 +56,7 @@ export default function Chamado() {
 
     setLoadingChamados(true);
     try {
-      const res = await fetch(
-        `https://project-finc.onrender.com/chamados/user/${user.id}`
-      );
+      const res = await fetch(`${API_URL}/chamados/user/${user.id}`);
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.erro || "Erro ao buscar chamados");
@@ -69,7 +92,7 @@ export default function Chamado() {
     setFeedback("Abrindo chamado...");
 
     try {
-      const res = await fetch("https://project-finc.onrender.com/chamados", {
+      const res = await fetch(`${API_URL}/chamados`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

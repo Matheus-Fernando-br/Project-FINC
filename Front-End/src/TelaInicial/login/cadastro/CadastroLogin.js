@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/telaInicial.css";
-import { apiFetch } from "../../../utils/api.js"
+import { apiFetch } from "../../../utils/api.js";
 
 function CadastroLogin() {
   const navigate = useNavigate();
@@ -20,11 +20,27 @@ function CadastroLogin() {
   });
 
   const validarFormulario = () => {
-    const { nome_social, tipoPessoa, cpf, email, telefone, senha, repitaSenha , termos } = formData;
+    const {
+      nome_social,
+      tipoPessoa,
+      cpf,
+      email,
+      telefone,
+      senha,
+      repitaSenha,
+      termos,
+    } = formData;
 
-    if (!nome_social || !tipoPessoa || !cpf || !email || !telefone || !senha || !repitaSenha) {
+    if (
+      !nome_social ||
+      !tipoPessoa ||
+      !cpf ||
+      !email ||
+      !telefone ||
+      !senha ||
+      !repitaSenha
+    ) {
       setFeedback("Preencha todos os campos!");
-
       return false;
     }
 
@@ -38,7 +54,6 @@ function CadastroLogin() {
       return false;
     }
 
-    
     if (senha !== repitaSenha) {
       setFeedback("As senhas não coincidem! Verifique e tente novamente.");
       return false;
@@ -58,28 +73,28 @@ function CadastroLogin() {
       setFeedback("CNPJ inválido. Verifique e tente novamente.");
       return false;
     }
-    
+
     return true;
   };
 
   const labelTipo =
-  formData.tipoPessoa === "FISICA"
-    ? "CPF"
-    : formData.tipoPessoa === "JURIDICA"
-    ? "CNPJ"
-    : "CPF/CNPJ";
-    
-    const formatarDocumento = (valor, tipoPessoa) => {
-      valor = valor.replace(/\D/g, "");
-      
-      if (tipoPessoa === "FISICA") {
+    formData.tipoPessoa === "FISICA"
+      ? "CPF"
+      : formData.tipoPessoa === "JURIDICA"
+        ? "CNPJ"
+        : "CPF/CNPJ";
+
+  const formatarDocumento = (valor, tipoPessoa) => {
+    valor = valor.replace(/\D/g, "");
+
+    if (tipoPessoa === "FISICA") {
       return valor
         .replace(/(\d{3})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d)/, "$1.$2")
         .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
         .slice(0, 14);
     }
-    
+
     if (tipoPessoa === "JURIDICA") {
       return valor
         .replace(/(\d{2})(\d)/, "$1.$2")
@@ -87,7 +102,7 @@ function CadastroLogin() {
         .replace(/(\d{3})(\d)/, "$1/$2")
         .replace(/(\d{4})(\d{1,2})$/, "$1-$2")
         .slice(0, 18);
-      }
+    }
 
     return valor;
   };
@@ -99,34 +114,33 @@ function CadastroLogin() {
       .replace(/^(\d{2})(\d)/, "($1) $2")
       .replace(/(\d{5})(\d)/, "$1-$2")
       .slice(0, 15);
-    };
+  };
 
-    const handleChange = (e) => {
-      setFeedback("");
+  const handleChange = (e) => {
+    setFeedback("");
 
-      const { id, value, type, checked } = e.target;
-  
-      let novoValor = type === "checkbox" ? checked : value;
-  
-      if (id === "cpf") {
-        if (!formData.tipoPessoa) {
-          setFeedback("Selecione o Tipo de Pessoa antes de digitar o CPF/CNPJ.");
-          return;
-        }
+    const { id, value, type, checked } = e.target;
 
-        novoValor = formatarDocumento(novoValor, formData.tipoPessoa);
+    let novoValor = type === "checkbox" ? checked : value;
+
+    if (id === "cpf") {
+      if (!formData.tipoPessoa) {
+        setFeedback("Selecione o Tipo de Pessoa antes de digitar o CPF/CNPJ.");
+        return;
       }
-  
-      if (id === "telefone") {
-        novoValor = formatarTelefone(novoValor);
-      }
-  
-      setFormData((prev) => ({
-        ...prev,
-        [id]: novoValor,
-      }));
-    };
 
+      novoValor = formatarDocumento(novoValor, formData.tipoPessoa);
+    }
+
+    if (id === "telefone") {
+      novoValor = formatarTelefone(novoValor);
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: novoValor,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,35 +153,25 @@ function CadastroLogin() {
     setFeedback("Cadastrando usuário...");
 
     try {
-      const response = await apiFetch("/auth/register",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: formData.email,
-            senha: formData.senha,
-            nome_social: formData.nome_social,
-            tipoPessoa: formData.tipoPessoa,
-            cpfCnpj: formData.cpf.replace(/\D/g, ""),
-            telefone: formData.telefone,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setFeedback(data.error || "Erro ao criar conta.");
-        return;
-      }
+      await apiFetch("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          email: formData.email,
+          senha: formData.senha,
+          nome_social: formData.nome_social,
+          tipoPessoa: formData.tipoPessoa,
+          cpfCnpj: formData.cpf.replace(/\D/g, ""),
+          telefone: formData.telefone,
+        }),
+      });
 
       setFeedback("Conta criada com sucesso! Redirecionando...");
       setTimeout(() => {
         navigate("/TelaInicial/Login");
       }, 1500);
-
     } catch (error) {
-      console.error("Erro de conexão:", error);
-      setFeedback("Falha de conexão com o servidor.");
+      console.error("Erro de cadastro:", error);
+      setFeedback(error.message || "Falha de conexão com o servidor.");
     } finally {
       setLoading(false);
     }
@@ -180,11 +184,8 @@ function CadastroLogin() {
       </div>
 
       <div className="rodape form-footer voltar">
-        <Link
-          to="/TelaInicial/Login"
-          state={{ direction: "left" }}
-        >
-          Voltar para Tela de Login {" "}
+        <Link to="/TelaInicial/Login" state={{ direction: "left" }}>
+          Voltar para Tela de Login{" "}
           <i className="bi bi-chevron-double-left"></i>
           <i className="bi bi-chevron-double-left"></i>
         </Link>
@@ -274,18 +275,18 @@ function CadastroLogin() {
               <i className="bi bi-lock-fill"></i>
             </div>
 
-          <div className="input-box full">
-            <div className="label">Repita sua senha:</div>
-            <input
-              type={"password"}
-              id="repitaSenha"
-              value={formData.repitaSenha}
-              onChange={handleChange}
-              placeholder="Repita a senha digitada anteriormente"
-              disabled={loading}
-            />
-            <i className="bi bi-lock-fill"></i>
-          </div>
+            <div className="input-box full">
+              <div className="label">Repita sua senha:</div>
+              <input
+                type={"password"}
+                id="repitaSenha"
+                value={formData.repitaSenha}
+                onChange={handleChange}
+                placeholder="Repita a senha digitada anteriormente"
+                disabled={loading}
+              />
+              <i className="bi bi-lock-fill"></i>
+            </div>
           </section>
 
           <div className="acept">
@@ -300,10 +301,7 @@ function CadastroLogin() {
               Aceito os
             </label>
 
-            <Link
-              to="/TelaInicial/Termos"
-              state={{ direction: "right" }}
-            >
+            <Link to="/TelaInicial/Termos" state={{ direction: "right" }}>
               Termos e Serviços
             </Link>
           </div>
@@ -311,16 +309,15 @@ function CadastroLogin() {
           <hr className="divider" />
 
           {feedback && (
-          <p style={{ textAlign: "center", marginTop: "10px" }} className="feedback">
-            {feedback}
-          </p>
+            <p
+              style={{ textAlign: "center", marginTop: "10px" }}
+              className="feedback"
+            >
+              {feedback}
+            </p>
           )}
 
-          <button
-            type="submit"
-            className="btn"
-            disabled={loading}
-          >
+          <button type="submit" className="btn" disabled={loading}>
             {loading && <span className="spinner"></span>}
 
             {loading ? "" : "Criar Conta"}

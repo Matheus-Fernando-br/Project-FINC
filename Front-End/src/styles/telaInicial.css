@@ -1527,7 +1527,7 @@
 }
 
 .Login .input-box input::placeholder {
-  color: var(--cor-preta-apagada);
+  color: rgba(255, 255, 255, 0.12);
 }
 
 .Login .input-box i {

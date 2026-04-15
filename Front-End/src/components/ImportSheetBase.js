@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as XLSX from "xlsx";
 import '../styles/global.css';
 import '../styles/app.css';
-import axios from "axios";
+import { apiFetch } from "../utils/api.js";
 
 function ImportSheetBase({ type }) {
     const [previewData, setPreviewData] = useState([]);
@@ -143,7 +143,6 @@ function ImportSheetBase({ type }) {
     const handleImport = async () => {
         if (previewData.length === 0) return;
         setIsImporting(true);
-        const token = localStorage.getItem("token");
 
         try {
             let dadosMapeados = [];
@@ -207,11 +206,9 @@ function ImportSheetBase({ type }) {
             }
 
 
-            await axios.put(`https://project-finc.onrender.com/${normalizedType}`, dadosMapeados, {
-                headers: { 
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            await apiFetch(`/${normalizedType}`, {
+                method: "PUT",
+                body: JSON.stringify(dadosMapeados),
             });
 
             setTimeout(() => {

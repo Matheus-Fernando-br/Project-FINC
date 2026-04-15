@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
 // Rotas Telegram
 import {
@@ -26,21 +28,52 @@ dotenv.config();
 
 const app = express();
 
-/* ===== CORS ===== */
-// Configurado para aceitar seu front-end na Vercel e localmente
+app.set("trust proxy", 1);
+
+const ALLOWED_ORIGINS = [
+  "https://finc-seven.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+
+/* ===== Segurança (headers) ===== */
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'none'"],
+        formAction: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    hsts:
+      process.env.NODE_ENV === "production"
+        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        : false,
+  }),
+);
+
+/* ===== CORS (cookies HttpOnly) ===== */
 app.use(
   cors({
-    origin: [
-      "https://finc-seven.vercel.app",
-      "http://localhost:3000",
-      "http://localhost:3001",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 app.options("*", cors());
-app.use(express.json());
+
+app.use(cookieParser());
+app.use(express.json({ limit: "2mb" }));
 
 /* ============================= */
 /* ROTAS CHAMADOS */

@@ -1,30 +1,23 @@
 import { supabase } from "../services/supabase.js";
+import { COOKIE_NAME } from "../utils/authCookies.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({ error: "Token não informado" });
-    }
-
-   const token = authHeader.startsWith("Bearer ")
-      ? authHeader.split(" ")[1]
-      : null;
+    const token = req.cookies?.[COOKIE_NAME];
 
     if (!token) {
-      return res.status(401).json({ error: "Token mal formatado" });
+      return res.status(401).json({ error: "Não autenticado" });
     }
 
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data?.user) {
-      return res.status(401).json({ error: "Token inválido" });
+      return res.status(401).json({ error: "Sessão inválida ou expirada" });
     }
 
     req.user = {
       id: data.user.id,
-      email: data.user.email
+      email: data.user.email,
     };
 
     return next();

@@ -1,141 +1,192 @@
+import { createClient } from "@supabase/supabase-js";
 import { supabase } from "../services/supabase.js";
+import {
+  setAccessTokenCookie,
+  clearAccessTokenCookie,
+} from "../utils/authCookies.js";
+import {
+  isValidEmail,
+  isStrongPassword,
+  validarCPF,
+  validarCNPJ,
+  normalizeDigits,
+} from "../utils/validators.js";
+
+const LOGIN_FAIL = { error: "Usuário ou senha inválidos" };
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+
+function getEphemeralClient() {
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
+
+export const me = (req, res) => {
+  return res.json({
+    user: {
+      id: req.user.id,
+      email: req.user.email,
+    },
+  });
+};
+
+export const logout = (req, res) => {
+  clearAccessTokenCookie(res);
+  return res.json({ ok: true });
+};
 
 export const register = async (req, res) => {
-  const { email, senha, nome_social, tipoPessoa, cpfCnpj, telefone } = req.body;
+  const { email, senha, nome_social, tipoPessoa, cpfCnpj, telefone } =
+    req.body || {};
+
+  const emailNorm = typeof email === "string" ? email.trim().toLowerCase() : "";
+  const nome = typeof nome_social === "string" ? nome_social.trim() : "";
+  const tipo = tipoPessoa === "JURIDICA" ? "JURIDICA" : tipoPessoa === "FISICA" ? "FISICA" : "";
+  const docDigits = normalizeDigits(cpfCnpj);
+  const telDigits = normalizeDigits(telefone);
+
+  if (!nome || nome.length < 2 || nome.length > 200) {
+    return res.status(400).json({ error: "Nome social inválido" });
+  }
+  if (tipo !== "FISICA" && tipo !== "JURIDICA") {
+    return res.status(400).json({ error: "Tipo de pessoa inválido" });
+  }
+  if (!isValidEmail(emailNorm)) {
+    return res.status(400).json({ error: "E-mail inválido" });
+  }
+  if (!isStrongPassword(senha)) {
+    return res.status(400).json({
+      error:
+        "Senha inválida: mínimo 8 caracteres, com pelo menos uma letra e um número",
+    });
+  }
+  if (tipo === "FISICA") {
+    if (docDigits.length !== 11 || !validarCPF(docDigits)) {
+      return res.status(400).json({ error: "CPF inválido" });
+    }
+  } else if (docDigits.length !== 14 || !validarCNPJ(docDigits)) {
+    return res.status(400).json({ error: "CNPJ inválido" });
+  }
+  if (telDigits.length < 10 || telDigits.length > 13) {
+    return res.status(400).json({ error: "Telefone inválido" });
+  }
 
   try {
-    // ✅ VALIDAR EMAIL ÚNICO
-    const { data: existingUser } = await supabase.auth.admin.listUsers();
-    const emailExists = existingUser.users.some(
-      u => u.email.toLowerCase() === email.toLowerCase()
-    );
-
-    if (emailExists) {
-      return res.status(400).json({ error: "Email já cadastrado" });
-    }
-
-    // ✅ VALIDAR CPF/CNPJ ÚNICO
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("id")
-      .eq("cpf_cnpj", cpfCnpj.replace(/\D/g, ""))
-      .single();
+      .eq("cpf_cnpj", docDigits)
+      .maybeSingle();
 
     if (existingProfile) {
       return res.status(400).json({ error: "CPF/CNPJ já cadastrado" });
     }
 
-    // 1. cria usuário no auth
     const { data, error } = await supabase.auth.admin.createUser({
-      email: email.toLowerCase(),
+      email: emailNorm,
       password: senha,
-      email_confirm: true
+      email_confirm: true,
     });
 
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+      const msg = (error.message || "").toLowerCase();
+      if (
+        msg.includes("already") ||
+        msg.includes("registered") ||
+        msg.includes("duplicate")
+      ) {
+        return res.status(400).json({ error: "E-mail já cadastrado" });
+      }
+      return res.status(400).json({ error: error.message || "Falha no cadastro" });
+    }
 
-    // 2. cria perfil
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        id: data.user.id,
-        social_name: nome_social,
-        tipo_pessoa: tipoPessoa,
-        cpf_cnpj: cpfCnpj.replace(/\D/g, ""),
-        telefone
-      });
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: data.user.id,
+      social_name: nome,
+      tipo_pessoa: tipo,
+      cpf_cnpj: docDigits,
+      telefone: telDigits,
+    });
 
     if (profileError) {
       await supabase.auth.admin.deleteUser(data.user.id);
+      if (profileError.code === "23505") {
+        return res.status(400).json({ error: "CPF/CNPJ já cadastrado" });
+      }
       return res.status(400).json({ error: profileError.message });
     }
 
-    res.status(201).json({ message: "Usuário criado com sucesso" });
-
+    return res.status(201).json({ message: "Usuário criado com sucesso" });
   } catch (error) {
     console.error("Erro no registro:", error);
-    res.status(500).json({ error: "Erro interno no servidor" });
+    return res.status(500).json({ error: "Erro interno no servidor" });
   }
 };
 
 export const login = async (req, res) => {
-  const { login, senha } = req.body;
+  const { login: loginField, senha } = req.body || {};
+
+  if (
+    !loginField ||
+    typeof loginField !== "string" ||
+    !senha ||
+    typeof senha !== "string"
+  ) {
+    return res.status(401).json(LOGIN_FAIL);
+  }
+
+  const trimmed = loginField.trim();
+  if (!trimmed || senha.length === 0) {
+    return res.status(401).json(LOGIN_FAIL);
+  }
 
   try {
-    let email = login;
+    let email = trimmed;
 
-    // 🔁 SE NÃO FOR EMAIL, BUSCA CPF
-    if (!login.includes("@")) {
-      const cpf = login.replace(/\D/g, "");
+    if (!trimmed.includes("@")) {
+      const cpf = normalizeDigits(trimmed);
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id")
         .eq("cpf_cnpj", cpf)
-        .single();
+        .maybeSingle();
 
       if (profileError || !profile) {
-        return res.status(401).json({ error: "Usuário não encontrado" });
+        return res.status(401).json(LOGIN_FAIL);
       }
 
       const { data: userData, error: userError } =
         await supabase.auth.admin.getUserById(profile.id);
 
-      if (userError || !userData?.user) {
-        return res.status(401).json({ error: "Erro ao buscar usuário" });
+      if (userError || !userData?.user?.email) {
+        return res.status(401).json(LOGIN_FAIL);
       }
 
       email = userData.user.email;
     }
 
-    // LOGIN FINAL
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const ephemeral = getEphemeralClient();
+    const { data, error } = await ephemeral.auth.signInWithPassword({
       email,
-      password: senha
+      password: senha,
     });
 
-    if (error) return res.status(401).json({ error: "Credenciais inválidas" });
-
-    // 🔥 BUSCAR O NOME SOCIAL NO PERFIL
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select(`
-        social_name,
-        cpf_cnpj,
-        telefone,
-        tipo_pessoa,
-        cep,
-        uf,
-        cidade,
-        logradouro,
-        numero,
-        complemento
-      `)
-      .eq("id", data.user.id)
-      .single();
-
-    if (profileError || !profile) {
-      return res.status(500).json({ error: "Perfil do usuário não encontrado" });
+    if (error || !data?.session?.access_token || !data?.user?.id) {
+      return res.status(401).json(LOGIN_FAIL);
     }
 
+    setAccessTokenCookie(res, data.session.access_token);
+
     return res.json({
-      session: data.session,
       user: {
-        ...data.user,
-        social_name: profile.social_name || "Usuário",
-        cpf_cnpj: profile.cpf_cnpj,
-        telefone: profile.telefone,
-        tipo_pessoa: profile.tipo_pessoa,
-        cep: profile.cep,
-        uf: profile.uf,
-        cidade: profile.cidade,
-        logradouro: profile.logradouro,
-        numero: profile.numero,
-        complemento: profile.complemento
-      }
+        id: data.user.id,
+        email: data.user.email,
+      },
     });
   } catch (error) {
     console.error("Erro no login:", error);
-    res.status(500).json({ error: "Erro interno no servidor" });
+    return res.status(401).json(LOGIN_FAIL);
   }
 };

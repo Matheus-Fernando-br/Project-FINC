@@ -173,7 +173,6 @@ function Tela_1_emitir_nota() {
       } catch (error) {
         console.error("Erro ao buscar clientes (detalhado):", error);
         console.error("Mensagem:", error?.message);
-        console.error("Token:", localStorage.getItem("token"));
       }
     }
 

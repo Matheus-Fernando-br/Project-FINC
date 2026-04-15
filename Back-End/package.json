@@ -10,9 +10,12 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
     "axios": "^1.13.5",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.3.2",
+    "helmet": "^8.1.0"
   },
   "engines": {
     "node": ">=18"

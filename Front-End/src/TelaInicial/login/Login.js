@@ -14,7 +14,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  // ✅ carrega preferências
   useEffect(() => {
     const savedUser = localStorage.getItem("remember_user_login");
     const savedRemember = localStorage.getItem("remember_me") === "1";
@@ -35,7 +34,7 @@ function Login() {
     setFeedback("Entrando...");
 
     try {
-      const data = await apiFetch("/auth/login", {
+      await apiFetch("/auth/login", {
         method: "POST",
         body: JSON.stringify({
           login: usuario.trim(),
@@ -43,12 +42,6 @@ function Login() {
         }),
       });
 
-      if (!data.session?.access_token) {
-        setFeedback("Token não retornado pelo servidor");
-        return;
-      }
-
-      // ✅ lembrar usuário (somente o login)
       if (lembrarMe) {
         localStorage.setItem("remember_me", "1");
         localStorage.setItem("remember_user_login", usuario.trim());
@@ -57,16 +50,10 @@ function Login() {
         localStorage.removeItem("remember_user_login");
       }
 
-      // ✅ onde salvar o token
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
-
-      const storage = lembrarMe ? localStorage : sessionStorage;
-      storage.setItem("token", data.session.access_token);
-
-      // user pode ficar no localStorage mesmo
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("user_name", data.user.social_name || "");
+      localStorage.removeItem("user");
+      localStorage.removeItem("user_name");
 
       navigate("/app");
     } catch (err) {
@@ -102,7 +89,10 @@ function Login() {
                 type="text"
                 placeholder="E-mail ou CPF"
                 value={usuario}
-                onChange={(e) => {setUsuario(e.target.value); setFeedback("");}}
+                onChange={(e) => {
+                  setUsuario(e.target.value);
+                  setFeedback("");
+                }}
                 disabled={loading}
                 autoComplete="username"
               />
@@ -114,7 +104,10 @@ function Login() {
                 type={mostrarSenha ? "text" : "password"}
                 placeholder="Informe sua senha"
                 value={senha}
-                onChange={(e) => {setSenha(e.target.value); setFeedback("");}}
+                onChange={(e) => {
+                  setSenha(e.target.value);
+                  setFeedback("");
+                }}
                 disabled={loading}
                 autoComplete="current-password"
               />
@@ -135,7 +128,6 @@ function Login() {
                 Lembrar-me
               </label>
 
-              {/* ✅ vira link */}
               <Link to="/TelaInicial/Login/EsqueciSenha">
                 Esqueceu a senha?
               </Link>

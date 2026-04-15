@@ -1,20 +1,39 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-
-function getToken() {
-  return (
-    sessionStorage.getItem("token") ||
-    localStorage.getItem("token")
-  );
-}
+import { apiFetch } from "../utils/api.js";
 
 export default function ProtectedRoute({ children }) {
-  const token = getToken();
+  const [status, setStatus] = useState("loading");
 
-  if (!token || token === "undefined" || token === "null") {
-    // limpa apenas o necessário
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
+  useEffect(() => {
+    let cancelled = false;
 
+    (async () => {
+      try {
+        await apiFetch("/auth/me", {
+          method: "GET",
+          skipLogoutOn401: true,
+        });
+        if (!cancelled) setStatus("ok");
+      } catch {
+        if (!cancelled) setStatus("unauth");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (status === "loading") {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        Verificando sessão...
+      </div>
+    );
+  }
+
+  if (status === "unauth") {
     return <Navigate to="/TelaInicial/Login" replace />;
   }
 

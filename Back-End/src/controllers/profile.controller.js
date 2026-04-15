@@ -58,7 +58,10 @@ export const getMyProfile = async (req, res) => {
     if (error) return res.status(400).json({ error: error.message });
     if (!data) return res.status(404).json({ error: "Perfil não encontrado." });
 
-    return res.json(data); // ✅ retorna o perfil direto
+    return res.json({
+      ...data,
+      email: req.user.email,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Erro interno ao buscar perfil." });

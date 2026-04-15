@@ -37,12 +37,9 @@ function MeusDados() {
         // ✅ GET /api/profile/me (precisa existir no backend)
         const profile = await apiFetch("/api/profile/me", { method: "GET" });
 
-        // email geralmente vem do auth; pega do localStorage se você salva lá
-        const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
-
         const dadosMapeados = {
           ...profile,
-          email: userLocal.email || profile.email || "",
+          email: profile.email || "",
           cep: profile.cep || "",
           uf: profile.uf || "",
           cidade: profile.cidade || "",
@@ -108,18 +105,13 @@ function MeusDados() {
       // ✅ refaz GET do perfil pra confirmar que gravou no banco
       const refreshed = await apiFetch("/api/profile/me", { method: "GET" });
 
-      const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
-      const novoUser = { ...userLocal, ...refreshed };
-
-      localStorage.setItem("user", JSON.stringify(novoUser));
-
       setFormOriginal({
-        ...novoUser,
-        email: novoUser.email || userLocal.email || "",
+        ...refreshed,
+        email: refreshed.email || "",
       });
       setUserData({
-        ...novoUser,
-        email: novoUser.email || userLocal.email || "",
+        ...refreshed,
+        email: refreshed.email || "",
       });
 
       setFeedback("Perfil atualizado com sucesso ✅");
