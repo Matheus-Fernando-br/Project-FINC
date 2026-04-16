@@ -1,6 +1,10 @@
 export const API_URL =
   process.env.REACT_APP_API_URL || "http://localhost:3333";
 
+const DEBUG_AUTH =
+  typeof process !== "undefined" &&
+  process.env.REACT_APP_DEBUG_AUTH === "1";
+
 async function clearSessionClientSide() {
   try {
     await fetch(`${API_URL}/auth/logout`, {
@@ -37,8 +41,8 @@ export async function apiFetch(path, options = {}) {
 
   const res = await fetch(`${API_URL}${path}`, {
     ...fetchOptions,
-    credentials: "include",
     headers,
+    credentials: "include",
   });
 
   const contentType = res.headers.get("content-type") || "";
@@ -71,4 +75,28 @@ export async function apiFetch(path, options = {}) {
   }
 
   return data;
+}
+
+/**
+ * GET /auth/me com pequenos retries (evita corrida cookie logo após login).
+ */
+export async function fetchSessionWithRetry(maxAttempts = 3, delayMs = 120) {
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      if (DEBUG_AUTH) {
+        console.log("Verificando sessão...", { attempt, path: "/auth/me" });
+      }
+      return await apiFetch("/auth/me", {
+        method: "GET",
+        skipLogoutOn401: true,
+      });
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, delayMs * attempt));
+      }
+    }
+  }
+  throw lastErr;
 }

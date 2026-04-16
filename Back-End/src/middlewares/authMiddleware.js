@@ -3,6 +3,10 @@ import { COOKIE_NAME } from "../utils/authCookies.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
+    if (process.env.DEBUG_AUTH === "1") {
+      console.log("[auth] path:", req.path, "cookies:", req.cookies);
+    }
+
     const token = req.cookies?.[COOKIE_NAME];
 
     if (!token) {

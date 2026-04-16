@@ -30,11 +30,35 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-const ALLOWED_ORIGINS = [
+/** Origens permitidas: lista fixa + CORS_ORIGINS (separado por vírgula), ex.: preview Vercel */
+const DEFAULT_ORIGINS = [
   "https://finc-seven.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
 ];
+
+const EXTRA = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const ALLOWED_ORIGINS = [...new Set([...DEFAULT_ORIGINS, ...EXTRA])];
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    if (process.env.DEBUG_AUTH === "1") {
+      console.warn("[CORS] origem rejeitada:", origin);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
 /* ===== Segurança (headers) ===== */
 app.use(
@@ -57,20 +81,9 @@ app.use(
   }),
 );
 
-/* ===== CORS (cookies HttpOnly) ===== */
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin) return callback(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
-app.options("*", cors());
+/* ===== CORS (cookies HttpOnly; origin nunca pode ser *) ===== */
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
@@ -108,6 +121,10 @@ const PORT = process.env.PORT || 3333;
 
 app.listen(PORT, () => {
   console.log(`🚀 API rodando na porta ${PORT}`);
+  console.log(
+    `[CORS] origens permitidas (${ALLOWED_ORIGINS.length}):`,
+    ALLOWED_ORIGINS.join(", "),
+  );
 });
 
 export default app;

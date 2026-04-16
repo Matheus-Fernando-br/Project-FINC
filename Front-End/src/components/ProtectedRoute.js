@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { apiFetch } from "../utils/api.js";
+import { fetchSessionWithRetry } from "../utils/api.js";
 
 export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState("loading");
@@ -10,10 +10,7 @@ export default function ProtectedRoute({ children }) {
 
     (async () => {
       try {
-        await apiFetch("/auth/me", {
-          method: "GET",
-          skipLogoutOn401: true,
-        });
+        await fetchSessionWithRetry(3, 120);
         if (!cancelled) setStatus("ok");
       } catch {
         if (!cancelled) setStatus("unauth");

@@ -3,6 +3,7 @@ import { supabase } from "../services/supabase.js";
 import {
   setAccessTokenCookie,
   clearAccessTokenCookie,
+  getAccessTokenCookieOptions,
 } from "../utils/authCookies.js";
 import {
   isValidEmail,
@@ -23,6 +24,9 @@ function getEphemeralClient() {
 }
 
 export const me = (req, res) => {
+  if (process.env.DEBUG_AUTH === "1") {
+    console.log("[auth/me] cookie presente:", Boolean(req.cookies?.access_token));
+  }
   return res.json({
     user: {
       id: req.user.id,
@@ -178,6 +182,19 @@ export const login = async (req, res) => {
     }
 
     setAccessTokenCookie(res, data.session.access_token);
+
+    if (process.env.DEBUG_AUTH === "1") {
+      const opts = getAccessTokenCookieOptions();
+      console.log("[auth/login] Set-Cookie enviado", {
+        origin: req.headers.origin || null,
+        sameSite: opts.sameSite,
+        secure: opts.secure,
+        httpOnly: opts.httpOnly,
+        path: opts.path,
+        hasAccessToken: Boolean(data.session.access_token),
+        userId: data.user.id,
+      });
+    }
 
     return res.json({
       user: {
