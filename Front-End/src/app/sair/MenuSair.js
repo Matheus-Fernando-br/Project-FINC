@@ -16,8 +16,7 @@ function MenuSair() {
     } catch {
       /* rede */
     }
-    sessionCache = null;
-    sessionCacheTime = 0;
+
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
     localStorage.removeItem("user");
