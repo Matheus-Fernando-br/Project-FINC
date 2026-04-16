@@ -62,15 +62,29 @@ async function logoutAndRedirect() {
 export async function apiFetch(path, options = {}) {
   const { skipLogoutOn401 = false, ...fetchOptions } = options;
   const method = (fetchOptions.method || "GET").toUpperCase();
+
   const hasFormDataBody =
     typeof FormData !== "undefined" && fetchOptions.body instanceof FormData;
-  const csrfToken = isUnsafeMethod(method) ? getCsrfTokenFromCookie() : "";
+
+  const csrfToken = isUnsafeMethod(method)
+    ? getCsrfTokenFromCookie()
+    : "";
 
   const headers = {
     ...(fetchOptions.headers || {}),
     ...(hasFormDataBody ? {} : { "Content-Type": "application/json" }),
     ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
   };
+
+  // ✅ DEBUG REQUEST
+  if (DEBUG_AUTH) {
+    console.log("[DEBUG AUTH] Request:", {
+      url: `${API_URL}${path}`,
+      method,
+      headers,
+      body: fetchOptions.body,
+    });
+  }
 
   const res = await fetch(`${API_URL}${path}`, {
     ...fetchOptions,
@@ -80,9 +94,18 @@ export async function apiFetch(path, options = {}) {
 
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
+
   const data = isJson
     ? await res.json().catch(() => null)
     : await res.text().catch(() => null);
+
+  // ✅ DEBUG RESPONSE
+  if (DEBUG_AUTH) {
+    console.log("[DEBUG AUTH] Response:", {
+      status: res.status,
+      data,
+    });
+  }
 
   if (res.status === 401) {
     if (path === "/auth/login") {
@@ -91,12 +114,14 @@ export async function apiFetch(path, options = {}) {
         "Usuário ou senha inválidos";
       throw new Error(msg);
     }
+
     if (!skipLogoutOn401) {
       await logoutAndRedirect();
       throw new Error("Sessão expirada");
     }
+
     throw new Error(
-      (data && (data.error || data.message)) || "Não autenticado",
+      (data && (data.error || data.message)) || "Não autenticado"
     );
   }
 
@@ -104,6 +129,7 @@ export async function apiFetch(path, options = {}) {
     const msg =
       (data && (data.error || data.erro || data.message)) ||
       `Erro HTTP ${res.status}`;
+
     throw new Error(msg);
   }
 
