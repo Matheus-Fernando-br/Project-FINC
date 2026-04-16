@@ -5,6 +5,10 @@ const DEBUG_AUTH =
   typeof process !== "undefined" &&
   process.env.REACT_APP_DEBUG_AUTH === "1";
 
+  let sessionCache = null;
+  let sessionCacheTime = 0;
+  const SESSION_TTL = 60 * 1000; // 1 minuto
+
 function readCookie(name) {
   if (typeof document === "undefined") return "";
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -110,22 +114,35 @@ export async function apiFetch(path, options = {}) {
  * GET /auth/me com pequenos retries (evita corrida cookie logo após login).
  */
 export async function fetchSessionWithRetry(maxAttempts = 3, delayMs = 120) {
+  const now = Date.now();
+
+  // ✅ usa cache se ainda válido
+  if (sessionCache && now - sessionCacheTime < SESSION_TTL) {
+    return sessionCache;
+  }
+
   let lastErr;
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      if (DEBUG_AUTH) {
-        console.log("Verificando sessão...", { attempt, path: "/auth/me" });
-      }
-      return await apiFetch("/auth/me", {
+      const data = await apiFetch("/auth/me", {
         method: "GET",
         skipLogoutOn401: true,
       });
+
+      // ✅ salva cache
+      sessionCache = data;
+      sessionCacheTime = Date.now();
+
+      return data;
     } catch (e) {
       lastErr = e;
+
       if (attempt < maxAttempts) {
         await new Promise((r) => setTimeout(r, delayMs * attempt));
       }
     }
   }
+
   throw lastErr;
 }

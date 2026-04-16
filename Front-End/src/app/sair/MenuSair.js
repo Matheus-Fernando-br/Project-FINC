@@ -16,6 +16,8 @@ function MenuSair() {
     } catch {
       /* rede */
     }
+    sessionCache = null;
+    sessionCacheTime = 0;
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -38,12 +40,12 @@ function MenuSair() {
       </section>
 
       <section className="form-section">
-        <div className="botoes">
+        <div className="botoes" style={{display: "flex", flexDirection: "column", gap: "1rem"}}>
           <Link to="/app">
-            <button className="verde">Voltar para a Página Inicial</button>
+            <button className="verde" style={{width: "100%"}}>Voltar para a Página Inicial</button>
           </Link>
 
-          <button className="vermelho" onClick={() => void logout()}>
+          <button className="vermelho" onClick={() => void logout()} style={{width: "100%"}}>
             Fazer Logout / Sair
           </button>
         </div>
