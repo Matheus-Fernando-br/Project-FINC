@@ -7,16 +7,21 @@ import {
   planosDisponiveis,
   atualizarMeuPlano,
 } from "../controllers/planos.controller.js";
+import {
+  publicPlanosRateLimiter,
+  sensitiveWriteRateLimiter,
+} from "../middlewares/securityRateLimit.js";
+import { csrfProtection } from "../middlewares/csrfProtection.js";
 
 const router = Router();
 
 // ✅ público
-router.get("/", listarPlanosPublico);
+router.get("/", publicPlanosRateLimiter, listarPlanosPublico);
 
 // ✅ privado
 router.use(authMiddleware);
 router.get("/meu", meuPlano);
 router.get("/disponiveis", planosDisponiveis);
-router.put("/meu", atualizarMeuPlano);
+router.put("/meu", csrfProtection, sensitiveWriteRateLimiter, atualizarMeuPlano);
 
 export default router;

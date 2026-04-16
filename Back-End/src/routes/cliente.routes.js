@@ -6,6 +6,8 @@ import { getClientes,
   updateCliente,
   importClientes } from "../controllers/cliente.controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import { csrfProtection } from "../middlewares/csrfProtection.js";
+import { sensitiveWriteRateLimiter } from "../middlewares/securityRateLimit.js";
 
 const router = Router();
 
@@ -13,9 +15,9 @@ router.use(authMiddleware); // Protege todas as rotas de clientes
 
 router.get("/", getClientes);
 router.get("/:id", getClienteById);
-router.post("/", createCliente);
-router.delete("/:id", deleteCliente);
-router.put("/:id", updateCliente);
-router.put("/", importClientes);
+router.post("/", csrfProtection, sensitiveWriteRateLimiter, createCliente);
+router.delete("/:id", csrfProtection, sensitiveWriteRateLimiter, deleteCliente);
+router.put("/:id", csrfProtection, sensitiveWriteRateLimiter, updateCliente);
+router.put("/", csrfProtection, sensitiveWriteRateLimiter, importClientes);
 
 export default router;

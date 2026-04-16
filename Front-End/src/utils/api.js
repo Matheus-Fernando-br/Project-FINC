@@ -5,12 +5,36 @@ const DEBUG_AUTH =
   typeof process !== "undefined" &&
   process.env.REACT_APP_DEBUG_AUTH === "1";
 
+function readCookie(name) {
+  if (typeof document === "undefined") return "";
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function getCsrfTokenFromCookie() {
+  const raw = readCookie("csrf_token");
+  if (!raw) return "";
+  const sep = raw.indexOf(".");
+  if (sep <= 0) return "";
+  return raw.slice(sep + 1);
+}
+
+function isUnsafeMethod(method = "GET") {
+  const m = method.toUpperCase();
+  return m === "POST" || m === "PUT" || m === "PATCH" || m === "DELETE";
+}
+
 async function clearSessionClientSide() {
   try {
+    const csrfToken = getCsrfTokenFromCookie();
     await fetch(`${API_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+      },
     });
   } catch {
     /* ignora falha de rede */
@@ -33,10 +57,15 @@ async function logoutAndRedirect() {
  */
 export async function apiFetch(path, options = {}) {
   const { skipLogoutOn401 = false, ...fetchOptions } = options;
+  const method = (fetchOptions.method || "GET").toUpperCase();
+  const hasFormDataBody =
+    typeof FormData !== "undefined" && fetchOptions.body instanceof FormData;
+  const csrfToken = isUnsafeMethod(method) ? getCsrfTokenFromCookie() : "";
 
   const headers = {
-    "Content-Type": "application/json",
     ...(fetchOptions.headers || {}),
+    ...(hasFormDataBody ? {} : { "Content-Type": "application/json" }),
+    ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
   };
 
   const res = await fetch(`${API_URL}${path}`, {

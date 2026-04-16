@@ -5,6 +5,7 @@ import {
   clearAccessTokenCookie,
   getAccessTokenCookieOptions,
 } from "../utils/authCookies.js";
+import { issueCsrfToken, clearCsrfToken } from "../utils/csrf.js";
 import {
   isValidEmail,
   isStrongPassword,
@@ -24,6 +25,7 @@ function getEphemeralClient() {
 }
 
 export const me = (req, res) => {
+  issueCsrfToken(res);
   if (process.env.DEBUG_AUTH === "1") {
     console.log("[auth/me] cookie presente:", Boolean(req.cookies?.access_token));
   }
@@ -37,6 +39,7 @@ export const me = (req, res) => {
 
 export const logout = (req, res) => {
   clearAccessTokenCookie(res);
+  clearCsrfToken(res);
   return res.json({ ok: true });
 };
 
@@ -182,6 +185,7 @@ export const login = async (req, res) => {
     }
 
     setAccessTokenCookie(res, data.session.access_token);
+    const csrfRaw = issueCsrfToken(res);
 
     if (process.env.DEBUG_AUTH === "1") {
       const opts = getAccessTokenCookieOptions();
@@ -192,6 +196,7 @@ export const login = async (req, res) => {
         httpOnly: opts.httpOnly,
         path: opts.path,
         hasAccessToken: Boolean(data.session.access_token),
+        hasCsrfCookie: Boolean(csrfRaw),
         userId: data.user.id,
       });
     }

@@ -54,7 +54,6 @@ export async function listarPlanosPublico(req, res) {
 export async function meuPlano(req, res) {
   try {
     const userId = req.user?.id;
-    console.log("USER ID:", userId);
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
@@ -62,18 +61,11 @@ export async function meuPlano(req, res) {
       .eq("user_id", userId)
       .maybeSingle();
 
-    console.log("PROFILE:", profile);
-    console.log("PROFILE ERROR:", profileError);
-
     const { data: plano, error: planoError } = await supabase
       .from("planos")
       .select("*")
       .eq("id", profile?.id_plan)
       .maybeSingle();
-
-    console.log("ID_PLAN:", profile?.id_plan);
-    console.log("PLANO:", plano);
-    console.log("PLANO ERROR:", planoError);
 
     if (profileError) return res.status(500).json({ erro: profileError.message });
     if (!profile?.id_plan) return res.status(404).json({ erro: "Usuário sem plano definido." });
@@ -135,8 +127,6 @@ export async function planosDisponiveis(req, res) {
 export async function atualizarMeuPlano(req, res) {
   try {
     const userId = req.user?.id;
-    console.log("REQ.USER.ID:", userId);
-    console.log("BODY:", req.body);
 
     if (!userId) {
       return res.status(401).json({ erro: "Não autenticado." });
@@ -155,9 +145,6 @@ export async function atualizarMeuPlano(req, res) {
       .eq("id", id_plan)
       .maybeSingle();
 
-    console.log("PLANO ENCONTRADO:", plano);
-    console.log("PLANO ERROR:", planoError);
-
     if (planoError) {
       return res.status(500).json({ erro: planoError.message });
     }
@@ -172,9 +159,6 @@ export async function atualizarMeuPlano(req, res) {
       .select("id, user_id, id_plan")
       .eq("user_id", userId)
       .maybeSingle();
-
-    console.log("PROFILE ENCONTRADO:", profile);
-    console.log("PROFILE ERROR:", profileError);
 
     if (profileError) {
       return res.status(500).json({ erro: profileError.message });
@@ -192,8 +176,6 @@ export async function atualizarMeuPlano(req, res) {
       .update({ id_plan })
       .eq("user_id", userId);
 
-    console.log("UPDATE ERROR:", updateError);
-
     if (updateError) {
       return res.status(500).json({ erro: updateError.message });
     }
@@ -204,9 +186,6 @@ export async function atualizarMeuPlano(req, res) {
       .select("id, user_id, id_plan")
       .eq("user_id", userId)
       .maybeSingle();
-
-    console.log("PROFILE ATUALIZADO:", atualizado);
-    console.log("CONFIRM ERROR:", confirmError);
 
     if (confirmError) {
       return res.status(500).json({ erro: confirmError.message });

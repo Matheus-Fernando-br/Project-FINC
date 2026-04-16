@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import { globalRateLimiter } from "./middlewares/securityRateLimit.js";
 
 // Rotas Telegram
 import {
@@ -57,7 +58,7 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
 };
 
 /* ===== Segurança (headers) ===== */
@@ -67,6 +68,7 @@ app.use(
       useDefaults: false,
       directives: {
         defaultSrc: ["'none'"],
+        objectSrc: ["'none'"],
         frameAncestors: ["'none'"],
         baseUri: ["'none'"],
         formAction: ["'none'"],
@@ -78,6 +80,7 @@ app.use(
       process.env.NODE_ENV === "production"
         ? { maxAge: 31536000, includeSubDomains: true, preload: true }
         : false,
+    referrerPolicy: { policy: "no-referrer" },
   }),
 );
 
@@ -87,6 +90,7 @@ app.options("*", cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
+app.use(globalRateLimiter);
 
 /* ============================= */
 /* ROTAS CHAMADOS */

@@ -27,7 +27,6 @@ function HomeTelaInicial() {
 
         // Busca os planos
         const json = await apiFetch("/planos", { method: "GET" });
-        console.log("Resposta /planos:", json);
 
         const planos = Array.isArray(json?.planos) ? json.planos : [];
 
