@@ -35,6 +35,7 @@ const icons = {
   cartao: "bi bi-credit-card",
   aparencia: "bi bi-palette",
   email: "bi bi-envelope",
+  certificado: "bi bi-journal-medical",
 };
 
 export default icons;

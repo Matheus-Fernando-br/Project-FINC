@@ -26,6 +26,7 @@ import Tela1EmitirNota from "./app/emitir-nota/tela1EmitirNota";
 import Tela2EmitirNota from "./app/emitir-nota/tela2EmitirNota";
 
 import MeusDados from "./app/meusDados/MeusDados";
+import Tela1Certificado from "./app/certificado/tela1Certificado";
 
 import Tela1Clientes from "./app/clientes/tela1Clientes";
 import CadastroCliente from "./app/clientes/cadastroCliente";
@@ -238,6 +239,18 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <MeusDados />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+
+      <Route
+        path="/certificado"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Tela1Certificado />
             </Layout>
           </ProtectedRoute>
         }

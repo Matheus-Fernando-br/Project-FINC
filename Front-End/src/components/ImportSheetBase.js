@@ -227,6 +227,11 @@ function ImportSheetBase({ type }) {
     return (
         <Layout>
             <main className="content import-sheet">
+                <section className="titulo-secao">
+                    <h1>
+                    <i className={icons.clientes}></i> Importar Planilha de {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </h1>
+                </section>
                 <section className="form-section">
                     <div className="form-footer-voltar">
                         <Link to={normalizedType === 'clientes' ? "/clientes" : "/produtos"} className="previous-step">

@@ -57,6 +57,8 @@ function Sidebar() {
             </Link>
           </li>
 
+          <hr className="divider" />
+
           <li className={location.pathname.includes("/emitir-nota") ? "ativo" : ""}>
             <Link to="/emitir-nota/Dados" onClick={closeMenu}>
               <i className={icons.emitirNota}></i>
