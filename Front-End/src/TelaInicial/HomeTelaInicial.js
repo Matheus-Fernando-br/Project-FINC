@@ -334,7 +334,7 @@ function HomeTelaInicial() {
             <h2>Baixe nosso app</h2>
             <p>
               Emita notas com agilidade e eficiência de <br />
-              qualquer lugar
+              qualquer lugar do BRASIL, a qualquer hora, com o app da FINC.
             </p>
             <div className="botoes-app scroll-fade delay-1">
               <a
