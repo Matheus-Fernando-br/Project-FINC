@@ -17,10 +17,23 @@ function parseDetalhes(v) {
   return [];
 }
 
+function normalizarTipo(nome) {
+  return String(nome || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
 function mapPlano(p) {
+  // A tabela atual usa `nome` (minúsculo). `Nome` fica como fallback
+  // para não quebrar ambientes antigos que ainda tenham essa coluna.
+  const nome = p.nome ?? p.Nome ?? "";
+
   return {
     id: p.id,
-    nome: p.Nome,
+    nome,
+    tipo: normalizarTipo(nome),
     valor: p.valor,
     limites: {
       notas: p.limite_notas,
