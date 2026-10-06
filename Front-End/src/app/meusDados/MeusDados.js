@@ -74,7 +74,7 @@ function MeusDados() {
     }, 800);
     setTimeout(() => {
       setFeedback("");
-    },2000);
+    }, 2000);
   };
 
   const salvarAlteracoes = async () => {

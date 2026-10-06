@@ -41,7 +41,8 @@ function HomeTelaInicial() {
           return (
             tipo === "basico" ||
             nome.includes("básico") ||
-            nome.includes("basico")
+            nome.includes("basico") ||
+            nome.includes("BASICO")
           );
         });
 
