@@ -1,0 +1,373 @@
+# Licenças das dependências de produção
+
+Gerado por `npm run licenses` em 2026-10-14 a partir de `npm ls --omit=dev --all`. Total: **336 pacotes**.
+
+## Resumo por licença
+
+| Licença | Pacotes |
+|---|---|
+| MIT | 290 |
+| ISC | 28 |
+| Apache-2.0 | 4 |
+| BSD-3-Clause | 4 |
+| DESCONHECIDA | 2 |
+| Unlicense | 1 |
+| MIT/X11 | 1 |
+| (MIT OR GPL-3.0-or-later) | 1 |
+| (BSD-3-Clause OR GPL-2.0) | 1 |
+| MIT-0 | 1 |
+| (MIT AND Zlib) | 1 |
+| 0BSD | 1 |
+| MIT AND ISC | 1 |
+
+## Pontos de atenção
+
+- `buffers@0.1.1`: DESCONHECIDA
+- `chainsaw@0.1.0`: MIT/X11
+- `png-js@1.1.0`: DESCONHECIDA
+- `victory-vendor@37.3.6`: MIT AND ISC
+
+Revisão manual (2026-10-14): `png-js` traz arquivo LICENSE com texto MIT (falta apenas o campo no package.json); `chainsaw` e `victory-vendor` são variantes permissivas (MIT/X11, MIT+ISC); `buffers@0.1.1` não declara licença — é dependência transitiva antiga do `exceljs` (via `unzipper` → `binary`), usada só na leitura de .xlsx. Risco aceito e registrado; alternativa: substituir a importação .xlsx por CSV.
+
+`node-forge` é distribuído sob licença dupla (BSD-3-Clause OU GPL-2.0); a FINC o utiliza sob os termos BSD-3-Clause.
+
+## Lista completa
+
+| Pacote | Versão | Licença |
+|---|---|---|
+| @electric-sql/pglite | 0.3.15 | Apache-2.0 |
+| @fast-csv/format | 4.3.5 | MIT |
+| @fast-csv/parse | 4.3.6 | MIT |
+| @pinojs/redact | 0.4.0 | MIT |
+| @reduxjs/toolkit | 2.13.0 | MIT |
+| @standard-schema/spec | 1.1.0 | MIT |
+| @standard-schema/utils | 0.3.0 | MIT |
+| @swc/helpers | 0.5.23 | Apache-2.0 |
+| @types/d3-array | 3.2.2 | MIT |
+| @types/d3-color | 3.1.3 | MIT |
+| @types/d3-ease | 3.0.2 | MIT |
+| @types/d3-interpolate | 3.0.4 | MIT |
+| @types/d3-path | 3.1.1 | MIT |
+| @types/d3-scale | 4.0.9 | MIT |
+| @types/d3-shape | 3.2.0 | MIT |
+| @types/d3-time | 3.0.4 | MIT |
+| @types/d3-timer | 3.0.2 | MIT |
+| @types/node | 14.18.63 | MIT |
+| @types/react | 19.2.2 | MIT |
+| @types/use-sync-external-store | 0.0.6 | MIT |
+| accepts | 2.0.0 | MIT |
+| append-field | 1.0.0 | MIT |
+| archiver | 5.3.2 | MIT |
+| archiver-utils | 2.1.0 | MIT |
+| archiver-utils | 3.0.4 | MIT |
+| array-buffer-byte-length | 1.0.2 | MIT |
+| arraybuffer.prototype.slice | 1.0.4 | MIT |
+| async | 3.2.6 | MIT |
+| async-function | 1.0.0 | MIT |
+| atomic-sleep | 1.0.0 | MIT |
+| available-typed-arrays | 1.0.7 | MIT |
+| balanced-match | 1.0.2 | MIT |
+| base64-js | 1.5.1 | MIT |
+| base64-js | 0.0.8 | MIT |
+| big-integer | 1.6.52 | Unlicense |
+| binary | 0.3.0 | MIT |
+| bl | 4.1.0 | MIT |
+| bluebird | 3.4.7 | MIT |
+| body-parser | 2.3.0 | MIT |
+| bootstrap-icons | 1.13.1 | MIT |
+| brace-expansion | 1.1.21 | MIT |
+| brace-expansion | 2.1.7 | MIT |
+| brotli | 1.3.3 | MIT |
+| browserify-zlib | 0.2.0 | MIT |
+| buffer | 5.7.1 | MIT |
+| buffer-crc32 | 0.2.13 | MIT |
+| buffer-indexof-polyfill | 1.0.2 | MIT |
+| buffers | 0.1.1 | DESCONHECIDA |
+| busboy | 1.6.0 | MIT |
+| bytes | 3.1.2 | MIT |
+| call-bind | 1.0.9 | MIT |
+| call-bind-apply-helpers | 1.0.2 | MIT |
+| call-bound | 1.0.4 | MIT |
+| chainsaw | 0.1.0 | MIT/X11 |
+| clone | 2.1.2 | MIT |
+| clsx | 2.1.1 | MIT |
+| compress-commons | 4.1.2 | MIT |
+| concat-map | 0.0.1 | MIT |
+| content-disposition | 1.1.0 | MIT |
+| content-type | 2.1.0 | MIT |
+| content-type | 1.0.5 | MIT |
+| cookie | 0.7.2 | MIT |
+| cookie | 1.1.1 | MIT |
+| cookie-parser | 1.4.7 | MIT |
+| cookie-signature | 1.0.6 | MIT |
+| cookie-signature | 1.2.2 | MIT |
+| core-util-is | 1.0.3 | MIT |
+| crc-32 | 1.2.2 | Apache-2.0 |
+| crc32-stream | 4.0.3 | MIT |
+| crypto-js | 4.2.0 | MIT |
+| csstype | 3.2.3 | MIT |
+| d3-array | 3.2.4 | ISC |
+| d3-color | 3.1.0 | ISC |
+| d3-ease | 3.0.1 | BSD-3-Clause |
+| d3-format | 3.1.2 | ISC |
+| d3-interpolate | 3.0.1 | ISC |
+| d3-path | 3.1.0 | ISC |
+| d3-scale | 4.0.2 | ISC |
+| d3-shape | 3.2.0 | ISC |
+| d3-time | 3.1.0 | ISC |
+| d3-time-format | 4.1.0 | ISC |
+| d3-timer | 3.0.1 | ISC |
+| data-view-buffer | 1.0.2 | MIT |
+| data-view-byte-length | 1.0.2 | MIT |
+| data-view-byte-offset | 1.0.1 | MIT |
+| dayjs | 1.11.23 | MIT |
+| debug | 4.4.3 | MIT |
+| decimal.js-light | 2.5.1 | MIT |
+| define-data-property | 1.1.4 | MIT |
+| define-properties | 1.2.1 | MIT |
+| depd | 2.0.0 | MIT |
+| dfa | 1.2.0 | MIT |
+| dunder-proto | 1.0.1 | MIT |
+| duplexer2 | 0.1.4 | BSD-3-Clause |
+| ee-first | 1.1.1 | MIT |
+| encodeurl | 2.0.0 | MIT |
+| end-of-stream | 1.4.5 | MIT |
+| es-abstract | 1.24.2 | MIT |
+| es-abstract-get | 1.0.0 | MIT |
+| es-define-property | 1.0.1 | MIT |
+| es-errors | 1.3.0 | MIT |
+| es-object-atoms | 1.1.2 | MIT |
+| es-set-tostringtag | 2.1.0 | MIT |
+| es-to-primitive | 1.3.4 | MIT |
+| es-toolkit | 1.52.0 | MIT |
+| escape-html | 1.0.3 | MIT |
+| etag | 1.8.1 | MIT |
+| eventemitter3 | 5.0.4 | MIT |
+| exceljs | 4.4.0 | MIT |
+| express | 5.1.0 | MIT |
+| express-rate-limit | 8.7.1 | MIT |
+| fast-csv | 4.3.6 | MIT |
+| fast-deep-equal | 3.1.3 | MIT |
+| finalhandler | 2.1.1 | MIT |
+| fontkit | 2.0.4 | MIT |
+| for-each | 0.3.5 | MIT |
+| forwarded | 0.2.0 | MIT |
+| fresh | 2.0.0 | MIT |
+| fs-constants | 1.0.0 | MIT |
+| fs.realpath | 1.0.0 | ISC |
+| fstream | 1.0.12 | ISC |
+| function-bind | 1.1.2 | MIT |
+| function.prototype.name | 1.2.0 | MIT |
+| functions-have-names | 1.2.3 | MIT |
+| generator-function | 2.0.1 | MIT |
+| get-caller-file | 2.0.5 | ISC |
+| get-intrinsic | 1.3.0 | MIT |
+| get-proto | 1.0.1 | MIT |
+| get-symbol-description | 1.1.0 | MIT |
+| glob | 7.2.3 | ISC |
+| globalthis | 1.0.4 | MIT |
+| gopd | 1.2.0 | MIT |
+| graceful-fs | 4.2.11 | ISC |
+| has-bigints | 1.1.0 | MIT |
+| has-property-descriptors | 1.0.2 | MIT |
+| has-proto | 1.2.0 | MIT |
+| has-symbols | 1.1.0 | MIT |
+| has-tostringtag | 1.0.2 | MIT |
+| hasown | 2.0.4 | MIT |
+| helmet | 8.1.0 | MIT |
+| http-errors | 2.0.1 | MIT |
+| iconv-lite | 0.7.3 | MIT |
+| ieee754 | 1.2.1 | BSD-3-Clause |
+| immediate | 3.0.6 | MIT |
+| immer | 11.1.21 | MIT |
+| immer | 10.2.0 | MIT |
+| inflight | 1.0.6 | ISC |
+| inherits | 2.0.4 | ISC |
+| internal-slot | 1.1.0 | MIT |
+| internmap | 2.0.3 | ISC |
+| ip-address | 10.7.4 | MIT |
+| ipaddr.js | 1.9.1 | MIT |
+| is-array-buffer | 3.0.5 | MIT |
+| is-async-function | 2.1.1 | MIT |
+| is-bigint | 1.1.0 | MIT |
+| is-boolean-object | 1.2.2 | MIT |
+| is-callable | 1.2.7 | MIT |
+| is-data-view | 1.0.2 | MIT |
+| is-date-object | 1.1.0 | MIT |
+| is-document.all | 1.0.0 | MIT |
+| is-finalizationregistry | 1.1.1 | MIT |
+| is-generator-function | 1.1.2 | MIT |
+| is-map | 2.0.3 | MIT |
+| is-negative-zero | 2.0.3 | MIT |
+| is-number-object | 1.1.1 | MIT |
+| is-promise | 4.0.0 | MIT |
+| is-regex | 1.2.1 | MIT |
+| is-set | 2.0.3 | MIT |
+| is-shared-array-buffer | 1.0.4 | MIT |
+| is-string | 1.1.1 | MIT |
+| is-symbol | 1.1.1 | MIT |
+| is-typed-array | 1.1.15 | MIT |
+| is-weakmap | 2.0.2 | MIT |
+| is-weakref | 1.1.1 | MIT |
+| is-weakset | 2.0.4 | MIT |
+| isarray | 1.0.0 | MIT |
+| isarray | 2.0.5 | MIT |
+| jpeg-exif | 1.1.4 | MIT |
+| jszip | 3.10.2 | (MIT OR GPL-3.0-or-later) |
+| lazystream | 1.0.1 | MIT |
+| lie | 3.3.0 | MIT |
+| linebreak | 1.1.0 | MIT |
+| listenercount | 1.0.1 | ISC |
+| lodash.defaults | 4.2.0 | MIT |
+| lodash.difference | 4.5.0 | MIT |
+| lodash.escaperegexp | 4.1.2 | MIT |
+| lodash.flatten | 4.4.0 | MIT |
+| lodash.groupby | 4.6.0 | MIT |
+| lodash.isboolean | 3.0.3 | MIT |
+| lodash.isequal | 4.5.0 | MIT |
+| lodash.isfunction | 3.0.9 | MIT |
+| lodash.isnil | 4.0.0 | MIT |
+| lodash.isplainobject | 4.0.6 | MIT |
+| lodash.isundefined | 3.0.1 | MIT |
+| lodash.union | 4.6.0 | MIT |
+| lodash.uniq | 4.5.0 | MIT |
+| math-intrinsics | 1.1.0 | MIT |
+| media-typer | 1.1.1 | MIT |
+| media-typer | 0.3.0 | MIT |
+| merge-descriptors | 2.0.0 | MIT |
+| mime-db | 1.54.0 | MIT |
+| mime-db | 1.52.0 | MIT |
+| mime-types | 3.0.2 | MIT |
+| mime-types | 2.1.35 | MIT |
+| minimatch | 3.1.5 | ISC |
+| minimatch | 5.1.9 | ISC |
+| minimist | 1.2.8 | MIT |
+| mkdirp | 0.5.6 | MIT |
+| ms | 2.1.3 | MIT |
+| multer | 2.4.0 | MIT |
+| negotiator | 1.1.0 | MIT |
+| node-forge | 1.4.0 | (BSD-3-Clause OR GPL-2.0) |
+| nodemailer | 10.1.0 | MIT-0 |
+| normalize-path | 3.0.0 | MIT |
+| object-inspect | 1.13.4 | MIT |
+| object-keys | 1.1.1 | MIT |
+| object.assign | 4.1.7 | MIT |
+| on-exit-leak-free | 2.1.2 | MIT |
+| on-finished | 2.4.1 | MIT |
+| once | 1.4.0 | ISC |
+| own-keys | 1.0.2 | MIT |
+| pako | 1.0.11 | (MIT AND Zlib) |
+| pako | 0.2.9 | MIT |
+| parseurl | 1.3.3 | MIT |
+| path-is-absolute | 1.0.1 | MIT |
+| path-to-regexp | 8.4.2 | MIT |
+| pdfkit | 0.17.2 | MIT |
+| pg | 8.16.3 | MIT |
+| pg-cloudflare | 1.4.1 | MIT |
+| pg-connection-string | 2.14.1 | MIT |
+| pg-int8 | 1.0.1 | ISC |
+| pg-pool | 3.14.0 | MIT |
+| pg-protocol | 1.16.1 | MIT |
+| pg-types | 2.2.0 | MIT |
+| pgpass | 1.0.5 | MIT |
+| pino | 9.14.0 | MIT |
+| pino-abstract-transport | 2.0.0 | MIT |
+| pino-http | 10.5.0 | MIT |
+| pino-std-serializers | 7.1.0 | MIT |
+| png-js | 1.1.0 | DESCONHECIDA |
+| possible-typed-array-names | 1.1.0 | MIT |
+| postgres-array | 2.0.0 | MIT |
+| postgres-bytea | 1.0.1 | MIT |
+| postgres-date | 1.0.7 | MIT |
+| postgres-interval | 1.2.0 | MIT |
+| process-nextick-args | 2.0.1 | MIT |
+| process-warning | 5.1.1 | MIT |
+| proxy-addr | 2.0.8 | MIT |
+| qs | 6.16.0 | BSD-3-Clause |
+| quick-format-unescaped | 4.0.4 | MIT |
+| range-parser | 1.3.0 | MIT |
+| raw-body | 3.0.2 | MIT |
+| react | 19.2.0 | MIT |
+| react-dom | 19.2.0 | MIT |
+| react-is | 19.3.0 | MIT |
+| react-redux | 9.3.0 | MIT |
+| react-router | 7.18.4 | MIT |
+| react-router-dom | 7.18.4 | MIT |
+| readable-stream | 2.3.8 | MIT |
+| readable-stream | 3.6.2 | MIT |
+| readdir-glob | 1.1.3 | Apache-2.0 |
+| real-require | 0.2.0 | MIT |
+| recharts | 3.3.0 | MIT |
+| redux | 5.0.1 | MIT |
+| redux-thunk | 3.1.0 | MIT |
+| reflect.getprototypeof | 1.0.10 | MIT |
+| regexp.prototype.flags | 1.5.4 | MIT |
+| reselect | 5.1.1 | MIT |
+| restructure | 3.0.2 | MIT |
+| rimraf | 2.7.1 | ISC |
+| router | 2.2.0 | MIT |
+| safe-array-concat | 1.1.4 | MIT |
+| safe-buffer | 5.1.2 | MIT |
+| safe-buffer | 5.2.1 | MIT |
+| safe-push-apply | 1.0.0 | MIT |
+| safe-regex-test | 1.1.0 | MIT |
+| safe-stable-stringify | 2.5.0 | MIT |
+| safer-buffer | 2.1.2 | MIT |
+| saxes | 5.0.1 | ISC |
+| scheduler | 0.27.0 | MIT |
+| send | 1.2.1 | MIT |
+| serve-static | 2.2.1 | MIT |
+| set-cookie-parser | 2.7.2 | MIT |
+| set-function-length | 1.2.2 | MIT |
+| set-function-name | 2.0.2 | MIT |
+| set-proto | 1.0.0 | MIT |
+| setimmediate | 1.0.5 | MIT |
+| setprototypeof | 1.2.0 | ISC |
+| side-channel | 1.1.1 | MIT |
+| side-channel-list | 1.0.1 | MIT |
+| side-channel-map | 1.0.1 | MIT |
+| side-channel-weakmap | 1.0.2 | MIT |
+| sonic-boom | 4.2.1 | MIT |
+| split2 | 4.2.0 | ISC |
+| statuses | 2.0.2 | MIT |
+| stop-iteration-iterator | 1.1.0 | MIT |
+| streamsearch | 1.1.0 | MIT |
+| string_decoder | 1.1.1 | MIT |
+| string_decoder | 1.3.0 | MIT |
+| string.prototype.trim | 1.2.11 | MIT |
+| string.prototype.trimend | 1.0.10 | MIT |
+| string.prototype.trimstart | 1.0.8 | MIT |
+| tar-stream | 2.2.0 | MIT |
+| thread-stream | 3.2.0 | MIT |
+| tiny-inflate | 1.0.3 | MIT |
+| tiny-invariant | 1.3.3 | MIT |
+| tmp | 0.2.7 | MIT |
+| toidentifier | 1.0.1 | MIT |
+| traverse | 0.3.10 | MIT |
+| tslib | 2.8.1 | 0BSD |
+| type-is | 2.1.0 | MIT |
+| type-is | 1.6.18 | MIT |
+| typed-array-buffer | 1.0.3 | MIT |
+| typed-array-byte-length | 1.0.3 | MIT |
+| typed-array-byte-offset | 1.0.5 | MIT |
+| typed-array-length | 1.0.8 | MIT |
+| typedarray.prototype.slice | 1.0.6 | MIT |
+| unbox-primitive | 1.1.0 | MIT |
+| unicode-properties | 1.4.1 | MIT |
+| unicode-trie | 2.0.0 | MIT |
+| unpipe | 1.0.0 | MIT |
+| unzipper | 0.10.14 | MIT |
+| use-sync-external-store | 1.7.0 | MIT |
+| util-deprecate | 1.0.2 | MIT |
+| uuid | 11.1.1 | MIT |
+| vary | 1.1.2 | MIT |
+| victory-vendor | 37.3.6 | MIT AND ISC |
+| which-boxed-primitive | 1.1.1 | MIT |
+| which-builtin-type | 1.2.1 | MIT |
+| which-collection | 1.0.2 | MIT |
+| which-typed-array | 1.1.24 | MIT |
+| wrappy | 1.0.2 | ISC |
+| xmlchars | 2.2.0 | MIT |
+| xtend | 4.0.2 | MIT |
+| zip-stream | 4.1.1 | MIT |
+| zod | 3.25.76 | MIT |

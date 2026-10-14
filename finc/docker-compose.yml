@@ -1,0 +1,35 @@
+# Produção local / servidor único: PostgreSQL + FINC.
+# Uso: cp .env.example .env (preencha SESSION_SECRET e POSTGRES_PASSWORD) && docker compose up -d --build
+services:
+  db:
+    image: postgres:16.10-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: finc
+      POSTGRES_USER: finc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finc -d finc"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      SERVE_WEB: "true"
+      DATABASE_URL: postgres://finc:${POSTGRES_PASSWORD}@db:5432/finc
+      APP_URL: ${APP_URL:-http://localhost:3333}
+    ports:
+      - "${FINC_PORT:-3333}:3333"
+
+volumes:
+  pgdata:

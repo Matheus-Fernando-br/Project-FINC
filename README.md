@@ -2,6 +2,9 @@
 
 ![FINC Logo](https://raw.githubusercontent.com/Matheus-Fernando-br/Project-FINC/main/Front-End/public/Images/FINC.png)
 
+> **FINC 2.0:** a plataforma reconstruída por engenharia reversa (código, testes e documentação) está em [`finc/`](finc/README.md).
+> Os diretórios `Back-End/` e `Front-End/` abaixo são a versão original, preservada como referência.
+
 ## Visão Geral do Projeto
 
 O FINC é uma solução SaaS (Software as a Service) projetada para simplificar a vida de Microempreendedores Individuais (MEIs) e pequenos prestadores de serviços. A plataforma oferece uma experiência unificada e intuitiva para emissão de Notas Fiscais (NF-e e NFS-e), gestão de clientes, produtos, serviços e acompanhamento financeiro, eliminando a complexidade dos sistemas governamentais e o alto custo de emissores privados.

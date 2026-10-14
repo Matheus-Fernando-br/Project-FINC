@@ -1,0 +1,10 @@
+{
+  "threshold": 5,
+  "minLines": 6,
+  "minTokens": 60,
+  "reporters": ["console"],
+  "path": ["apps/api/src", "apps/web/src", "packages/shared/src"],
+  "ignore": ["**/*.test.ts", "**/*.test.tsx", "**/dist/**"],
+  "absolute": false,
+  "gitignore": true
+}
