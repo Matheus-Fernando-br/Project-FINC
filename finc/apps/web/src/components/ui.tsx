@@ -13,38 +13,43 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import { ApiError } from "../api/client";
+import { moduloDaRota } from "../nav";
 
-export function Logo({ claro = false, altura = 30 }: { claro?: boolean; altura?: number }) {
-  const cor = claro ? "#ffffff" : "var(--ink)";
+/** Marca FINC: palavra "finc" + a bolinha verde. */
+export function Logo({ claro = false, altura = 26 }: { claro?: boolean; altura?: number }) {
   return (
-    <svg height={altura} viewBox="0 0 120 44" role="img" aria-label="FINC">
-      <text
-        x="0"
-        y="33"
-        fontFamily="var(--font)"
-        fontWeight="800"
-        fontSize="34"
-        letterSpacing="-1"
-        fill={cor}
+    <span
+      className="logo-finc"
+      role="img"
+      aria-label="FINC"
+      style={{ display: "inline-flex", alignItems: "center", gap: altura * 0.14, height: altura }}
+    >
+      <span
+        aria-hidden
+        style={{
+          fontWeight: 700,
+          fontSize: altura * 0.92,
+          letterSpacing: "-0.055em",
+          color: claro ? "#fff" : "var(--ink)",
+          lineHeight: 1,
+        }}
       >
         finc
-      </text>
-      <circle cx="98" cy="24" r="16" fill="var(--brand)" />
-      <path
-        d="M93 29 L104 18 M97 18 H104 V25"
-        stroke="#fff"
-        strokeWidth="3"
-        fill="none"
-        strokeLinecap="round"
+      </span>
+      <span
+        aria-hidden
+        className="orb"
+        style={{ width: altura * 0.5, height: altura * 0.5, boxShadow: "none" }}
       />
-    </svg>
+    </span>
   );
 }
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "danger";
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   icon?: string;
 };
@@ -62,7 +67,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`btn ${variant === "primary" ? "" : variant} ${size === "sm" ? "sm" : ""} ${!children ? "icon" : ""} ${className}`}
+      className={`btn ${variant === "primary" ? "" : variant} ${size === "sm" ? "sm" : size === "lg" ? "lg" : ""} ${!children ? "icon" : ""} ${className}`}
       disabled={disabled || loading}
       {...rest}
     >
@@ -122,30 +127,31 @@ export function Field({
 export function PageHeader({
   title,
   icon,
+  eyebrow,
   sub,
   actions,
 }: {
   title: string;
   icon?: string;
+  eyebrow?: string;
   sub?: ReactNode;
   actions?: ReactNode;
 }) {
+  const { pathname } = useLocation();
+  const modulo = eyebrow ?? moduloDaRota(pathname)?.label;
   useEffect(() => {
     document.title = `${title} · FINC`;
   }, [title]);
   return (
-    <div className="page-header">
+    <div className="page-header" data-icon={icon}>
       <div>
-        <h1>
-          {icon && (
-            <i
-              className={`bi ${icon}`}
-              style={{ color: "var(--brand)", marginRight: 8 }}
-              aria-hidden
-            />
-          )}
-          {title}
-        </h1>
+        {modulo && (
+          <div className="eyebrow">
+            <span className="dot" />
+            {modulo}
+          </div>
+        )}
+        <h1>{title}</h1>
         {sub && <div className="sub">{sub}</div>}
       </div>
       {actions && <div className="actions">{actions}</div>}
@@ -190,13 +196,15 @@ export const Badge = ({
 
 export const Loading = ({ texto = "Carregando..." }: { texto?: string }) => (
   <div className="loading" role="status">
-    <span className="spinner" /> {texto}
+    <span className="pulso" /> {texto}
   </div>
 );
 
 export const Empty = ({ icon = "bi-inbox", children }: { icon?: string; children: ReactNode }) => (
   <div className="empty">
-    <i className={`bi ${icon}`} aria-hidden />
+    <span className="orb" aria-hidden>
+      <i className={`bi ${icon}`} />
+    </span>
     {children}
   </div>
 );

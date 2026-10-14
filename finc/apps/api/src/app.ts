@@ -23,6 +23,13 @@ import {
   planosPublicRoutes,
   utilRoutes,
 } from "./modules/conta.js";
+import {
+  buscaRoutes,
+  comprasRoutes,
+  fornecedoresRoutes,
+  orcamentosRoutes,
+  relatoriosRoutes,
+} from "./modules/erp.js";
 import { dashboardRoutes, financeiroRoutes } from "./modules/financeiro.js";
 import { notasRoutes } from "./modules/notas.js";
 import { pedidosRoutes } from "./modules/pedidos.js";
@@ -113,6 +120,11 @@ export function createApp(ctx: AppContext) {
     ["/servicos", cad.servicos],
     ["/contadores", cad.contadores],
     ["/estoque", cad.estoque],
+    ["/fornecedores", fornecedoresRoutes(ctx)],
+    ["/compras", comprasRoutes(ctx)],
+    ["/orcamentos", orcamentosRoutes(ctx)],
+    ["/relatorios", relatoriosRoutes(ctx)],
+    ["/busca", buscaRoutes(ctx)],
     ["/notas", notasRoutes(ctx)],
     ["/pedidos", pedidosRoutes(ctx)],
     ["/financeiro", financeiroRoutes(ctx)],

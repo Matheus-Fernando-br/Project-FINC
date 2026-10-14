@@ -50,6 +50,7 @@ export function Login() {
     <main className="auth-page">
       <Card className="auth-card">
         <form className="stack" onSubmit={entrar} noValidate>
+          <span className="orb" aria-hidden />
           <h1>Entrar na FINC</h1>
           {params.get("cadastro") === "ok" && (
             <Alert tone="success">Conta criada! Faça login para continuar.</Alert>
@@ -122,6 +123,7 @@ export function Cadastro() {
     <main className="auth-page">
       <Card className="auth-card">
         <form className="stack" onSubmit={enviar} noValidate>
+          <span className="orb" aria-hidden />
           <h1>Criar conta</h1>
           <p className="muted small">
             Você começa no plano BÁSICO e pode mudar para o BLACK quando quiser.
@@ -215,6 +217,7 @@ export function EsqueciSenha() {
     <main className="auth-page">
       <Card className="auth-card">
         <form className="stack" onSubmit={enviar} noValidate>
+          <span className="orb" aria-hidden />
           <h1>Recuperar senha</h1>
           <p className="muted small">
             Informe o e-mail da sua conta. Enviaremos um link válido por 1 hora.
@@ -260,6 +263,7 @@ export function RedefinirSenha() {
     <main className="auth-page">
       <Card className="auth-card">
         <form className="stack" onSubmit={enviar} noValidate>
+          <span className="orb" aria-hidden />
           <h1>Definir nova senha</h1>
           {!token && <Alert tone="danger">Link inválido. Solicite uma nova redefinição.</Alert>}
           {f.erroGeral && <Alert tone="danger">{f.erroGeral}</Alert>}

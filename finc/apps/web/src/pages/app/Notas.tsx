@@ -344,7 +344,7 @@ export function NotaForm() {
 
   const corpo = (emitir: boolean) => ({
     tipo,
-    cliente_id: clienteId,
+    cliente_id: clienteId || null,
     itens: itens
       .filter((i) => i.ref)
       .map((i) => ({
@@ -442,7 +442,9 @@ export function NotaForm() {
             htmlFor="cliente"
           >
             <select id="cliente" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
-              <option value="">Selecione</option>
+              <option value="">
+                {tipo === "NFC-e" ? "Consumidor final (sem identificação)" : "Selecione"}
+              </option>
               {cat?.clientes.map((c) => (
                 <option key={c.id} value={c.id}>
                   {String(c.nome_social)} — {formatCpfCnpj(c.cpf_cnpj)}

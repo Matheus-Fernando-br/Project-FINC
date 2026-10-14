@@ -152,8 +152,9 @@ async function snapshotEmitente(q: Queryable, userId: string): Promise<Parte> {
 async function snapshotDestinatario(
   q: Queryable,
   userId: string,
-  clienteId: string,
+  clienteId: string | null | undefined,
 ): Promise<Parte> {
+  if (!clienteId) return { nome: "Consumidor final" };
   const { rows } = await q.query<Parte & { nome_social: string }>(
     `SELECT nome_social, email, inscricao_estadual, ${PARTE_COLS} FROM clientes WHERE id = $1 AND usuario_id = $2`,
     [clienteId, userId],
@@ -197,7 +198,7 @@ async function salvarRascunho(q: Queryable, userId: string, input: NotaInput, no
   const destinatario = await snapshotDestinatario(q, userId, input.cliente_id);
   const transporte = input.tipo === "NFS-e" ? {} : (input.transporte ?? { incluir_frete: false });
   const valores = [
-    input.cliente_id,
+    input.cliente_id ?? null,
     input.tipo,
     cfg.serie,
     cfg.ambiente,
@@ -270,6 +271,10 @@ async function salvarRascunho(q: Queryable, userId: string, input: NotaInput, no
       ],
     );
   }
+  await q.query("UPDATE notas SET forma_pagamento = $2 WHERE id = $1", [
+    id,
+    input.forma_pagamento ?? null,
+  ]);
   return id;
 }
 
@@ -362,9 +367,13 @@ async function emitir(ctx: AppContext, q: Queryable, req: Request, userId: strin
   }
 
   if (nota.gerar_financeiro && Number(nota.total) > 0) {
+    // Venda com forma de pagamento informada (PDV) entra no financeiro já recebida.
+    const pagoNoAto = Boolean(nota.forma_pagamento);
     await q.query(
-      `INSERT INTO contas (usuario_id, tipo, descricao, valor, vencimento, categoria, cliente_id, nota_id)
-       VALUES ($1, 'receber', $2, $3, COALESCE($4::date, CURRENT_DATE + 30), $5, $6, $7)`,
+      `INSERT INTO contas (usuario_id, tipo, descricao, valor, vencimento, categoria, cliente_id, nota_id,
+                           status, data_pagamento, forma_pagamento)
+       VALUES ($1, 'receber', $2, $3, COALESCE($4::date, CASE WHEN $8 THEN CURRENT_DATE ELSE CURRENT_DATE + 30 END), $5, $6, $7,
+               CASE WHEN $8 THEN 'paga' ELSE 'aberta' END, CASE WHEN $8 THEN CURRENT_DATE END, $9)`,
       [
         userId,
         `${nota.tipo} nº ${numero} — ${(nota.destinatario as Parte).nome ?? "cliente"}`,
@@ -373,6 +382,8 @@ async function emitir(ctx: AppContext, q: Queryable, req: Request, userId: strin
         nota.tipo === "NFS-e" ? "Serviços prestados" : "Vendas",
         nota.cliente_id,
         notaId,
+        pagoNoAto,
+        nota.forma_pagamento ?? null,
       ],
     );
   }

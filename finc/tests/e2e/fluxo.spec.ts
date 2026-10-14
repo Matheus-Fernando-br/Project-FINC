@@ -35,7 +35,7 @@ const usuario = { email: `e2e${seed}@finc.test`, senha: "SenhaForte123", cpf: cp
 test("área pública: início, planos, dúvidas e termos", async ({ page }) => {
   vigiar(page);
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Gestão e notas fiscais");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("A gestão do seu negócio");
   await page.getByRole("link", { name: "Planos", exact: true }).click();
   await expect(page.getByRole("heading", { name: "BÁSICO" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "BLACK" })).toBeVisible();
@@ -214,7 +214,9 @@ test("financeiro, pedido → nota, planos, suporte e configurações", async ({ 
   await page.goto("/planos");
   await page.getByRole("button", { name: "Fazer upgrade" }).click();
   await expect(page.getByText("Plano alterado.")).toBeVisible();
-  await expect(page.locator(".plano-box")).toContainText("BLACK");
+  await page.getByRole("button", { name: "Menu da conta" }).click();
+  await expect(page.getByText("Plano BLACK")).toBeVisible();
+  await page.keyboard.press("Escape");
 
   await page.goto("/suporte/novo");
   await page.getByLabel("Categoria").selectOption("Notas fiscais");
@@ -249,7 +251,8 @@ test("financeiro, pedido → nota, planos, suporte e configurações", async ({ 
   ]);
   expect(json.suggestedFilename()).toBe("finc-meus-dados.json");
 
-  await page.getByRole("button", { name: "Sair" }).click();
+  await page.getByRole("button", { name: "Menu da conta" }).click();
+  await page.getByRole("menuitem", { name: "Sair" }).click();
   await expect(page).toHaveURL(/\/login$/);
   expect(erros).toEqual([]);
 });

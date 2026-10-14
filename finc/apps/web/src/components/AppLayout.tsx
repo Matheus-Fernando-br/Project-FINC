@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import type { Preferencias } from "@finc/shared";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
-import type { Preferencias } from "@finc/shared";
 import { configurarExibicao, dataHoraBR } from "../format";
-import { Button, Logo } from "./ui";
+import { CONTA, MODULOS, moduloDaRota, type Modulo } from "../nav";
+import { Logo } from "./ui";
 
 interface Notif {
   id: string;
@@ -15,65 +16,108 @@ interface Notif {
   criado_em: string;
 }
 
-const MENU: { grupo?: string; itens: { to: string; label: string; icon: string }[] }[] = [
-  { itens: [{ to: "/app", label: "Painel", icon: "bi-speedometer2" }] },
-  {
-    grupo: "Vendas e fiscal",
-    itens: [
-      { to: "/notas", label: "Notas fiscais", icon: "bi-receipt" },
-      { to: "/pedidos", label: "Pedidos de venda", icon: "bi-cart3" },
-    ],
-  },
-  {
-    grupo: "Cadastros",
-    itens: [
-      { to: "/clientes", label: "Clientes", icon: "bi-people" },
-      { to: "/produtos", label: "Produtos", icon: "bi-box-seam" },
-      { to: "/servicos", label: "Serviços", icon: "bi-tools" },
-      { to: "/estoque", label: "Estoque", icon: "bi-boxes" },
-      { to: "/contadores", label: "Contadores", icon: "bi-person-badge" },
-    ],
-  },
-  { grupo: "Finanças", itens: [{ to: "/financeiro", label: "Financeiro", icon: "bi-cash-coin" }] },
-  {
-    grupo: "Conta",
-    itens: [
-      { to: "/planos", label: "Planos", icon: "bi-stars" },
-      { to: "/certificado", label: "Certificado digital", icon: "bi-shield-lock" },
-      { to: "/configuracoes", label: "Configurações", icon: "bi-gear" },
-      { to: "/suporte", label: "Suporte", icon: "bi-headset" },
-    ],
-  },
-];
+interface ResultadoBusca {
+  tipo: "cliente" | "produto" | "servico" | "fornecedor" | "nota";
+  id: string;
+  titulo: string;
+  detalhe: string | null;
+}
+
+const ROTA_BUSCA: Record<ResultadoBusca["tipo"], { base: string; icon: string; nome: string }> = {
+  cliente: { base: "/clientes", icon: "bi-person", nome: "Cliente" },
+  produto: { base: "/produtos", icon: "bi-box-seam", nome: "Produto" },
+  servico: { base: "/servicos", icon: "bi-tools", nome: "Serviço" },
+  fornecedor: { base: "/fornecedores", icon: "bi-truck", nome: "Fornecedor" },
+  nota: { base: "/notas", icon: "bi-receipt", nome: "Nota fiscal" },
+};
+
+/** Fecha um painel ao clicar fora ou pressionar Esc. */
+function useFechar(aberto: boolean, fechar: () => void) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!aberto) return;
+    const fora = (e: MouseEvent) =>
+      ref.current && !ref.current.contains(e.target as Node) && fechar();
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && fechar();
+    document.addEventListener("mousedown", fora);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", fora);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [aberto, fechar]);
+  return ref;
+}
+
+function MenuModulo({ m, ativo }: { m: Modulo; ativo: boolean }) {
+  const [aberto, setAberto] = useState(false);
+  const fechar = useCallback(() => setAberto(false), []);
+  const ref = useFechar(aberto, fechar);
+  const loc = useLocation();
+  useEffect(() => setAberto(false), [loc.pathname, loc.search]);
+
+  if (m.itens.length === 1) {
+    return (
+      <Link to={m.itens[0]!.to} className={`modulo-btn ${ativo ? "active" : ""}`}>
+        {m.label}
+      </Link>
+    );
+  }
+  return (
+    <div ref={ref} style={{ position: "static" }}>
+      <button
+        type="button"
+        className={`modulo-btn ${ativo ? "active" : ""}`}
+        aria-expanded={aberto}
+        aria-haspopup="true"
+        onClick={() => setAberto(!aberto)}
+      >
+        {m.label} <i className="bi bi-chevron-down" aria-hidden />
+      </button>
+      {aberto && (
+        <div className="flyout" role="menu" aria-label={m.label}>
+          <div className="flyout-titulo">{m.label}</div>
+          <div className="flyout-grid">
+            {m.itens.map((it) => (
+              <Link key={it.to} to={it.to} className="flyout-item" role="menuitem">
+                <i className={`bi ${it.icon}`} aria-hidden />
+                <div>
+                  <strong>{it.label}</strong>
+                  <span>{it.desc}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Notificacoes() {
   const [aberto, setAberto] = useState(false);
+  const fechar = useCallback(() => setAberto(false), []);
+  const ref = useFechar(aberto, fechar);
   const [dados, setDados] = useState<{ items: Notif[]; naoLidas: number }>({
     items: [],
     naoLidas: 0,
   });
-  const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const loc = useLocation();
 
-  const carregar = () =>
-    api
-      .get<{ items: Notif[]; naoLidas: number }>("/notificacoes")
-      .then(setDados)
-      .catch(() => undefined);
-
+  const carregar = useCallback(
+    () =>
+      api
+        .get<{ items: Notif[]; naoLidas: number }>("/notificacoes")
+        .then(setDados)
+        .catch(() => undefined),
+    [],
+  );
   useEffect(() => {
     void carregar();
     const t = setInterval(carregar, 60_000);
     return () => clearInterval(t);
-  }, [loc.pathname]);
-
-  useEffect(() => {
-    const fora = (e: MouseEvent) =>
-      ref.current && !ref.current.contains(e.target as Node) && setAberto(false);
-    document.addEventListener("mousedown", fora);
-    return () => document.removeEventListener("mousedown", fora);
-  }, []);
+  }, [loc.pathname, carregar]);
 
   const abrir = async (n: Notif) => {
     if (!n.lida_em) await api.post(`/notificacoes/${n.id}/lida`).catch(() => undefined);
@@ -83,33 +127,27 @@ function Notificacoes() {
   };
 
   return (
-    <div className="dropdown" ref={ref}>
+    <div ref={ref}>
       <button
-        className="btn ghost icon bell"
+        type="button"
+        className="icon-btn"
         aria-label={`Notificações (${dados.naoLidas} não lidas)`}
         onClick={() => setAberto(!aberto)}
       >
         <i className="bi bi-bell" />
         {dados.naoLidas > 0 && (
-          <span className="dot">{dados.naoLidas > 9 ? "9+" : dados.naoLidas}</span>
+          <span className="badge-dot">{dados.naoLidas > 9 ? "9+" : dados.naoLidas}</span>
         )}
       </button>
       {aberto && (
-        <div className="dropdown-panel">
-          <div
-            className="row"
-            style={{
-              justifyContent: "space-between",
-              padding: "10px 14px",
-              borderBottom: "1px solid var(--border)",
-            }}
-          >
+        <div className="flyout estreito" style={{ width: "min(380px, calc(100vw - 24px))" }}>
+          <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
             <strong>Notificações</strong>
-            <Link to="/notificacoes" onClick={() => setAberto(false)} className="small">
+            <Link to="/notificacoes" className="small" onClick={() => setAberto(false)}>
               Ver todas
             </Link>
           </div>
-          {dados.items.length === 0 && <div className="notif-item muted">Nenhuma notificação.</div>}
+          {dados.items.length === 0 && <p className="muted small">Nenhuma notificação.</p>}
           {dados.items.slice(0, 6).map((n) => (
             <div
               key={n.id}
@@ -120,9 +158,12 @@ function Notificacoes() {
               onClick={() => abrir(n)}
               onKeyDown={(e) => e.key === "Enter" && abrir(n)}
             >
-              <strong>{n.titulo}</strong>
-              <div className="muted">{n.mensagem}</div>
-              <div className="muted small">{dataHoraBR(n.criado_em)}</div>
+              <span className={`dot ${n.lida_em ? "muted" : ""}`} />
+              <div>
+                <strong>{n.titulo}</strong>
+                <div className="muted">{n.mensagem}</div>
+                <div className="muted small">{dataHoraBR(n.criado_em)}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -131,13 +172,229 @@ function Notificacoes() {
   );
 }
 
+function MenuConta({ sair }: { sair: () => void }) {
+  const { usuario } = useAuth();
+  const [aberto, setAberto] = useState(false);
+  const fechar = useCallback(() => setAberto(false), []);
+  const ref = useFechar(aberto, fechar);
+  const loc = useLocation();
+  useEffect(() => setAberto(false), [loc.pathname]);
+  const iniciais = (usuario?.nome ?? "?")
+    .split(" ")
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+  return (
+    <div ref={ref}>
+      <button
+        type="button"
+        className="icon-btn"
+        aria-label="Menu da conta"
+        aria-expanded={aberto}
+        onClick={() => setAberto(!aberto)}
+      >
+        <span className="avatar">{iniciais}</span>
+      </button>
+      {aberto && (
+        <div className="flyout estreito menu-lista" role="menu">
+          <div style={{ padding: "6px 12px 10px" }}>
+            <strong>{usuario?.nome}</strong>
+            <div className="muted small">{usuario?.email}</div>
+            <div className="small" style={{ marginTop: 6 }}>
+              <span className="badge success">Plano {usuario?.plano.nome}</span>
+            </div>
+          </div>
+          <hr />
+          {CONTA.map((c) => (
+            <Link key={c.to} to={c.to} role="menuitem">
+              <i className={`bi ${c.icon}`} aria-hidden /> {c.label}
+            </Link>
+          ))}
+          {usuario?.papel === "admin" && (
+            <Link to="/admin/chamados" role="menuitem">
+              <i className="bi bi-inboxes" aria-hidden /> Chamados (equipe)
+            </Link>
+          )}
+          <hr />
+          <button type="button" onClick={sair} role="menuitem">
+            <i className="bi bi-box-arrow-right" aria-hidden /> Sair
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BuscaGlobal({ aberta, fechar }: { aberta: boolean; fechar: () => void }) {
+  const [termo, setTermo] = useState("");
+  const [res, setRes] = useState<ResultadoBusca[]>([]);
+  const [sel, setSel] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!aberta) {
+      setTermo("");
+      setRes([]);
+    }
+  }, [aberta]);
+  useEffect(() => {
+    if (termo.trim().length < 2) return setRes([]);
+    const t = setTimeout(() => {
+      api
+        .get<ResultadoBusca[]>(`/busca?q=${encodeURIComponent(termo.trim())}`)
+        .then((r) => {
+          setRes(r);
+          setSel(0);
+        })
+        .catch(() => setRes([]));
+    }, 200);
+    return () => clearTimeout(t);
+  }, [termo]);
+
+  if (!aberta) return null;
+  const ir = (r: ResultadoBusca) => {
+    fechar();
+    navigate(`${ROTA_BUSCA[r.tipo].base}/${r.id}`);
+  };
+  return (
+    <div className="busca-overlay" onMouseDown={(e) => e.target === e.currentTarget && fechar()}>
+      <div className="busca-painel" role="dialog" aria-modal="true" aria-label="Buscar na FINC">
+        <div className="campo">
+          <i className="bi bi-search muted" aria-hidden />
+          <input
+            autoFocus
+            placeholder="Buscar clientes, produtos, fornecedores, notas…"
+            aria-label="Buscar"
+            value={termo}
+            onChange={(e) => setTermo(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") fechar();
+              if (e.key === "ArrowDown") setSel((s) => Math.min(s + 1, res.length - 1));
+              if (e.key === "ArrowUp") setSel((s) => Math.max(s - 1, 0));
+              if (e.key === "Enter" && res[sel]) ir(res[sel]);
+            }}
+          />
+          <span className="atalho-tecla">Esc</span>
+        </div>
+        <div className="resultados">
+          {termo.trim().length >= 2 && res.length === 0 && (
+            <p className="muted small" style={{ padding: 12 }}>
+              Nada encontrado.
+            </p>
+          )}
+          {termo.trim().length < 2 && (
+            <p className="muted small" style={{ padding: 12 }}>
+              Digite ao menos 2 letras. Dica: abra a busca com{" "}
+              <span className="atalho-tecla">Ctrl</span> + <span className="atalho-tecla">K</span>.
+            </p>
+          )}
+          {res.map((r, i) => (
+            <a
+              key={`${r.tipo}-${r.id}`}
+              className={`resultado ${i === sel ? "sel" : ""}`}
+              onMouseEnter={() => setSel(i)}
+              onClick={() => ir(r)}
+            >
+              <i
+                className={`bi ${ROTA_BUSCA[r.tipo].icon}`}
+                style={{ color: "var(--brand)" }}
+                aria-hidden
+              />
+              <div>
+                {r.titulo}
+                <small>
+                  {ROTA_BUSCA[r.tipo].nome}
+                  {r.detalhe ? ` · ${r.detalhe}` : ""}
+                </small>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuMovel({
+  aberto,
+  fechar,
+  sair,
+}: {
+  aberto: boolean;
+  fechar: () => void;
+  sair: () => void;
+}) {
+  const loc = useLocation();
+  const atual = moduloDaRota(loc.pathname);
+  const { usuario } = useAuth();
+  if (!aberto) return null;
+  return (
+    <>
+      <div className="sheet-backdrop" onClick={fechar} />
+      <nav className="sheet" aria-label="Menu principal">
+        <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
+          <Logo />
+          <button type="button" className="icon-btn" aria-label="Fechar menu" onClick={fechar}>
+            <i className="bi bi-x-lg" />
+          </button>
+        </div>
+        {MODULOS.map((m) => (
+          <details key={m.id} open={m.id === atual?.id}>
+            <summary>
+              <span className="row">
+                {m.id === atual?.id && <span className="dot" />}
+                {m.label}
+              </span>
+              <i className="bi bi-chevron-down" aria-hidden />
+            </summary>
+            <div className="links">
+              {m.itens.map((it) => (
+                <NavLink key={it.to} to={it.to} end onClick={fechar}>
+                  <i className={`bi ${it.icon}`} aria-hidden /> {it.label}
+                </NavLink>
+              ))}
+            </div>
+          </details>
+        ))}
+        <details>
+          <summary>
+            Minha conta <i className="bi bi-chevron-down" aria-hidden />
+          </summary>
+          <div className="links">
+            {CONTA.map((c) => (
+              <NavLink key={c.to} to={c.to} onClick={fechar}>
+                <i className={`bi ${c.icon}`} aria-hidden /> {c.label}
+              </NavLink>
+            ))}
+            {usuario?.papel === "admin" && (
+              <NavLink to="/admin/chamados" onClick={fechar}>
+                <i className="bi bi-inboxes" aria-hidden /> Chamados (equipe)
+              </NavLink>
+            )}
+          </div>
+        </details>
+        <button type="button" className="btn secondary mt" style={{ width: "100%" }} onClick={sair}>
+          <i className="bi bi-box-arrow-right" /> Sair
+        </button>
+      </nav>
+    </>
+  );
+}
+
 export function AppLayout() {
-  const { usuario, logout } = useAuth();
-  const [menu, setMenu] = useState(false);
+  const { logout } = useAuth();
   const loc = useLocation();
   const navigate = useNavigate();
+  const [menuMovel, setMenuMovel] = useState(false);
+  const [busca, setBusca] = useState(false);
   const [, setPronto] = useState(0);
-  useEffect(() => setMenu(false), [loc.pathname]);
+  const modulo = moduloDaRota(loc.pathname);
+
+  useEffect(() => {
+    setMenuMovel(false);
+    window.scrollTo({ top: 0 });
+  }, [loc.pathname]);
   useEffect(() => {
     api
       .get<Preferencias>("/config/preferencias")
@@ -148,6 +405,16 @@ export function AppLayout() {
       })
       .catch(() => undefined);
   }, []);
+  useEffect(() => {
+    const atalho = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setBusca(true);
+      }
+    };
+    window.addEventListener("keydown", atalho);
+    return () => window.removeEventListener("keydown", atalho);
+  }, []);
 
   const sair = async () => {
     // Navega antes de limpar o usuário para não acionar o redirecionamento "voltar" da rota protegida.
@@ -155,80 +422,76 @@ export function AppLayout() {
     await logout();
   };
 
+  const subitens = modulo && modulo.itens.length > 1 ? modulo.itens : null;
+  // Item ativo do submenu: correspondência exata com a query primeiro; depois o caminho mais longo.
+  const atualCompleto = loc.pathname + loc.search;
+  const ativoTo = subitens
+    ? (subitens.find((i) => i.to.includes("?") && i.to === atualCompleto)?.to ??
+      subitens
+        .filter((i) => !i.to.includes("?") || i.to.split("?")[0] === loc.pathname)
+        .map((i) => i.to.split("?")[0]!)
+        .filter((to) => loc.pathname === to || loc.pathname.startsWith(`${to}/`))
+        .sort((x, y) => y.length - x.length)[0])
+    : undefined;
+  const itemAtivo = (to: string) =>
+    to.includes("?")
+      ? to === ativoTo
+      : to === ativoTo || (!ativoTo?.includes("?") && to === ativoTo);
+
   return (
-    <div className="shell">
-      <div className={`sidebar-backdrop ${menu ? "open" : ""}`} onClick={() => setMenu(false)} />
-      <aside className={`sidebar ${menu ? "open" : ""}`} aria-label="Menu principal">
-        <Link to="/app" className="logo" aria-label="Início">
-          <Logo claro altura={32} />
-        </Link>
-        <nav>
-          {MENU.map((g, i) => (
-            <div key={i}>
-              {g.grupo && <div className="grupo">{g.grupo}</div>}
-              {g.itens.map((it) => (
-                <NavLink
-                  key={it.to}
-                  to={it.to}
-                  end={it.to === "/app"}
-                  className={({ isActive }) => `item ${isActive ? "active" : ""}`}
-                >
-                  <i className={`bi ${it.icon}`} aria-hidden /> {it.label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
-          {usuario?.papel === "admin" && (
-            <>
-              <div className="grupo">Administração</div>
-              <NavLink
-                to="/admin/chamados"
-                className={({ isActive }) => `item ${isActive ? "active" : ""}`}
-              >
-                <i className="bi bi-inboxes" aria-hidden /> Chamados (equipe)
-              </NavLink>
-            </>
-          )}
-        </nav>
-        {usuario && (
-          <div className="plano-box">
-            Plano <strong style={{ color: "#fff" }}>{usuario.plano.nome}</strong>
-            {usuario.plano.codigo === "basico" && (
-              <div style={{ marginTop: 6 }}>
-                <Link to="/planos" style={{ color: "var(--accent)" }}>
-                  Conhecer o BLACK →
-                </Link>
-              </div>
-            )}
+    <>
+      <header className="topnav">
+        <div className="inner">
+          <Link to="/app" className="brand" aria-label="FINC — início">
+            <Logo />
+          </Link>
+          <nav className="modulos" aria-label="Módulos">
+            {MODULOS.map((m) => (
+              <MenuModulo key={m.id} m={m} ativo={m.id === modulo?.id} />
+            ))}
+          </nav>
+          <div className="nav-acoes">
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Buscar (Ctrl+K)"
+              title="Buscar (Ctrl+K)"
+              onClick={() => setBusca(true)}
+            >
+              <i className="bi bi-search" />
+            </button>
+            <Link to="/notas/nova" className="btn sm ocultar-movel" style={{ marginInline: 6 }}>
+              <i className="bi bi-plus-lg" /> Emitir nota
+            </Link>
+            <Notificacoes />
+            <MenuConta sair={sair} />
+            <button
+              type="button"
+              className="icon-btn menu-movel-btn"
+              aria-label="Abrir menu"
+              onClick={() => setMenuMovel(true)}
+            >
+              <i className="bi bi-list" />
+            </button>
           </div>
-        )}
-      </aside>
-      <div className="main">
-        <header className="topbar">
-          <Button
-            variant="ghost"
-            className="menu-toggle"
-            icon="bi-list"
-            aria-label="Abrir menu"
-            onClick={() => setMenu(true)}
-          />
-          <Link to="/notas/nova" className="btn sm">
-            <i className="bi bi-plus-lg" /> Emitir nota
-          </Link>
-          <div className="spacer" />
-          <Notificacoes />
-          <Link to="/meus-dados" className="btn ghost sm" title="Meus dados">
-            <i className="bi bi-person-circle" />{" "}
-            <span className="hide-sm">{usuario?.nome.split(" ")[0]}</span>
-          </Link>
-          <Button variant="ghost" size="sm" icon="bi-box-arrow-right" onClick={sair}>
-            Sair
-          </Button>
-        </header>
-        <main className="content" id="conteudo">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+        </div>
+      </header>
+      {subitens && (
+        <nav className="subnav" aria-label={`Seções de ${modulo?.label}`}>
+          <div className="inner">
+            {subitens.map((it) => (
+              <Link key={it.to} to={it.to} className={itemAtivo(it.to) ? "active" : ""}>
+                {it.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
+      <main className="content" id="conteudo">
+        <Outlet />
+      </main>
+      <MenuMovel aberto={menuMovel} fechar={() => setMenuMovel(false)} sair={sair} />
+      <BuscaGlobal aberta={busca} fechar={() => setBusca(false)} />
+    </>
   );
 }

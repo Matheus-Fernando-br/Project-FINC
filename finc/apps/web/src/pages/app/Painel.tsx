@@ -188,7 +188,7 @@ export function Painel() {
                     }
                   />
                   <Tooltip formatter={(v) => formatBRL(v)} labelStyle={{ color: "#0f172a" }} />
-                  <Bar dataKey="total" name="Faturamento" fill="#12a150" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="total" name="Faturamento" fill="#16a34a" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

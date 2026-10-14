@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TIPOS_NOTA, UFS } from "./catalogos.js";
+import { FORMAS_PAGAMENTO, TIPOS_NOTA, UFS } from "./catalogos.js";
 import {
   isStrongPassword,
   isValidCEP,
@@ -268,20 +268,35 @@ export const transporteSchema = z.object({
   info: optText(500),
 });
 
-export const notaSchema = z.object({
-  tipo: z.enum(TIPOS_NOTA, {
-    errorMap: () => ({ message: "Selecione o tipo de nota (NF-e / NFC-e / NFS-e)" }),
-  }),
-  cliente_id: z.string({ required_error: "Selecione um cliente" }).uuid("Selecione um cliente"),
-  itens: z.array(notaItemSchema).min(1, "Adicione pelo menos 1 produto/serviço").max(200),
-  desconto_incondicional: numOpt(z.number().min(0)),
-  desconto_condicional: numOpt(z.number().min(0)),
-  observacoes: optText(2000),
-  natureza_operacao: optText(120),
-  transporte: transporteSchema.optional(),
-  gerar_financeiro: z.boolean().optional().default(true),
-  vencimento: z.preprocess(emptyToNull, z.string().date("Data inválida").nullable()).optional(),
-});
+export const notaSchema = z
+  .object({
+    tipo: z.enum(TIPOS_NOTA, {
+      errorMap: () => ({ message: "Selecione o tipo de nota (NF-e / NFC-e / NFS-e)" }),
+    }),
+    // Opcional apenas na NFC-e (venda ao consumidor final, ex.: PDV).
+    cliente_id: z
+      .preprocess(emptyToNull, z.string().uuid("Selecione um cliente").nullable())
+      .optional(),
+    itens: z.array(notaItemSchema).min(1, "Adicione pelo menos 1 produto/serviço").max(200),
+    /** Quando informado, a venda é considerada paga no ato (conta a receber já baixada). */
+    forma_pagamento: z.preprocess(emptyToNull, z.enum(FORMAS_PAGAMENTO).nullable()).optional(),
+    desconto_incondicional: numOpt(z.number().min(0)),
+    desconto_condicional: numOpt(z.number().min(0)),
+    observacoes: optText(2000),
+    natureza_operacao: optText(120),
+    transporte: transporteSchema.optional(),
+    gerar_financeiro: z.boolean().optional().default(true),
+    vencimento: z.preprocess(emptyToNull, z.string().date("Data inválida").nullable()).optional(),
+  })
+  .superRefine((n, ctx) => {
+    if (!n.cliente_id && n.tipo !== "NFC-e") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cliente_id"],
+        message: "Selecione um cliente",
+      });
+    }
+  });
 
 export const cancelarNotaSchema = z.object({
   motivo: reqText(15, 255, "Justificativa (mínimo 15 caracteres)"),
@@ -377,3 +392,56 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
     { label: "Financeiro", icon: "bi-cash-coin", to: "/financeiro" },
   ],
 };
+
+/* ============ Suprimentos e vendas (ERP) ============ */
+
+export const fornecedorSchema = z
+  .object({
+    nome_social: reqText(2, 200, "Nome / razão social"),
+    tipo_pessoa: tipoPessoaSchema,
+    cpf_cnpj: docDigits,
+    inscricao_estadual: optText(30),
+    contato: optText(120),
+    email: emailOpt,
+    telefone: digitsOpt(isValidTelefone, "Telefone inválido"),
+    observacoes: optText(1000),
+    ...enderecoShape,
+  })
+  .superRefine(refineDocumento);
+
+export const compraItemSchema = z.object({
+  produto_id: z.string({ required_error: "Selecione o produto" }).uuid("Selecione o produto"),
+  quantidade: numberFrom(z.number().positive("Quantidade deve ser maior que zero").max(9999999)),
+  custo_unitario: numberFrom(z.number().min(0, "Custo inválido").max(99999999)),
+});
+
+export const compraSchema = z.object({
+  fornecedor_id: z
+    .string({ required_error: "Selecione o fornecedor" })
+    .uuid("Selecione o fornecedor"),
+  data_compra: z.preprocess(emptyToNull, z.string().date().nullable()).optional(),
+  previsao: z.preprocess(emptyToNull, z.string().date().nullable()).optional(),
+  itens: z.array(compraItemSchema).min(1, "Adicione pelo menos 1 item").max(200),
+  frete: numOpt(z.number().min(0)),
+  desconto: numOpt(z.number().min(0)),
+  observacoes: optText(2000),
+});
+
+export const receberCompraSchema = z.object({
+  gerar_conta: z.boolean().optional().default(true),
+  vencimento: z.preprocess(emptyToNull, z.string().date("Data inválida").nullable()).optional(),
+});
+
+export const orcamentoSchema = z.object({
+  cliente_id: z.string({ required_error: "Selecione um cliente" }).uuid("Selecione um cliente"),
+  data_orcamento: z.preprocess(emptyToNull, z.string().date().nullable()).optional(),
+  validade: z.preprocess(emptyToNull, z.string().date().nullable()).optional(),
+  itens: z.array(notaItemSchema).min(1, "Adicione pelo menos 1 item").max(200),
+  desconto: numOpt(z.number().min(0)),
+  condicoes: optText(1000),
+  observacoes: optText(2000),
+});
+
+export type FornecedorInput = z.infer<typeof fornecedorSchema>;
+export type CompraInput = z.infer<typeof compraSchema>;
+export type OrcamentoInput = z.infer<typeof orcamentoSchema>;

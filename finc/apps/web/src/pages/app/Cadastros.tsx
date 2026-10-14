@@ -5,6 +5,7 @@ import {
   UNIDADES_MEDIDA,
   clienteSchema,
   contadorSchema,
+  fornecedorSchema,
   produtoCreateSchema,
   servicoSchema,
 } from "@finc/shared";
@@ -430,6 +431,79 @@ export const ContadorForm = () => (
     secoes={CONTADOR_SECOES}
     inicial={vazio(CONTADOR_SECOES[0]!.campos)}
     schema={contadorSchema}
+  />
+);
+
+/* ================= Fornecedores ================= */
+
+const FORNECEDOR_SECOES: Secao[] = [
+  {
+    titulo: "Identificação",
+    icon: "bi-truck",
+    campos: [
+      { name: "nome_social", label: "Nome / razão social", required: true, col: "c8" },
+      {
+        name: "tipo_pessoa",
+        label: "Tipo de pessoa",
+        tipo: "select",
+        required: true,
+        col: "c4",
+        opcoes: [
+          { value: "JURIDICA", label: "Pessoa jurídica" },
+          { value: "FISICA", label: "Pessoa física" },
+        ],
+      },
+      { name: "cpf_cnpj", label: "CNPJ / CPF", required: true, col: "c6" },
+      { name: "inscricao_estadual", label: "Inscrição estadual", col: "c6" },
+    ],
+  },
+  {
+    titulo: "Contato",
+    icon: "bi-telephone",
+    campos: [
+      { name: "contato", label: "Pessoa de contato", col: "c4" },
+      { name: "email", label: "E-mail", tipo: "email", col: "c4" },
+      { name: "telefone", label: "Telefone", tipo: "tel", col: "c4" },
+    ],
+  },
+  { titulo: "Endereço", icon: "bi-geo-alt", campos: ENDERECO },
+  {
+    titulo: "Observações",
+    icon: "bi-journal-text",
+    campos: [{ name: "observacoes", label: "Observações internas", tipo: "textarea" }],
+  },
+];
+
+export const FornecedoresLista = () => (
+  <CadastroLista<Registro>
+    titulo="Fornecedores"
+    icon="bi-truck"
+    endpoint="/fornecedores"
+    rotaBase="/fornecedores"
+    vazio="Nenhum fornecedor cadastrado ainda."
+    sub="Usados nos pedidos de compra e nas contas a pagar."
+    colunas={[
+      { titulo: "Fornecedor", render: (r) => <strong>{String(r.nome_social)}</strong> },
+      { titulo: "CNPJ/CPF", render: (r) => formatCpfCnpj(r.cpf_cnpj) },
+      { titulo: "Contato", render: (r) => (r.contato as string) || (r.email as string) || "—" },
+      { titulo: "Telefone", render: (r) => formatTelefone(r.telefone) || "—" },
+      { titulo: "Cidade", render: (r) => (r.cidade ? `${r.cidade}/${r.uf ?? ""}` : "—") },
+    ]}
+  />
+);
+
+export const FornecedorForm = () => (
+  <CadastroForm
+    titulo="fornecedor"
+    icon="bi-truck"
+    endpoint="/fornecedores"
+    voltar="/fornecedores"
+    secoes={FORNECEDOR_SECOES}
+    inicial={vazio(
+      FORNECEDOR_SECOES.flatMap((s) => s.campos),
+      { tipo_pessoa: "JURIDICA" },
+    )}
+    schema={fornecedorSchema}
   />
 );
 

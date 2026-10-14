@@ -9,11 +9,11 @@ export function PublicLayout() {
       <header className="pub-header">
         <div className="inner">
           <Link to="/" aria-label="FINC — início">
-            <Logo claro />
+            <Logo altura={24} />
           </Link>
-          <nav>
+          <nav aria-label="Navegação pública">
             <NavLink to="/" end>
-              Início
+              Visão geral
             </NavLink>
             <NavLink to="/planos-finc">Planos</NavLink>
             <NavLink to="/quem-somos">Quem somos</NavLink>
@@ -21,11 +21,11 @@ export function PublicLayout() {
           </nav>
           {usuario ? (
             <Link to="/app" className="btn sm">
-              Ir para o painel
+              Abrir a FINC
             </Link>
           ) : (
             <div className="row">
-              <Link to="/login" className="btn ghost sm" style={{ color: "#fff" }}>
+              <Link to="/login" className="btn ghost sm">
                 Entrar
               </Link>
               <Link to="/cadastro" className="btn sm">
@@ -39,10 +39,10 @@ export function PublicLayout() {
       <footer className="pub-footer">
         <div className="inner">
           <span>
-            © {new Date().getFullYear()} FINC — gestão simples para MEIs e pequenas empresas.
+            © {new Date().getFullYear()} FINC. Gestão simples para MEIs e pequenas empresas.
           </span>
-          <span className="row">
-            <Link to="/termos">Termos de uso e privacidade</Link>
+          <span className="row" style={{ gap: 16 }}>
+            <Link to="/termos">Termos e privacidade</Link>
             <a href="mailto:plataforma.finc@gmail.com">plataforma.finc@gmail.com</a>
             <a
               href="https://www.instagram.com/plataforma.finc/"

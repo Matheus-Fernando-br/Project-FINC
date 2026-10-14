@@ -253,3 +253,12 @@ export const CATEGORIAS_FINANCEIRO = [
   "Transporte",
   "Outros",
 ] as const;
+
+export const FORMAS_PAGAMENTO = [
+  "Dinheiro",
+  "PIX",
+  "Cartão de débito",
+  "Cartão de crédito",
+  "Boleto",
+  "Transferência",
+] as const;

@@ -8,6 +8,8 @@ import {
   ClientesLista,
   ContadorForm,
   ContadoresLista,
+  FornecedorForm,
+  FornecedoresLista,
   ProdutoForm,
   ProdutosLista,
   ServicoForm,
@@ -24,6 +26,14 @@ import {
   MeusDados,
   Planos,
 } from "./pages/app/Conta";
+import {
+  CompraForm,
+  ComprasLista,
+  OrcamentoForm,
+  OrcamentosLista,
+  Pdv,
+  Relatorios,
+} from "./pages/app/Erp";
 import { NotaDetalhe, NotaForm, NotasLista } from "./pages/app/Notas";
 import { Estoque, Financeiro, PedidoForm, PedidosLista } from "./pages/app/Operacoes";
 import { Painel } from "./pages/app/Painel";
@@ -92,6 +102,17 @@ export function Rotas() {
         <Route path="/contadores/novo" element={<ContadorForm />} />
         <Route path="/contadores/:id" element={<ContadorForm />} />
         <Route path="/estoque" element={<Estoque />} />
+        <Route path="/fornecedores" element={<FornecedoresLista />} />
+        <Route path="/fornecedores/novo" element={<FornecedorForm />} />
+        <Route path="/fornecedores/:id" element={<FornecedorForm />} />
+        <Route path="/compras" element={<ComprasLista />} />
+        <Route path="/compras/nova" element={<CompraForm />} />
+        <Route path="/compras/:id" element={<CompraForm />} />
+        <Route path="/orcamentos" element={<OrcamentosLista />} />
+        <Route path="/orcamentos/novo" element={<OrcamentoForm />} />
+        <Route path="/orcamentos/:id" element={<OrcamentoForm />} />
+        <Route path="/pdv" element={<Pdv />} />
+        <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/importar/:entidade" element={<Importar />} />
         <Route path="/planos" element={<Planos />} />

@@ -9,7 +9,7 @@ import { audit } from "../services/audit.js";
 import { UUID_RE } from "./crud.js";
 import { criarRascunho, resolverItens } from "./notas.js";
 
-const pedidoSchema = z.object({
+export const pedidoSchema = z.object({
   cliente_id: z.string({ required_error: "Selecione um cliente" }).uuid("Selecione um cliente"),
   data_pedido: z.string().date().optional(),
   itens: z.array(notaItemSchema).min(1, "Adicione pelo menos 1 item").max(200),
@@ -78,6 +78,23 @@ async function gravarItens(
   );
 }
 
+/** Cria um pedido de venda (usado pela tela de pedidos e pela conversão de orçamentos). */
+export async function criarPedido(
+  q: Queryable,
+  userId: string,
+  input: z.infer<typeof pedidoSchema>,
+) {
+  // Numeração sequencial por conta; o índice único protege contra corrida.
+  const { rows } = await q.query<{ id: string }>(
+    `INSERT INTO pedidos (usuario_id, numero, cliente_id)
+     VALUES ($1, (SELECT COALESCE(max(numero), 0) + 1 FROM pedidos WHERE usuario_id = $1), $2) RETURNING id`,
+    [userId, input.cliente_id],
+  );
+  const pid = rows[0]!.id;
+  await gravarItens(q, userId, pid, input);
+  return pid;
+}
+
 export function pedidosRoutes(ctx: AppContext) {
   const r = Router();
   const { db } = ctx;
@@ -106,14 +123,7 @@ export function pedidosRoutes(ctx: AppContext) {
   r.post("/", async (req, res) => {
     const input = parse(pedidoSchema, req.body);
     const id = await db.tx(async (q) => {
-      // Numeração sequencial por conta; o índice único protege contra corrida.
-      const { rows } = await q.query<{ id: string }>(
-        `INSERT INTO pedidos (usuario_id, numero, cliente_id)
-         VALUES ($1, (SELECT COALESCE(max(numero), 0) + 1 FROM pedidos WHERE usuario_id = $1), $2) RETURNING id`,
-        [uid(req), input.cliente_id],
-      );
-      const pid = rows[0]!.id;
-      await gravarItens(q, uid(req), pid, input);
+      const pid = await criarPedido(q, uid(req), input);
       await audit(q, req, uid(req), "pedidos.criar", "pedidos", pid);
       return pid;
     });

@@ -8,34 +8,34 @@ import { useApi } from "../../hooks/useApi";
 const RECURSOS = [
   {
     icon: "bi-receipt",
-    titulo: "Documentos fiscais",
+    titulo: "Notas fiscais",
     texto:
-      "NF-e, NFC-e e NFS-e com numeração automática, PDF, XML e cancelamento com justificativa.",
+      "NF-e, NFC-e e NFS-e com numeração automática, PDF, XML, cancelamento e envio ao contador.",
   },
   {
-    icon: "bi-people",
-    titulo: "Cadastros completos",
-    texto: "Clientes, produtos e serviços com validação de CPF/CNPJ, NCM, CFOP e alíquotas.",
-  },
-  {
-    icon: "bi-boxes",
-    titulo: "Estoque",
-    texto: "Saldo atualizado a cada nota emitida, movimentações e alerta de estoque mínimo.",
-  },
-  {
-    icon: "bi-cash-coin",
-    titulo: "Financeiro",
-    texto: "Contas a pagar e a receber, baixas, estornos e saldo previsto em um só lugar.",
+    icon: "bi-shop",
+    titulo: "Frente de caixa",
+    texto: "Venda no balcão em segundos, com NFC-e, troco e recebimento registrado no financeiro.",
   },
   {
     icon: "bi-cart3",
-    titulo: "Pedidos de venda",
-    texto: "Registre pedidos e transforme-os em nota fiscal com um clique.",
+    titulo: "Vendas",
+    texto: "Orçamento vira pedido, pedido vira nota. Sem redigitar nada.",
   },
   {
-    icon: "bi-person-badge",
-    titulo: "Seu contador por perto",
-    texto: "Envie PDF e XML dos documentos direto para o e-mail do seu contador.",
+    icon: "bi-boxes",
+    titulo: "Suprimentos",
+    texto: "Fornecedores, pedidos de compra e estoque atualizado a cada entrada e saída.",
+  },
+  {
+    icon: "bi-cash-coin",
+    titulo: "Finanças",
+    texto: "Contas a pagar e a receber, baixas, vencidos e saldo previsto.",
+  },
+  {
+    icon: "bi-bar-chart",
+    titulo: "Relatórios",
+    texto: "Vendas, DRE simplificado, fluxo de caixa e posição de estoque, com exportação.",
   },
 ];
 
@@ -43,67 +43,111 @@ export function Landing() {
   return (
     <main>
       <section className="hero">
-        <div className="inner">
-          <div>
-            <h1>Gestão e notas fiscais sem complicação para o seu negócio.</h1>
-            <p>
-              A FINC reúne emissão de documentos fiscais, cadastros, estoque e financeiro numa
-              plataforma simples, pensada para MEIs e pequenas empresas.
-            </p>
-            <div className="cta">
-              <Link to="/cadastro" className="btn">
-                Criar conta <i className="bi bi-arrow-right" />
-              </Link>
-              <Link to="/planos-finc" className="btn secondary">
-                Ver planos
-              </Link>
+        <div className="eyebrow">
+          <span className="dot lg" /> FINC
+        </div>
+        <h1>A gestão do seu negócio. Simples assim.</h1>
+        <p>
+          Notas fiscais, vendas, estoque e financeiro em uma única plataforma, pensada para MEIs e
+          pequenas empresas.
+        </p>
+        <div className="cta">
+          <Link to="/cadastro" className="btn lg">
+            Começar agora
+          </Link>
+          <Link to="/planos-finc" className="btn ghost lg">
+            Ver planos <i className="bi bi-chevron-right" />
+          </Link>
+        </div>
+        <div className="palco" aria-hidden>
+          <div className="orb" />
+          <div className="janela">
+            <div className="row" style={{ gap: 6, marginBottom: 18 }}>
+              <span className="dot danger" />
+              <span className="dot warning" />
+              <span className="dot" />
             </div>
-          </div>
-          <div className="mock" aria-hidden>
-            <div className="grid grid-2">
+            <div className="grid grid-4">
               {[
-                "Notas emitidas no mês",
-                "A receber",
-                "Clientes ativos",
-                "Produtos com estoque baixo",
-              ].map((t, i) => (
+                ["Faturamento do mês", "bi-graph-up"],
+                ["A receber", "bi-arrow-down-circle"],
+                ["A pagar", "bi-arrow-up-circle"],
+                ["Notas emitidas", "bi-receipt"],
+              ].map(([t, i]) => (
                 <div
                   key={t}
                   className="kpi"
-                  style={{ background: "rgb(255 255 255 / 6%)", padding: 14, borderRadius: 12 }}
+                  style={{ background: "var(--surface-2)", padding: 16, borderRadius: 16 }}
                 >
-                  <span className="label" style={{ color: "#a9c0d6" }}>
-                    {t}
+                  <span className="label">
+                    <i className={`bi ${i}`} /> {t}
                   </span>
-                  <span className="value" style={{ color: i === 3 ? "var(--accent)" : "#fff" }}>
-                    {["▮▮▮", "R$ ▮▮▮", "▮▮", "▮"][i]}
+                  <span className="value" style={{ color: "var(--border-strong)" }}>
+                    ••••
                   </span>
                 </div>
               ))}
             </div>
-            <p className="small" style={{ marginTop: 12, fontSize: "0.85rem" }}>
-              Seu painel com indicadores calculados a partir dos seus dados reais.
+            <p
+              className="small muted"
+              style={{ marginTop: 14, textAlign: "center", fontSize: "0.85rem" }}
+            >
+              Seu painel, com indicadores calculados a partir dos seus próprios dados.
             </p>
           </div>
         </div>
       </section>
-      <section className="section">
-        <h2>Tudo o que um pequeno negócio precisa</h2>
-        <p className="muted">
-          Recursos que funcionam juntos: a nota emitida baixa o estoque e lança a conta a receber
+      <section className="section" style={{ textAlign: "center" }}>
+        <h2>Do orçamento ao caixa, tudo conectado.</h2>
+        <p className="lead" style={{ margin: "0 auto" }}>
+          Cada etapa alimenta a próxima: a nota emitida baixa o estoque e lança a conta a receber
           automaticamente.
+        </p>
+        <div className="fluxo">
+          {["Orçamento", "Pedido de venda", "Nota fiscal", "Estoque", "Contas a receber"].map(
+            (p, i, arr) => (
+              <span key={p} className="row" style={{ gap: 10 }}>
+                <span className="passo">
+                  <span className="dot" /> {p}
+                </span>
+                {i < arr.length - 1 && <i className="bi bi-arrow-right" aria-hidden />}
+              </span>
+            ),
+          )}
+        </div>
+      </section>
+      <section className="section">
+        <h2>Tudo o que o seu negócio precisa.</h2>
+        <p className="lead">
+          Módulos organizados como num ERP completo, com a simplicidade de um aplicativo.
         </p>
         <div className="grid grid-3 mt">
           {RECURSOS.map((r) => (
             <Card key={r.titulo}>
-              <div className="feature stack">
-                <i className={`bi ${r.icon}`} aria-hidden />
+              <div className="feature">
+                <span className="icone">
+                  <i className={`bi ${r.icon}`} aria-hidden />
+                </span>
                 <h3>{r.titulo}</h3>
                 <p className="muted">{r.texto}</p>
               </div>
             </Card>
           ))}
         </div>
+      </section>
+      <section className="section" style={{ textAlign: "center", paddingBottom: 96 }}>
+        <span
+          className="orb"
+          style={{ width: 64, height: 64, display: "inline-block" }}
+          aria-hidden
+        />
+        <h2 style={{ marginTop: 18 }}>Pronto para começar?</h2>
+        <p className="lead" style={{ margin: "0 auto 24px" }}>
+          Crie sua conta no plano BÁSICO e evolua para o BLACK quando o negócio crescer.
+        </p>
+        <Link to="/cadastro" className="btn lg">
+          Criar conta
+        </Link>
       </section>
     </main>
   );
