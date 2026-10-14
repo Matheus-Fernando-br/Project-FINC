@@ -50,6 +50,16 @@ const envSchema = z.object({
   TELEGRAM_WEBHOOK_SECRET: z.string().optional(),
   VIACEP_URL: z.string().url().default("https://viacep.com.br/ws"),
   RATE_LIMIT_DESATIVADO: bool(false),
+  // E-mails (separados por vírgula) que recebem o papel de administrador do suporte.
+  ADMIN_EMAILS: z
+    .string()
+    .default("")
+    .transform((v) =>
+      v
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ),
 });
 
 export type Config = z.infer<typeof envSchema> & { sessionSecret: string };

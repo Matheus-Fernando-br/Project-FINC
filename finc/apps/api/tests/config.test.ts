@@ -57,3 +57,31 @@ describe("DATABASE_SCHEMA", () => {
     expect(() => parseConfig({ DATABASE_SCHEMA: "finc; drop" })).toThrow(ConfigError);
   });
 });
+
+describe("ADMIN_EMAILS", () => {
+  it("o e-mail listado é cadastrado como administrador; os demais, como usuário", async () => {
+    const { setup, registrar, gerarCpf } = await import("./helpers.js");
+    const request = (await import("supertest")).default;
+    const env = await setup({ ADMIN_EMAILS: " Chefe@FINC.com.br, outro@x.com " });
+    try {
+      const res = await request(env.app).post("/api/auth/cadastro").send({
+        nome: "Chefe",
+        tipo_pessoa: "FISICA",
+        cpf_cnpj: gerarCpf(),
+        email: "chefe@finc.com.br",
+        senha: "Senha1234",
+        telefone: "11988887777",
+        aceite_termos: true,
+      });
+      expect(res.status).toBe(201);
+      const comum = await registrar(env);
+      const { rows } = await env.ctx.db.query<{ email: string; papel: string }>(
+        "SELECT email, papel FROM usuarios WHERE email = ANY($1) ORDER BY papel",
+        [["chefe@finc.com.br", comum.email]],
+      );
+      expect(rows.map((r) => r.papel)).toEqual(["admin", "usuario"]);
+    } finally {
+      await env.close();
+    }
+  });
+});

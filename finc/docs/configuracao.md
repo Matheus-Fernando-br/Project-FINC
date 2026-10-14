@@ -55,6 +55,7 @@ As migrações são aplicadas automaticamente quando a API inicia. Também podem
 | Variável | Padrão | Obrigatória | O que faz |
 |---|---|---|---|
 | `SESSION_SECRET` | vazio | Sim, em produção | Segredo que assina os tokens CSRF. Precisa ter **32 caracteres ou mais**; gere com `openssl rand -base64 48`. Trocar o valor invalida as abas abertas (o usuário só precisa recarregar a página). Em desenvolvimento, se ficar vazio, é gerado um segredo temporário a cada reinício |
+| `ADMIN_EMAILS` | vazio | Não | E-mails, separados por vírgula, que recebem o papel de administrador (menu *Administração › Chamados*). Vale no cadastro e também para contas já existentes, a cada partida da API. Dispensa rodar SQL ou `admin:promover` |
 | `SESSION_TTL_HORAS` | `8` | Não | Duração da sessão, de 1 a 720 horas. Depois disso o usuário precisa entrar de novo |
 | `COOKIE_SECURE` | vazio (automático) | Não | Vazio = `Secure` ligado em produção e desligado em desenvolvimento. `true` força o ligado (HTTPS com `NODE_ENV` diferente de production). `false` desliga: use **só** para testar em rede local sem HTTPS, porque sem isso o navegador recusa o cookie e o login não funciona |
 | `CORS_ORIGINS` | vazio | Não | Origens extras liberadas, separadas por vírgula. Só é necessário quando o site está em **outro subdomínio do mesmo domínio** (ex.: site em `app.empresa.com`, API em `api.empresa.com`). Domínios de sites diferentes não são suportados (o cookie é `SameSite=Lax`) |

@@ -14,6 +14,11 @@ export async function buildContext(
   const logger = pino({ level: cfg.LOG_LEVEL, redact: ["*.senha", "*.password", "*.token"] });
   const db = overrides.db ?? (await createDb(cfg.DATABASE_URL, databaseOptions(cfg)));
   await migrate(db);
+  if (cfg.ADMIN_EMAILS.length) {
+    await db.query("UPDATE usuarios SET papel = 'admin' WHERE lower(email) = ANY($1)", [
+      cfg.ADMIN_EMAILS,
+    ]);
+  }
   return {
     cfg,
     logger,

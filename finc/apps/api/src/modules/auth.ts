@@ -50,8 +50,8 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
       if (!plano.rows[0])
         throw new AppError("INTERNO", "Planos não configurados. Execute as migrações.");
       const { rows } = await q.query<{ id: string }>(
-        `INSERT INTO usuarios (email, senha_hash, nome, tipo_pessoa, cpf_cnpj, telefone, plano_id)
-         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+        `INSERT INTO usuarios (email, senha_hash, nome, tipo_pessoa, cpf_cnpj, telefone, plano_id, papel)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
         [
           input.email,
           senhaHash,
@@ -60,6 +60,7 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
           input.cpf_cnpj,
           input.telefone,
           plano.rows[0].id,
+          ctx.cfg.ADMIN_EMAILS.includes(input.email.toLowerCase()) ? "admin" : "usuario",
         ],
       );
       const id = rows[0]!.id;

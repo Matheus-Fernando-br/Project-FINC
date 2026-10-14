@@ -122,6 +122,7 @@ Em **Environment › Environment Variables**, cadastre:
 | `CERT_ENCRYPTION_KEY` | 32 bytes em base64: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` | Para usar o certificado A1. **Guarde essa chave**: se ela se perder, os certificados salvos ficam ilegíveis |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Do seu provedor de e-mail (Gmail com senha de app, Brevo, SES…) | Recomendadas. Sem elas, ninguém recupera a senha nem envia documentos ao contador. Veja [integracoes.md](integracoes.md) |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET` | Do bot | Opcionais (suporte) |
+| `ADMIN_EMAILS` | Seu e-mail | Opcional. Quem se cadastrar com esse e-mail vira administrador do suporte |
 | `LOG_LEVEL` | `info` | Opcional |
 
 Algumas variáveis **não devem** ser definidas:
@@ -178,7 +179,7 @@ Se o projeto antigo tinha variáveis como `REACT_APP_API_URL` ou `REACT_APP_SUPA
 
 ### 3.4. Administrador do suporte
 
-Libera o menu *Administração › Chamados*. No Supabase, abra **SQL Editor** e rode:
+Libera o menu *Administração › Chamados*. O jeito mais simples é definir `ADMIN_EMAILS` no Render com o seu e-mail e se cadastrar com ele. Outra opção: no Supabase, abra **SQL Editor** e rode:
 
 ```sql
 UPDATE finc.usuarios SET papel = 'admin' WHERE email = 'seu@email.com';
