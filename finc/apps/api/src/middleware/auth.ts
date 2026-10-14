@@ -1,4 +1,5 @@
 import type { CookieOptions, Request, RequestHandler, Response } from "express";
+import { cookieSecure } from "../config.js";
 import type { AppContext } from "../context.js";
 import { AppError } from "../http/errors.js";
 import { hmac, randomToken, safeEqual, sha256 } from "../security/tokens.js";
@@ -9,7 +10,7 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 export function sessionCookieOptions(ctx: AppContext): CookieOptions {
   return {
     httpOnly: true,
-    secure: ctx.cfg.COOKIE_SECURE || ctx.cfg.NODE_ENV === "production",
+    secure: cookieSecure(ctx.cfg),
     sameSite: "lax",
     path: "/",
     maxAge: ctx.cfg.SESSION_TTL_HORAS * 3600 * 1000,

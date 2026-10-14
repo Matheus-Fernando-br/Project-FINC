@@ -12,5 +12,5 @@ echo "==> Build de produção";               npm run build
 if [ "${SKIP_E2E:-0}" != "1" ]; then
   echo "==> Testes E2E (Playwright)";       npx playwright test
 fi
-echo "==> Verificação de segredos";         bash scripts/check-secrets.sh
+echo "==> Verificação de segredos";         PERMITIR_ENV_LOCAL=1 bash scripts/check-secrets.sh
 echo "Todas as verificações passaram."

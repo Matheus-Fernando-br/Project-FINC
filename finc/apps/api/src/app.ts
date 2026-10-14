@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
+import { cookieSecure } from "./config.js";
 import type { AppContext } from "./context.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
 import { requireAdmin, requireAuth } from "./middleware/auth.js";
@@ -48,10 +49,12 @@ export function createApp(ctx: AppContext) {
           "frame-src": ["'self'", "blob:", "https://www.youtube-nocookie.com"],
           "object-src": ["'none'"],
           "frame-ancestors": ["'self'"],
+          // Só força HTTPS nos recursos quando os cookies são Secure (implantação com TLS).
+          "upgrade-insecure-requests": cookieSecure(cfg) ? [] : null,
         },
       },
       crossOriginEmbedderPolicy: false,
-      hsts: cfg.NODE_ENV === "production",
+      hsts: cookieSecure(cfg),
       referrerPolicy: { policy: "same-origin" },
     }),
   );

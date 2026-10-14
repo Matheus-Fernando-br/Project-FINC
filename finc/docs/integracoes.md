@@ -30,8 +30,8 @@ Exemplo com um provedor de envio transacional (Brevo, Mailgun, Amazon SES, Googl
 SMTP_HOST=smtp-relay.exemplo.com
 SMTP_PORT=587
 SMTP_SECURE=false        # true para a porta 465
-SMTP_USER=usuario-smtp
-SMTP_PASS=senha-ou-chave-smtp
+SMTP_USER=<usuario-smtp>
+SMTP_PASS=<senha-ou-chave-smtp>
 SMTP_FROM="FINC <nao-responda@seudominio.com.br>"
 APP_URL=https://finc.seudominio.com.br   # usada para montar os links dos e-mails
 ```

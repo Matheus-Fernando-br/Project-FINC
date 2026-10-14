@@ -18,7 +18,7 @@ verificar "JWT"                      "eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10
 verificar "Token de bot do Telegram" "[0-9]{8,10}:AA[A-Za-z0-9_-]{30,}"
 verificar "Chave AWS"                "AKIA[0-9A-Z]{16}"
 verificar "Chave secreta Supabase"   "sb_secret_[A-Za-z0-9]{20,}"
-verificar "Senha SMTP preenchida"    "^SMTP_PASS=.+"
+verificar "Senha SMTP preenchida"    "^SMTP_PASS=[^<[:space:]].*"
 ENVS=$(find "$ALVO" -name ".env" -not -path "*/node_modules/*" 2>/dev/null)
 if [ -n "$ENVS" ] && [ "${PERMITIR_ENV_LOCAL:-0}" != "1" ]; then
   echo "[ALERTA] Arquivo(s) .env presentes: $ENVS"; FALHA=1

@@ -20,7 +20,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1).default("pglite://./.data/pglite"),
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET deve ter ao menos 32 caracteres").optional(),
   SESSION_TTL_HORAS: z.coerce.number().min(1).max(720).default(8),
-  COOKIE_SECURE: bool(false),
+  // Vazio = automático (Secure em produção). "false" permite testar em rede local sem TLS.
+  COOKIE_SECURE: z.enum(["true", "false", ""]).optional(),
   CORS_ORIGINS: z.string().default(""),
   TRUST_PROXY: z.string().default("loopback"),
   SERVE_WEB: bool(false),
@@ -77,6 +78,13 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
 
 function cryptoRandom(): string {
   return randomBytes(32).toString("base64url");
+}
+
+/** Cookies Secure: explícito via COOKIE_SECURE ou, por padrão, ligado em produção. */
+export function cookieSecure(cfg: Config): boolean {
+  if (cfg.COOKIE_SECURE === "true") return true;
+  if (cfg.COOKIE_SECURE === "false") return false;
+  return cfg.NODE_ENV === "production";
 }
 
 export function integracoes(cfg: Config) {

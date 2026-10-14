@@ -31,7 +31,7 @@
 
 - **Decisão:** a API serve o build da SPA (`SERVE_WEB=true`).
 - **Motivo:** a FINC original usava Vercel e Render em domínios diferentes, o que exigia `SameSite=None` e tornava o CSRF frágil (o cookie não era legível pelo outro domínio). Com a mesma origem, `SameSite=Lax` basta.
-- **Alternativa:** `CORS_ORIGINS` continua disponível para quem precisar separar os domínios.
+- **Alternativa:** `CORS_ORIGINS` permite separar front e API em subdomínios do mesmo site (ex.: `app.` e `api.`). Domínios de sites diferentes não são suportados de propósito, porque exigiriam `SameSite=None`.
 
 ## ADR-05: Documentos gerados no servidor e persistidos
 

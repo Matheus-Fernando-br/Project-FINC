@@ -60,7 +60,8 @@ npm run dev
 cp .env.example .env
 # Preencha no .env: SESSION_SECRET, POSTGRES_PASSWORD, APP_URL (URL pública) e as integrações desejadas
 docker compose up -d --build
-# Acesse http://SEU_SERVIDOR:3333  (coloque um proxy HTTPS, como nginx ou Caddy, na frente)
+# Publique atrás de um proxy HTTPS (nginx, Caddy) — em produção os cookies são Secure.
+# Teste local: http://localhost:3333 funciona; em outra máquina sem HTTPS, use COOKIE_SECURE=false apenas para testes.
 ```
 
 A imagem compila tudo, aplica as migrações ao iniciar, roda como usuário não-root e tem *healthcheck* em `/api/health`.
@@ -148,7 +149,7 @@ finc/
 |---|---|
 | `Configuração inválida: SESSION_SECRET é obrigatório em produção` | Defina `SESSION_SECRET` no `.env` |
 | `Em produção use PostgreSQL` | Troque `DATABASE_URL` para `postgres://…` |
-| Login funciona, mas toda ação dá "Falha na validação de segurança (CSRF)" | O front e a API estão em origens diferentes. Use `SERVE_WEB=true` ou um proxy na mesma origem; se não for possível, configure `CORS_ORIGINS` e `COOKIE_SECURE=true` com HTTPS |
+| Login funciona, mas toda ação dá "Falha na validação de segurança (CSRF)" | O front e a API estão em origens diferentes. Use `SERVE_WEB=true` ou um proxy na mesma origem. Domínios separados só funcionam no mesmo site (ex.: `app.seudominio.com` e `api.seudominio.com`), com `CORS_ORIGINS` e HTTPS — o cookie é `SameSite=Lax` |
 | "Serviço de CEP indisponível" | O servidor não alcança `viacep.com.br`. Preencha o endereço manualmente ou ajuste `VIACEP_URL` |
 | Link de redefinição de senha não chega | SMTP não configurado. Em desenvolvimento, o link aparece no log da API |
 | "Armazenamento de certificados desativado" | Defina `CERT_ENCRYPTION_KEY` (32 bytes em base64) |
