@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import type { Preferencias } from "@finc/shared";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { configurarExibicao, dataHoraBR } from "../format";
 import { CONTA, MODULOS, moduloDaRota, type Modulo } from "../nav";
-import { Logo } from "./ui";
+import { Loading, Logo } from "./ui";
 
 interface Notif {
   id: string;
@@ -172,6 +172,15 @@ function Notificacoes() {
   );
 }
 
+const iniciaisDe = (nome?: string) =>
+  (nome ?? "?")
+    .split(" ")
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+
+/** Menu da conta no desktop. No celular, essas opções ficam dentro do menu lateral. */
 function MenuConta({ sair }: { sair: () => void }) {
   const { usuario } = useAuth();
   const [aberto, setAberto] = useState(false);
@@ -179,14 +188,9 @@ function MenuConta({ sair }: { sair: () => void }) {
   const ref = useFechar(aberto, fechar);
   const loc = useLocation();
   useEffect(() => setAberto(false), [loc.pathname]);
-  const iniciais = (usuario?.nome ?? "?")
-    .split(" ")
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
+  const iniciais = iniciaisDe(usuario?.nome);
   return (
-    <div ref={ref}>
+    <div ref={ref} className="so-desktop">
       <button
         type="button"
         className="icon-btn"
@@ -339,6 +343,23 @@ function MenuMovel({
             <i className="bi bi-x-lg" />
           </button>
         </div>
+        <Link to="/meus-dados" className="sheet-usuario" onClick={fechar}>
+          <span className="avatar lg">{iniciaisDe(usuario?.nome)}</span>
+          <span className="dados">
+            <strong>{usuario?.nome}</strong>
+            <span className="muted small">{usuario?.email}</span>
+            <span className="badge success">Plano {usuario?.plano.nome}</span>
+          </span>
+          <i className="bi bi-chevron-right muted" aria-hidden />
+        </Link>
+        <Link
+          to="/notas/nova"
+          className="btn"
+          style={{ width: "100%", marginBottom: 8 }}
+          onClick={fechar}
+        >
+          <i className="bi bi-plus-lg" /> Emitir nota
+        </Link>
         {MODULOS.map((m) => (
           <details key={m.id} open={m.id === atual?.id}>
             <summary>
@@ -357,10 +378,8 @@ function MenuMovel({
             </div>
           </details>
         ))}
-        <details>
-          <summary>
-            Minha conta <i className="bi bi-chevron-down" aria-hidden />
-          </summary>
+        <div className="sheet-conta">
+          <div className="titulo-secao">Minha conta</div>
           <div className="links">
             {CONTA.map((c) => (
               <NavLink key={c.to} to={c.to} onClick={fechar}>
@@ -373,7 +392,7 @@ function MenuMovel({
               </NavLink>
             )}
           </div>
-        </details>
+        </div>
         <button type="button" className="btn secondary mt" style={{ width: "100%" }} onClick={sair}>
           <i className="bi bi-box-arrow-right" /> Sair
         </button>
@@ -488,7 +507,9 @@ export function AppLayout() {
         </nav>
       )}
       <main className="content" id="conteudo">
-        <Outlet />
+        <Suspense fallback={<Loading />}>
+          <Outlet />
+        </Suspense>
       </main>
       <MenuMovel aberto={menuMovel} fechar={() => setMenuMovel(false)} sair={sair} />
       <BuscaGlobal aberta={busca} fechar={() => setBusca(false)} />

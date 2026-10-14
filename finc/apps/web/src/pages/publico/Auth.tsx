@@ -2,14 +2,18 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   forgotPasswordSchema,
-  formatCpfCnpj,
+  normalizarCampo,
   registerSchema,
   resetPasswordSchema,
 } from "@finc/shared";
 import { api } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
-import { Alert, Button, Card, Field } from "../../components/ui";
+import { Alert, BotaoVoltar, Button, Card, Field } from "../../components/ui";
 import { useForm } from "../../hooks/useForm";
+
+/** Login por e-mail (minúsculas) ou por CPF/CNPJ (só dígitos, com ou sem pontuação). */
+const normalizarLogin = (v: string) =>
+  v.includes("@") ? normalizarCampo("email", v) : normalizarCampo("cpfCnpj", v) || v.trim();
 
 function lerLembrado() {
   try {
@@ -29,7 +33,7 @@ export function Login() {
   const entrar = (e: React.FormEvent) => {
     e.preventDefault();
     void f.enviar(async () => {
-      await login(f.values.login.trim(), f.values.senha);
+      await login(normalizarLogin(f.values.login), f.values.senha);
       try {
         if (f.values.lembrar) localStorage.setItem("finc.lembrar_login", f.values.login.trim());
         else localStorage.removeItem("finc.lembrar_login");
@@ -48,6 +52,9 @@ export function Login() {
 
   return (
     <main className="auth-page">
+      <div className="auth-voltar">
+        <BotaoVoltar />
+      </div>
       <Card className="auth-card">
         <form className="stack" onSubmit={entrar} noValidate>
           <span className="orb" aria-hidden />
@@ -112,7 +119,7 @@ export function Cadastro() {
       return;
     }
     void f.enviar(async () => {
-      const { confirmar: _c, ...dados } = f.values;
+      const { confirmar: _c, ...dados } = f.dados();
       await cadastrar(dados);
       navigate("/app", { replace: true });
     });
@@ -121,6 +128,9 @@ export function Cadastro() {
   const pf = f.values.tipo_pessoa === "FISICA";
   return (
     <main className="auth-page">
+      <div className="auth-voltar">
+        <BotaoVoltar />
+      </div>
       <Card className="auth-card">
         <form className="stack" onSubmit={enviar} noValidate>
           <span className="orb" aria-hidden />
@@ -134,27 +144,40 @@ export function Cadastro() {
           </Field>
           <div className="row" role="radiogroup" aria-label="Tipo de pessoa">
             <label className="check">
-              <input type="radio" checked={pf} onChange={() => f.set("tipo_pessoa", "FISICA")} />{" "}
+              <input
+                type="radio"
+                checked={pf}
+                onChange={() => {
+                  f.set("tipo_pessoa", "FISICA");
+                  f.set("cpf_cnpj", "");
+                }}
+              />{" "}
               Pessoa física
             </label>
             <label className="check">
-              <input type="radio" checked={!pf} onChange={() => f.set("tipo_pessoa", "JURIDICA")} />{" "}
+              <input
+                type="radio"
+                checked={!pf}
+                onChange={() => {
+                  f.set("tipo_pessoa", "JURIDICA");
+                  f.set("cpf_cnpj", "");
+                }}
+              />{" "}
               Pessoa jurídica (CNPJ / MEI)
             </label>
           </div>
           <Field label={pf ? "CPF" : "CNPJ"} required error={f.errors.cpf_cnpj} htmlFor="cpf_cnpj">
             <input
-              {...f.bind("cpf_cnpj")}
-              inputMode="numeric"
-              onBlur={() => f.set("cpf_cnpj", formatCpfCnpj(f.values.cpf_cnpj))}
+              {...f.bind("cpf_cnpj", pf ? "cpf" : "cnpj")}
+              placeholder={pf ? "000.000.000-00" : "00.000.000/0000-00"}
             />
           </Field>
           <Field label="E-mail" required error={f.errors.email} htmlFor="email">
-            <input {...f.bind("email")} type="email" autoComplete="email" />
+            <input {...f.bind("email", "email")} type="email" autoComplete="email" />
           </Field>
           <Field label="Telefone" required error={f.errors.telefone} htmlFor="telefone">
             <input
-              {...f.bind("telefone")}
+              {...f.bind("telefone", "telefone")}
               type="tel"
               autoComplete="tel"
               placeholder="(31) 99999-9999"
@@ -209,12 +232,15 @@ export function EsqueciSenha() {
     e.preventDefault();
     if (!f.validar(forgotPasswordSchema)) return;
     void f.enviar(async () => {
-      const r = await api.post<{ message: string }>("/auth/esqueci-senha", f.values);
+      const r = await api.post<{ message: string }>("/auth/esqueci-senha", f.dados());
       setMsg(r.message);
     });
   };
   return (
     <main className="auth-page">
+      <div className="auth-voltar">
+        <BotaoVoltar />
+      </div>
       <Card className="auth-card">
         <form className="stack" onSubmit={enviar} noValidate>
           <span className="orb" aria-hidden />
@@ -225,7 +251,7 @@ export function EsqueciSenha() {
           {msg && <Alert tone="success">{msg}</Alert>}
           {f.erroGeral && <Alert tone="danger">{f.erroGeral}</Alert>}
           <Field label="E-mail" required error={f.errors.email} htmlFor="email">
-            <input {...f.bind("email")} type="email" autoComplete="email" />
+            <input {...f.bind("email", "email")} type="email" autoComplete="email" />
           </Field>
           <Button type="submit" loading={f.enviando}>
             Enviar link
@@ -261,6 +287,9 @@ export function RedefinirSenha() {
   };
   return (
     <main className="auth-page">
+      <div className="auth-voltar">
+        <BotaoVoltar />
+      </div>
       <Card className="auth-card">
         <form className="stack" onSubmit={enviar} noValidate>
           <span className="orb" aria-hidden />

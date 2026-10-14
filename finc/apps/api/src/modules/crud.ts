@@ -37,7 +37,7 @@ export interface CrudDef {
 const PAGE_MAX = 200;
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function pick(obj: Record<string, unknown>, cols: string[]) {
+function pick(obj: Record<string, unknown>, cols: string[]) {
   return cols.filter((c) => obj[c] !== undefined).map((c) => [c, obj[c]] as const);
 }
 

@@ -282,7 +282,7 @@ export function criarRascunho(q: Queryable, userId: string, body: unknown) {
   return salvarRascunho(q, userId, parse(notaSchema, body));
 }
 
-export async function carregarNota(
+async function carregarNota(
   q: Queryable,
   userId: string,
   id: string,

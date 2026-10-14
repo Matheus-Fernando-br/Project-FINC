@@ -118,7 +118,7 @@ export const servicosDef: CrudDef = {
   csv: SERVICO_COLS.map((c) => ({ coluna: c, titulo: c })),
 };
 
-export const contadoresDef: CrudDef = {
+const contadoresDef: CrudDef = {
   tabela: "contadores",
   entidade: "Contador",
   schema: contadorSchema,
@@ -181,7 +181,7 @@ export async function movimentar(
   };
 }
 
-export function estoqueRoutes(ctx: AppContext) {
+function estoqueRoutes(ctx: AppContext) {
   const r = Router();
   r.get("/movimentos", async (req, res) => {
     const params: unknown[] = [uid(req)];

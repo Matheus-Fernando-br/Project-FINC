@@ -19,20 +19,6 @@ O navegador fala **só com a Vercel**. As chamadas a `/api/...` são repassadas 
 
 Por que repassar em vez de o site chamar o Render direto: para o navegador, a API fica no mesmo endereço do site. Assim, o cookie de login funciona em todos os navegadores, inclusive no Safari e no iPhone, que bloqueiam cookies de outro domínio. Também não é preciso configurar CORS.
 
-## Antes de começar: quando mexer nos painéis
-
-A Vercel e o Render publicam a branch `main`. A FINC 2.0 está na branch `claude/finc-reverse-engineering-q5jp2l` e ainda não está na `main`.
-
-Se você mudar as configurações (pasta `finc`, comandos) **antes** do merge, os próximos deploys da `main` vão falhar, porque a pasta `finc` ainda não existe lá.
-
-Por isso, faça **na mesma hora**:
-
-1. Ajuste a Vercel (seção 3) e o Render (seção 2).
-2. Faça o merge da branch na `main`.
-3. Se algum deploy não começar sozinho, clique em **Redeploy** (Vercel) ou **Manual Deploy › Deploy latest commit** (Render).
-
-Para validar antes do merge, rode tudo localmente (seção 4). Se quiser testar o Render antes, troque temporariamente a **Branch** do serviço para `claude/finc-reverse-engineering-q5jp2l`. Enquanto isso, o site antigo da Vercel deixa de funcionar com a API.
-
 ---
 
 ## 1. Supabase (banco de dados)
@@ -65,10 +51,7 @@ O projeto do Supabase já tem as tabelas da versão antiga em `public` (`cliente
 - cria um schema próprio, chamado `finc`, com as tabelas novas;
 - **não altera nem apaga nada** em `public`.
 
-Isso traz duas vantagens:
-
-- A versão antiga continua funcionando até o merge.
-- Os dados ficam protegidos. O Supabase publica automaticamente pela internet as tabelas de `public` (a "Data API", acessível com a `anon key`). O schema `finc` não é publicado, então senhas (cifradas), sessões e notas ficam acessíveis só pelo back-end.
+Além disso, os dados ficam protegidos: o Supabase publica automaticamente pela internet as tabelas de `public` (a "Data API", acessível com a `anon key`). O schema `finc` não é publicado, então senhas (cifradas), sessões e notas ficam acessíveis só pelo back-end.
 
 Para conferir, depois do primeiro deploy, abra **Table Editor** no Supabase e escolha o schema **`finc`** no seletor do topo. As tabelas novas devem estar lá.
 
@@ -94,7 +77,7 @@ Abra https://dashboard.render.com e entre no serviço **`srv-d55d3vfgi27c73eik5n
 
 | Campo | Valor |
 |---|---|
-| **Branch** | `main` (ou a branch da FINC 2.0, só para testar antes do merge) |
+| **Branch** | `main` |
 | **Root Directory** | `finc` |
 | **Runtime** | Node |
 | **Build Command** | `npm ci --include=dev && npm run build -w @finc/shared && npm run build -w @finc/api` |
@@ -130,7 +113,7 @@ Algumas variáveis **não devem** ser definidas:
 - **`PORT`:** o Render escolhe a porta.
 - **`CORS_ORIGINS`:** não é necessária, porque a Vercel repassa as chamadas.
 
-As variáveis antigas (`SUPABASE_URL`, `SUPABASE_KEY` etc.) só servem para o back-end antigo. Apague-as **depois** do merge.
+As variáveis da versão antiga (`SUPABASE_URL`, `SUPABASE_KEY` etc.) não são usadas e podem ser apagadas.
 
 A explicação de todas as variáveis, uma a uma, está em [configuracao.md](configuracao.md).
 
@@ -169,7 +152,7 @@ Em https://vercel.com, abra o projeto conectado ao repositório e vá em **Setti
 
 Se o endereço do Render mudar, por exemplo para um domínio próprio, altere essa linha e faça um commit. Na Vercel não há segredos: tudo o que é sensível fica no Render.
 
-Se o projeto antigo tinha variáveis como `REACT_APP_API_URL` ou `REACT_APP_SUPABASE_*`, elas não são mais usadas e podem ser apagadas depois do merge.
+Variáveis da versão antiga, como `REACT_APP_API_URL` ou `REACT_APP_SUPABASE_*`, não são usadas e podem ser apagadas.
 
 ### 3.3. Teste
 
@@ -245,7 +228,7 @@ DATABASE_SSL=no-verify
 | `Tenant or user not found` | O usuário precisa ser `postgres.bionwcsdrmmtxueypbbt`, não só `postgres` |
 | `relation "planos" already exists` | Faltou `DATABASE_SCHEMA=finc`, e a FINC tentou criar as tabelas em `public`, onde estão as antigas |
 | Erro do `tsup` ou `tsc` no build do Render | O Build Command precisa ter `--include=dev` |
-| Build da Vercel procurando `Front-End` ou `react-scripts` | A Root Directory ainda aponta para a pasta antiga. Mude para `finc` |
+| Build da Vercel procurando `Front-End` ou `react-scripts` | A Root Directory ainda aponta para a pasta antiga, que não existe mais. Mude para `finc` |
 | `/api/...` na Vercel devolve a página do site | O `vercel.json` não foi lido. Confira se a Root Directory é `finc` |
 | Login funciona, mas as ações dão "Falha na validação de segurança (CSRF)" | O site está chamando o Render direto, e não pela Vercel. Use sempre o endereço da Vercel |
 | A primeira abertura demora cerca de 1 minuto ou dá erro 504 | O plano gratuito do Render desliga a API após 15 minutos sem uso e a religa no próximo acesso. Aguarde e recarregue a página. O plano gratuito do Supabase pausa o projeto após uma semana sem uso; nesse caso, reative-o no painel |

@@ -23,6 +23,15 @@ test("layout responsivo: páginas públicas e área logada sem rolagem horizonta
     await page.goto(rota);
     expect(await sobra(page), `rolagem horizontal em ${rota}`).toBeLessThanOrEqual(1);
   }
+  if (page.viewportSize()!.width <= 720) {
+    // Landing no celular: atalhos para as seções e botão de voltar nas páginas internas.
+    await page.goto("/");
+    const atalhos = page.getByRole("navigation", { name: "Seções do site" });
+    await atalhos.getByRole("link", { name: "Quem somos" }).click();
+    await expect(page.getByRole("heading", { name: "Quem somos" })).toBeVisible();
+    await page.getByRole("button", { name: "Voltar" }).click();
+    await expect(page).toHaveURL(/\/$/);
+  }
   const seed = (Date.now() + Math.floor(Math.random() * 1000)) % 1_000_000;
   const cadastro = await page.request.post("/api/auth/cadastro", {
     data: {
@@ -57,7 +66,12 @@ test("layout responsivo: páginas públicas e área logada sem rolagem horizonta
   }
   const vw = page.viewportSize()!.width;
   if (vw < 1100) {
+    // No celular/tablet: só lupa, notificações e menu; a conta fica dentro do menu lateral.
+    await expect(page.getByRole("button", { name: "Menu da conta" })).toBeHidden();
+    await expect(page.getByRole("button", { name: "Buscar (Ctrl+K)" })).toBeVisible();
     await page.getByRole("button", { name: "Abrir menu" }).click();
+    await expect(page.locator(".sheet-usuario")).toBeVisible();
+    await expect(page.locator(".sheet").getByRole("button", { name: "Sair" })).toBeVisible();
     await page.locator(".sheet summary", { hasText: "Vendas" }).click();
     await page.getByRole("link", { name: /Frente de caixa/ }).click();
     await expect(page).toHaveURL(/\/pdv$/);

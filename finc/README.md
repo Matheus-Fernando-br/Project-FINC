@@ -32,6 +32,10 @@ Recursos que valem para toda a plataforma:
 - tema claro, escuro ou automático;
 - layout responsivo para desktop, tablet e celular.
 
+**Animações:** a splash com a logo (antes da página inicial, uma vez por sessão, e depois do login) e os tempos de fade e escala ficam em um único arquivo, `apps/web/src/animacoes.ts` (padrão: 3 segundos). Quem ativa "reduzir movimento" no sistema não vê as splash screens.
+
+**Máscaras e validação:** CPF, CNPJ, telefone (fixo e celular, com DDD), CEP e e-mail são formatados enquanto se digita e normalizados antes do envio (`packages/shared/src/mascaras.ts`). A API valida e normaliza de novo com os mesmos schemas.
+
 **Identidade visual:** interface minimalista, com tipografia do sistema, barra superior translúcida e cantos arredondados. A **bolinha verde** da marca aparece no logotipo, no indicador do módulo ativo, nos status e nos destaques.
 
 **Stack:** 100% TypeScript.

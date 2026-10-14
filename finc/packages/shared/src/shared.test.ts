@@ -10,6 +10,13 @@ import {
   produtoSchema,
   registerSchema,
   tipoItemPermitido,
+  aplicarMascara,
+  isValidTelefone,
+  mascaraCpfCnpj,
+  mascaraTelefone,
+  normalizarCampos,
+  normalizarTelefone,
+  perfilSchema,
 } from "./index.js";
 
 describe("validadores", () => {
@@ -128,5 +135,53 @@ describe("schemas", () => {
     expect(dentroDoLimite(null, 1000)).toBe(true);
     expect(dentroDoLimite(10, 9)).toBe(true);
     expect(dentroDoLimite(10, 10)).toBe(false);
+  });
+});
+
+describe("máscaras e normalização", () => {
+  it("formata CPF, CNPJ, CEP e telefone enquanto digita", () => {
+    expect(mascaraCpfCnpj("5294")).toBe("529.4");
+    expect(mascaraCpfCnpj("52998224725")).toBe("529.982.247-25");
+    expect(mascaraCpfCnpj("112223330001811")).toBe("11.222.333/0001-81");
+    expect(aplicarMascara("cep", "01001000")).toBe("01001-000");
+    expect(mascaraTelefone("31")).toBe("(31");
+    expect(mascaraTelefone("313333444")).toBe("(31) 3333-444");
+    expect(mascaraTelefone("3133334444")).toBe("(31) 3333-4444");
+    expect(mascaraTelefone("31999998888")).toBe("(31) 99999-8888");
+    expect(mascaraTelefone("+55 31 99999-8888")).toBe("(31) 99999-8888");
+    expect(aplicarMascara("email", " a b@x.com ")).toBe("ab@x.com");
+  });
+
+  it("normaliza antes de enviar à API", () => {
+    expect(
+      normalizarCampos(
+        {
+          cpf_cnpj: "529.982.247-25",
+          telefone: "(31) 99999-8888",
+          email: " Ana@X.COM ",
+          nome: "Ana",
+        },
+        { cpf_cnpj: "cpfCnpj", telefone: "telefone", email: "email" },
+      ),
+    ).toEqual({
+      cpf_cnpj: "52998224725",
+      telefone: "31999998888",
+      email: "ana@x.com",
+      nome: "Ana",
+    });
+    expect(normalizarTelefone("+55 (31) 3333-4444")).toBe("3133334444");
+    expect(normalizarTelefone("031 99999-8888")).toBe("31999998888");
+  });
+
+  it("valida telefones brasileiros (fixo e celular)", () => {
+    expect(isValidTelefone("(31) 99999-8888")).toBe(true);
+    expect(isValidTelefone("(31) 3333-4444")).toBe(true);
+    expect(isValidTelefone("+55 11 98888-7777")).toBe(true);
+    expect(isValidTelefone("(31) 89999-8888")).toBe(false); // celular sem o 9
+    expect(isValidTelefone("(01) 3333-4444")).toBe(false); // DDD inválido
+    expect(isValidTelefone("(31) 9333-4444")).toBe(false); // fixo começando com 9
+    expect(isValidTelefone("123")).toBe(false);
+    const r = perfilSchema.safeParse({ nome: "Ana", telefone: "+55 (31) 99999-8888" });
+    expect(r.success && r.data.telefone).toBe("31999998888");
   });
 });

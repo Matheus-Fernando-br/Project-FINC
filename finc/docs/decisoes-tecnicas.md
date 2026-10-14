@@ -3,7 +3,7 @@
 ## ADR-01: Nova plataforma em `finc/`, preservando a original
 
 - **Contexto:** a FINC original precisava ser preservada como fonte de requisitos.
-- **Decisão:** a FINC 2.0 é um monorepo independente em `finc/`. `Back-End/` e `Front-End/` ficaram intocados.
+- **Decisão:** a FINC 2.0 é um monorepo independente em `finc/`. As pastas da versão original (`Back-End/` e `Front-End/`) foram removidas depois da migração; continuam disponíveis no histórico do Git.
 - **Consequência:** é possível comparar as duas versões lado a lado. As rotas antigas do front redirecionam para as novas.
 
 ## ADR-02: PostgreSQL próprio no lugar do Supabase

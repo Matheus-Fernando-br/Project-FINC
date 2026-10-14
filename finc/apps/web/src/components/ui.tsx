@@ -13,11 +13,35 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { moduloDaRota } from "../nav";
 
 /** Marca FINC: palavra "finc" + a bolinha verde. */
+/**
+ * Volta para a página anterior quando ela é da própria FINC; se a pessoa chegou direto pelo link,
+ * leva para `fallback` (padrão: início).
+ */
+export function BotaoVoltar({
+  fallback = "/",
+  rotulo = "Voltar",
+}: {
+  fallback?: string;
+  rotulo?: string;
+}) {
+  const navigate = useNavigate();
+  const loc = useLocation();
+  return (
+    <button
+      type="button"
+      className="btn-voltar"
+      onClick={() => (loc.key !== "default" ? navigate(-1) : navigate(fallback))}
+    >
+      <i className="bi bi-chevron-left" aria-hidden /> {rotulo}
+    </button>
+  );
+}
+
 export function Logo({ claro = false, altura = 26 }: { claro?: boolean; altura?: number }) {
   return (
     <span

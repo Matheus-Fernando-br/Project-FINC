@@ -7,11 +7,114 @@
       name="description"
       content="FINC — gestão empresarial e documentos fiscais para MEIs e pequenas empresas."
     />
-    <meta name="theme-color" content="#0b2236" />
+    <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/png" href="/finc-logo.png" />
     <title>FINC — Gestão para MEIs</title>
+    <style>
+      /* Splash screens. Ficam aqui (e não no CSS do app) para aparecerem antes do JavaScript,
+         sem tela branca. Os tempos vêm de src/animacoes.ts (variáveis CSS); os valores abaixo
+         são apenas o padrão até o app carregar. */
+      html:not(.finc-pronto) {
+        background: #000;
+      }
+      .splash {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 22px;
+        background: radial-gradient(circle at 50% 46%, rgb(22 163 74 / 28%), transparent 42%), #000;
+        color: #f5f5f7;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        opacity: 1;
+        transition-property: opacity, transform;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: var(--splash-inicial-saida, 600ms);
+      }
+      .splash.saindo {
+        opacity: 0;
+        transform: scale(1.04);
+        pointer-events: none;
+      }
+      .splash-marca {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        animation: splash-entrada var(--splash-inicial-entrada, 700ms)
+          cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      .splash-nome {
+        font-size: clamp(3rem, 12vw, 5.2rem);
+        font-weight: 700;
+        letter-spacing: -0.055em;
+        line-height: 1;
+      }
+      .splash-orb {
+        width: clamp(1.6rem, 6vw, 2.6rem);
+        height: clamp(1.6rem, 6vw, 2.6rem);
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #4ade80 0%, #16a34a 55%, #0f7a35 100%);
+        box-shadow: 0 0 60px rgb(22 163 74 / 55%);
+        animation:
+          splash-orb var(--splash-inicial-entrada, 700ms) cubic-bezier(0.2, 0.8, 0.2, 1) both,
+          splash-pulso 1.8s ease-in-out 0.8s infinite;
+      }
+      .splash-texto {
+        font-size: 0.95rem;
+        color: #98989d;
+        animation: splash-entrada 900ms ease 300ms both;
+      }
+      .splash-login {
+        animation: splash-fundo var(--splash-login-entrada, 500ms) ease both;
+        transition-duration: var(--splash-login-saida, 600ms);
+      }
+      .splash-login .splash-marca,
+      .splash-login .splash-orb {
+        animation-duration: var(--splash-login-entrada, 500ms);
+      }
+      @keyframes splash-entrada {
+        from {
+          opacity: 0;
+          transform: scale(0.92);
+        }
+      }
+      @keyframes splash-orb {
+        from {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+      }
+      @keyframes splash-pulso {
+        50% {
+          box-shadow: 0 0 90px rgb(22 163 74 / 80%);
+          transform: scale(1.06);
+        }
+      }
+      @keyframes splash-fundo {
+        from {
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .splash,
+        .splash * {
+          animation: none !important;
+          transition-duration: 0ms !important;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="splash-boot" class="splash" role="status" aria-label="Carregando a FINC">
+      <div class="splash-marca" aria-hidden="true">
+        <span class="splash-orb"></span>
+        <span class="splash-nome">finc</span>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

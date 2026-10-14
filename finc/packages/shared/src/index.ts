@@ -1,4 +1,5 @@
 export * from "./validators.js";
+export * from "./mascaras.js";
 export * from "./catalogos.js";
 export * from "./fiscal.js";
 export * from "./schemas.js";

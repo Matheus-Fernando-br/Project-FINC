@@ -1,50 +1,10 @@
+import { lazy, type ComponentType } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, RequireAuth } from "./auth/AuthContext";
 import { AppLayout } from "./components/AppLayout";
 import { PublicLayout } from "./components/PublicLayout";
+import { SplashInicial } from "./components/Splash";
 import { ToastProvider } from "./components/ui";
-import {
-  ClienteForm,
-  ClientesLista,
-  ContadorForm,
-  ContadoresLista,
-  FornecedorForm,
-  FornecedoresLista,
-  ProdutoForm,
-  ProdutosLista,
-  ServicoForm,
-  ServicosLista,
-} from "./pages/app/Cadastros";
-import {
-  Certificado,
-  ConfigAparencia,
-  ConfigFiscal,
-  ConfigIntegracoes,
-  ConfigPreferencias,
-  ConfigSeguranca,
-  Configuracoes,
-  MeusDados,
-  Planos,
-} from "./pages/app/Conta";
-import {
-  CompraForm,
-  ComprasLista,
-  OrcamentoForm,
-  OrcamentosLista,
-  Pdv,
-  Relatorios,
-} from "./pages/app/Erp";
-import { NotaDetalhe, NotaForm, NotasLista } from "./pages/app/Notas";
-import { Estoque, Financeiro, PedidoForm, PedidosLista } from "./pages/app/Operacoes";
-import { Painel } from "./pages/app/Painel";
-import {
-  AdminChamados,
-  ChatChamado,
-  Importar,
-  Notificacoes,
-  NovoChamado,
-  Suporte,
-} from "./pages/app/Suporte";
 import { Cadastro, EsqueciSenha, Login, RedefinirSenha } from "./pages/publico/Auth";
 import {
   Duvidas,
@@ -54,6 +14,63 @@ import {
   QuemSomos,
   Termos,
 } from "./pages/publico/Paginas";
+
+/** Telas do aplicativo carregadas sob demanda: a página inicial e o login baixam menos código. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- cada tela mantém as próprias props
+type Tela = ComponentType<any>;
+function sobDemanda<M extends Record<K, Tela>, K extends keyof M>(
+  carregar: () => Promise<M>,
+  nome: K,
+) {
+  return lazy(() => carregar().then((m) => ({ default: m[nome] })));
+}
+
+const carregarCadastros = () => import("./pages/app/Cadastros");
+const ClienteForm = sobDemanda(carregarCadastros, "ClienteForm");
+const ClientesLista = sobDemanda(carregarCadastros, "ClientesLista");
+const ContadorForm = sobDemanda(carregarCadastros, "ContadorForm");
+const ContadoresLista = sobDemanda(carregarCadastros, "ContadoresLista");
+const FornecedorForm = sobDemanda(carregarCadastros, "FornecedorForm");
+const FornecedoresLista = sobDemanda(carregarCadastros, "FornecedoresLista");
+const ProdutoForm = sobDemanda(carregarCadastros, "ProdutoForm");
+const ProdutosLista = sobDemanda(carregarCadastros, "ProdutosLista");
+const ServicoForm = sobDemanda(carregarCadastros, "ServicoForm");
+const ServicosLista = sobDemanda(carregarCadastros, "ServicosLista");
+const carregarConta = () => import("./pages/app/Conta");
+const Certificado = sobDemanda(carregarConta, "Certificado");
+const ConfigAparencia = sobDemanda(carregarConta, "ConfigAparencia");
+const ConfigFiscal = sobDemanda(carregarConta, "ConfigFiscal");
+const ConfigIntegracoes = sobDemanda(carregarConta, "ConfigIntegracoes");
+const ConfigPreferencias = sobDemanda(carregarConta, "ConfigPreferencias");
+const ConfigSeguranca = sobDemanda(carregarConta, "ConfigSeguranca");
+const Configuracoes = sobDemanda(carregarConta, "Configuracoes");
+const MeusDados = sobDemanda(carregarConta, "MeusDados");
+const Planos = sobDemanda(carregarConta, "Planos");
+const carregarErp = () => import("./pages/app/Erp");
+const CompraForm = sobDemanda(carregarErp, "CompraForm");
+const ComprasLista = sobDemanda(carregarErp, "ComprasLista");
+const OrcamentoForm = sobDemanda(carregarErp, "OrcamentoForm");
+const OrcamentosLista = sobDemanda(carregarErp, "OrcamentosLista");
+const Pdv = sobDemanda(carregarErp, "Pdv");
+const Relatorios = sobDemanda(carregarErp, "Relatorios");
+const carregarNotas = () => import("./pages/app/Notas");
+const NotaDetalhe = sobDemanda(carregarNotas, "NotaDetalhe");
+const NotaForm = sobDemanda(carregarNotas, "NotaForm");
+const NotasLista = sobDemanda(carregarNotas, "NotasLista");
+const carregarOperacoes = () => import("./pages/app/Operacoes");
+const Estoque = sobDemanda(carregarOperacoes, "Estoque");
+const Financeiro = sobDemanda(carregarOperacoes, "Financeiro");
+const PedidoForm = sobDemanda(carregarOperacoes, "PedidoForm");
+const PedidosLista = sobDemanda(carregarOperacoes, "PedidosLista");
+const carregarPainel = () => import("./pages/app/Painel");
+const Painel = sobDemanda(carregarPainel, "Painel");
+const carregarSuporte = () => import("./pages/app/Suporte");
+const AdminChamados = sobDemanda(carregarSuporte, "AdminChamados");
+const ChatChamado = sobDemanda(carregarSuporte, "ChatChamado");
+const Importar = sobDemanda(carregarSuporte, "Importar");
+const Notificacoes = sobDemanda(carregarSuporte, "Notificacoes");
+const NovoChamado = sobDemanda(carregarSuporte, "NovoChamado");
+const Suporte = sobDemanda(carregarSuporte, "Suporte");
 
 export function Rotas() {
   return (
@@ -157,6 +174,7 @@ export function Rotas() {
 export default function App() {
   return (
     <BrowserRouter>
+      <SplashInicial />
       <ToastProvider>
         <AuthProvider>
           <Rotas />

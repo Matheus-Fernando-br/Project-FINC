@@ -22,6 +22,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
     locale: "pt-BR",
     timezoneId: "America/Sao_Paulo",
+    // Sem splash screens nos fluxos (prefers-reduced-motion); splash.spec.ts as testa à parte.
+    reducedMotion: "reduce",
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },

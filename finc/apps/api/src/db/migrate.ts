@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Db } from "./index.js";
 
 /** Localiza db/migrations subindo a partir deste módulo (funciona em src/ e em dist/). */
-export function findMigrationsDir(): string {
+function findMigrationsDir(): string {
   if (process.env.MIGRATIONS_DIR) return path.resolve(process.env.MIGRATIONS_DIR);
   let dir = path.dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 8; i++) {

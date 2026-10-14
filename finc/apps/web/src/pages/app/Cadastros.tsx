@@ -50,7 +50,7 @@ const CLIENTE_SECOES: Secao[] = [
           { value: "JURIDICA", label: "Pessoa jurídica" },
         ],
       },
-      { name: "cpf_cnpj", label: "CPF / CNPJ", required: true, col: "c6" },
+      { name: "cpf_cnpj", label: "CPF / CNPJ", required: true, col: "c6", mascara: "cpfCnpj" },
       {
         name: "inscricao_estadual",
         label: "Inscrição estadual",
@@ -400,7 +400,7 @@ const CONTADOR_SECOES: Secao[] = [
         hint: "Usado para o envio de documentos.",
       },
       { name: "telefone", label: "Telefone", tipo: "tel", col: "c3" },
-      { name: "cpf", label: "CPF", col: "c3" },
+      { name: "cpf", label: "CPF", col: "c3", mascara: "cpf" },
     ],
   },
 ];
@@ -453,7 +453,7 @@ const FORNECEDOR_SECOES: Secao[] = [
           { value: "FISICA", label: "Pessoa física" },
         ],
       },
-      { name: "cpf_cnpj", label: "CNPJ / CPF", required: true, col: "c6" },
+      { name: "cpf_cnpj", label: "CNPJ / CPF", required: true, col: "c6", mascara: "cpfCnpj" },
       { name: "inscricao_estadual", label: "Inscrição estadual", col: "c6" },
     ],
   },
