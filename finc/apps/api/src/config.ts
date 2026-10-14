@@ -103,12 +103,8 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
   }
   if (problemas.length) throw new ConfigError(problemas);
   // Em desenvolvimento/teste, um segredo efêmero é aceitável (sessões caem ao reiniciar).
-  const sessionSecret = cfg.SESSION_SECRET ?? `dev-${cryptoRandom()}`;
+  const sessionSecret = cfg.SESSION_SECRET ?? `dev-${randomBytes(32).toString("base64url")}`;
   return { ...cfg, sessionSecret };
-}
-
-function cryptoRandom(): string {
-  return randomBytes(32).toString("base64url");
 }
 
 /** Opções de conexão derivadas da configuração (SSL e schema). */
