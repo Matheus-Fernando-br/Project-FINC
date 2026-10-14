@@ -2,6 +2,19 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { Logo } from "./ui";
 
+function LinksPublicos() {
+  return (
+    <>
+      <NavLink to="/" end>
+        Visão geral
+      </NavLink>
+      <NavLink to="/planos-finc">Planos</NavLink>
+      <NavLink to="/quem-somos">Quem somos</NavLink>
+      <NavLink to="/duvidas">Dúvidas</NavLink>
+    </>
+  );
+}
+
 export function PublicLayout() {
   const { usuario } = useAuth();
   return (
@@ -11,13 +24,8 @@ export function PublicLayout() {
           <Link to="/" aria-label="FINC — início">
             <Logo altura={24} />
           </Link>
-          <nav aria-label="Navegação pública">
-            <NavLink to="/" end>
-              Visão geral
-            </NavLink>
-            <NavLink to="/planos-finc">Planos</NavLink>
-            <NavLink to="/quem-somos">Quem somos</NavLink>
-            <NavLink to="/duvidas">Dúvidas</NavLink>
+          <nav aria-label="Navegação pública" className="pub-nav">
+            <LinksPublicos />
           </nav>
           {usuario ? (
             <Link to="/app" className="btn sm">
@@ -35,6 +43,10 @@ export function PublicLayout() {
           )}
         </div>
       </header>
+      {/* No celular, as seções viram atalhos roláveis logo abaixo do cabeçalho. */}
+      <nav aria-label="Seções do site" className="pub-atalhos">
+        <LinksPublicos />
+      </nav>
       <Outlet />
       <footer className="pub-footer">
         <div className="inner">

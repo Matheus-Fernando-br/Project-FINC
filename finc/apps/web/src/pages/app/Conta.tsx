@@ -150,7 +150,7 @@ export function MeusDados() {
     if (!perfil.data) return;
     const v: Record<string, unknown> = {};
     for (const k of Object.keys(f.values)) v[k] = perfil.data[k] ?? "";
-    f.setValues(v);
+    f.carregar(v);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perfil.data]);
 
@@ -175,7 +175,7 @@ export function MeusDados() {
     e.preventDefault();
     if (!f.validar(perfilSchema)) return;
     void f.enviar(async () => {
-      await api.put("/perfil", f.values);
+      await api.put("/perfil", f.dados());
       toast.sucesso("Dados atualizados.");
       await recarregar();
     });
@@ -220,7 +220,7 @@ export function MeusDados() {
             error={f.errors.telefone}
             htmlFor="telefone"
           >
-            <input {...f.bind("telefone")} type="tel" />
+            <input {...f.bind("telefone", "telefone")} type="tel" />
           </Field>
           <Field label="Inscrição estadual" className="c6" htmlFor="inscricao_estadual">
             <input {...f.bind("inscricao_estadual")} />
@@ -239,7 +239,7 @@ export function MeusDados() {
             hint="Preenche o endereço automaticamente."
             htmlFor="cep"
           >
-            <input {...f.bind("cep")} onBlur={cep} />
+            <input {...f.bind("cep", "cep")} onBlur={cep} />
           </Field>
           <Field label="UF" className="c3" error={f.errors.uf} htmlFor="uf">
             <select {...f.bind("uf")}>

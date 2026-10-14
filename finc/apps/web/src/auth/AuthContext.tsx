@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { Navigate, useLocation } from "react-router-dom";
 import { api, onUnauthorized, setCsrfToken } from "../api/client";
 import type { Usuario } from "../api/types";
+import { SplashLogin } from "../components/Splash";
 import { Loading } from "../components/ui";
 
 interface AuthState {
@@ -11,6 +12,9 @@ interface AuthState {
   cadastrar: (dados: Record<string, unknown>) => Promise<void>;
   logout: () => Promise<void>;
   recarregar: () => Promise<void>;
+  /** Verdadeiro logo após um login ou cadastro bem-sucedido (nunca ao restaurar a sessão). */
+  splashLogin: boolean;
+  encerrarSplashLogin: () => void;
 }
 
 const Ctx = createContext<AuthState | null>(null);
@@ -18,6 +22,8 @@ const Ctx = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [splashLogin, setSplashLogin] = useState(false);
+  const encerrarSplashLogin = useCallback(() => setSplashLogin(false), []);
 
   const recarregar = useCallback(async () => {
     try {
@@ -39,12 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (login: string, senha: string) => {
     const r = await api.post<{ csrfToken: string }>("/auth/login", { login, senha });
     setCsrfToken(r.csrfToken);
+    setSplashLogin(true);
     await recarregar();
   };
 
   const cadastrar = async (dados: Record<string, unknown>) => {
     const r = await api.post<{ csrfToken: string }>("/auth/cadastro", dados);
     setCsrfToken(r.csrfToken);
+    setSplashLogin(true);
     await recarregar();
   };
 
@@ -58,8 +66,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={{ usuario, carregando, login, cadastrar, logout, recarregar }}>
+    <Ctx.Provider
+      value={{
+        usuario,
+        carregando,
+        login,
+        cadastrar,
+        logout,
+        recarregar,
+        splashLogin,
+        encerrarSplashLogin,
+      }}
+    >
       {children}
+      <SplashLogin ativa={splashLogin} aoTerminar={encerrarSplashLogin} />
     </Ctx.Provider>
   );
 }

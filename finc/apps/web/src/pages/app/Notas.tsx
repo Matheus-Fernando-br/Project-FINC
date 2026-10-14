@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { TIPOS_NOTA, calcularTotais, tipoItemPermitido, type TipoNota } from "@finc/shared";
+import {
+  TIPOS_NOTA,
+  calcularTotais,
+  mascaraCpfCnpj,
+  onlyDigits,
+  tipoItemPermitido,
+  type TipoNota,
+} from "@finc/shared";
 import { api, qs, ApiError } from "../../api/client";
 import type { Nota, Pagina, Registro } from "../../api/types";
 import {
@@ -276,7 +283,9 @@ export function NotaForm() {
             ...Object.fromEntries(
               Object.entries(t ?? {}).map(([k, v]) => [
                 k,
-                v ?? (k === "incluir_frete" ? false : ""),
+                k === "cpf_cnpj" && v
+                  ? mascaraCpfCnpj(v)
+                  : (v ?? (k === "incluir_frete" ? false : "")),
               ]),
             ),
           }));
@@ -362,7 +371,7 @@ export function NotaForm() {
         ? undefined
         : {
             ...frete,
-            cpf_cnpj: frete.cpf_cnpj,
+            cpf_cnpj: onlyDigits(frete.cpf_cnpj),
             peso_bruto: frete.peso_bruto,
             peso_liquido: frete.peso_liquido,
           },
@@ -573,7 +582,8 @@ export function NotaForm() {
               >
                 <input
                   value={frete.cpf_cnpj}
-                  onChange={(e) => setFrete({ ...frete, cpf_cnpj: e.target.value })}
+                  onChange={(e) => setFrete({ ...frete, cpf_cnpj: mascaraCpfCnpj(e.target.value) })}
+                  inputMode="numeric"
                 />
               </Field>
               <Field label="Placa" className="c4">

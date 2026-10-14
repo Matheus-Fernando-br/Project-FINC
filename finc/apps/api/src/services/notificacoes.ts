@@ -2,7 +2,7 @@ import type { AppContext } from "../context.js";
 import type { Queryable } from "../db/index.js";
 import { escapeHtml } from "./email.js";
 
-export interface NovaNotificacao {
+interface NovaNotificacao {
   tipo: string;
   titulo: string;
   mensagem: string;

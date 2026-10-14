@@ -77,7 +77,7 @@ export interface NotaCompleta {
   }[];
 }
 
-export const AVISO_SEM_VALOR =
+const AVISO_SEM_VALOR =
   "DOCUMENTO AUXILIAR SEM VALOR FISCAL — gerado pela FINC sem transmissão à SEFAZ/Prefeitura.";
 
 export function numeroFormatado(n: NotaCompleta): string {
@@ -313,7 +313,7 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
   });
 }
 
-export function escapeXml(v: unknown): string {
+function escapeXml(v: unknown): string {
   return String(v ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

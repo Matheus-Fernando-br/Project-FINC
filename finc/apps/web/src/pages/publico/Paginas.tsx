@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Plano } from "@finc/shared";
 import { api } from "../../api/client";
-import { Card, ErrorBox, Loading, PageHeader } from "../../components/ui";
+import { BotaoVoltar, Card, ErrorBox, Loading, PageHeader } from "../../components/ui";
 import { formatBRL } from "../../format";
 import { useApi } from "../../hooks/useApi";
 
@@ -208,6 +208,7 @@ export function PlanosPublico() {
   const { data, error, loading, reload } = useApi(() => api.get<Plano[]>("/planos"));
   return (
     <main className="section">
+      <BotaoVoltar />
       <PageHeader
         title="Planos FINC"
         sub="Comece no BÁSICO e mude para o BLACK quando o seu negócio crescer."
@@ -244,6 +245,7 @@ export function PlanosPublico() {
 export function QuemSomos() {
   return (
     <main className="section" style={{ maxWidth: 860 }}>
+      <BotaoVoltar />
       <PageHeader title="Quem somos" />
       <Card>
         <div className="stack">
@@ -304,6 +306,7 @@ const FAQ = [
 export function Duvidas() {
   return (
     <main className="section" style={{ maxWidth: 860 }}>
+      <BotaoVoltar />
       <PageHeader
         title="Ficou com alguma dúvida?"
         sub="Separamos as dúvidas mais comuns. Se precisar, fale com a gente."
@@ -339,6 +342,7 @@ export function Duvidas() {
 export function Termos() {
   return (
     <main className="section" style={{ maxWidth: 860 }}>
+      <BotaoVoltar />
       <PageHeader title="Termos de uso e política de privacidade" />
       <Card>
         <div className="stack">

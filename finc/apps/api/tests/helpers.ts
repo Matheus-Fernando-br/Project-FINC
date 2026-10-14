@@ -16,7 +16,7 @@ export interface TestEnv {
   close: () => Promise<void>;
 }
 
-export const CERT_KEY = Buffer.alloc(32, 7).toString("base64");
+const CERT_KEY = Buffer.alloc(32, 7).toString("base64");
 
 export async function setup(
   extraEnv: Record<string, string> = {},

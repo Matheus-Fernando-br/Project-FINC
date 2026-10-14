@@ -1,5 +1,6 @@
-import { useState, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import type { ZodTypeAny } from "zod";
+import { aplicarMascara, normalizarCampos, type Mascara } from "@finc/shared";
 import { ApiError } from "../api/client";
 
 type Valores = Record<string, unknown>;
@@ -10,6 +11,8 @@ export function useForm<T extends Valores>(inicial: T) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [enviando, setEnviando] = useState(false);
   const [erroGeral, setErroGeral] = useState("");
+  // Máscaras registradas pelos campos (bind) — usadas para formatar e para normalizar no envio.
+  const mascaras = useRef<Record<string, Mascara>>({});
 
   const set = (campo: keyof T & string, valor: unknown) => {
     setValues((v) => ({ ...v, [campo]: valor }));
@@ -20,16 +23,38 @@ export function useForm<T extends Valores>(inicial: T) {
     });
   };
 
-  const bind = (campo: keyof T & string) => ({
-    id: campo,
-    name: campo,
-    value: (values[campo] ?? "") as string | number,
-    onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      set(
-        campo,
-        e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value,
-      ),
-  });
+  /** Liga um campo ao estado. Com `mascara`, formata enquanto digita (CPF, CNPJ, telefone, CEP, e-mail). */
+  const bind = (campo: keyof T & string, mascara?: Mascara) => {
+    if (mascara) mascaras.current[campo] = mascara;
+    return {
+      id: campo,
+      name: campo,
+      value: (values[campo] ?? "") as string | number,
+      ...(mascara && mascara !== "email" ? { inputMode: "numeric" as const } : {}),
+      onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+        set(
+          campo,
+          e.target.type === "checkbox"
+            ? (e.target as HTMLInputElement).checked
+            : mascara
+              ? aplicarMascara(mascara, e.target.value)
+              : e.target.value,
+        ),
+    };
+  };
+
+  /** Preenche o formulário com dados vindos da API, já formatados pelas máscaras dos campos. */
+  const carregar = (dados: T, mapa: Record<string, Mascara> = {}) => {
+    Object.assign(mascaras.current, mapa);
+    const v: Record<string, unknown> = { ...dados };
+    for (const [campo, m] of Object.entries(mascaras.current))
+      if (typeof v[campo] === "string" && v[campo]) v[campo] = aplicarMascara(m, v[campo]);
+    setValues(v as T);
+  };
+
+  /** Valores prontos para a API: campos mascarados viram só dígitos; e-mails, minúsculas. */
+  const dados = () =>
+    normalizarCampos(values, mascaras.current as Partial<Record<keyof T, Mascara>>);
 
   const validar = (schema: ZodTypeAny): boolean => {
     const r = schema.safeParse(values);
@@ -65,6 +90,8 @@ export function useForm<T extends Valores>(inicial: T) {
     setValues,
     set,
     bind,
+    carregar,
+    dados,
     errors,
     setErrors,
     validar,

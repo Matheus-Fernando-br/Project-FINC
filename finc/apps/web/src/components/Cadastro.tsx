@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { ZodTypeAny } from "zod";
+import type { Mascara } from "@finc/shared";
 import { api, qs } from "../api/client";
 import type { Pagina, Registro } from "../api/types";
 import { useApi } from "../hooks/useApi";
@@ -33,6 +34,8 @@ export interface Campo {
   mostrarSe?: (v: Record<string, unknown>) => boolean;
   /** Ao sair do campo CEP, consulta o endereço no servidor. */
   cep?: boolean;
+  /** Máscara do campo. Telefone, e-mail e CEP recebem a máscara automaticamente pelo tipo. */
+  mascara?: Mascara;
   somenteCriacao?: boolean;
 }
 
@@ -42,6 +45,10 @@ export interface Secao {
   campos: Campo[];
 }
 
+const mascaraDo = (c: Campo): Mascara | undefined =>
+  c.mascara ??
+  (c.tipo === "tel" ? "telefone" : c.tipo === "email" ? "email" : c.cep ? "cep" : undefined);
+
 function CampoInput({
   c,
   f,
@@ -49,7 +56,7 @@ function CampoInput({
   c: Campo;
   f: ReturnType<typeof useForm<Record<string, unknown>>>;
 }) {
-  const b = f.bind(c.name);
+  const b = f.bind(c.name, mascaraDo(c));
   if (c.tipo === "checkbox") {
     return (
       <label className={`check ${c.col ?? ""}`} style={{ alignSelf: "end", paddingBottom: 8 }}>
@@ -139,7 +146,13 @@ export function CadastroForm({
       .then((r) => {
         const v: Record<string, unknown> = { ...inicial };
         for (const k of Object.keys(inicial)) if (r[k] !== undefined && r[k] !== null) v[k] = r[k];
-        f.setValues(v);
+        const mapa: Record<string, Mascara> = {};
+        for (const sec of secoes)
+          for (const c of sec.campos) {
+            const m = mascaraDo(c);
+            if (m) mapa[c.name] = m;
+          }
+        f.carregar(v, mapa);
       })
       .catch(setErroCarga)
       .finally(() => setCarregando(false));
@@ -165,7 +178,7 @@ export function CadastroForm({
 
   const salvar = (e: React.FormEvent) => {
     e.preventDefault();
-    const body = saida ? saida(f.values) : f.values;
+    const body = saida ? saida(f.dados()) : f.dados();
     if (schema) {
       const r = schema.safeParse(body);
       if (!r.success) {
@@ -245,7 +258,7 @@ export function CadastroForm({
   );
 }
 
-export interface Coluna<T> {
+interface Coluna<T> {
   titulo: string;
   render: (r: T) => ReactNode;
   className?: string;

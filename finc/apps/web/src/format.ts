@@ -1,4 +1,4 @@
-export { formatBRL, formatCpfCnpj, formatTelefone, formatCEP } from "@finc/shared";
+export { formatBRL, formatCpfCnpj, formatTelefone } from "@finc/shared";
 
 /** Preferências de exibição do usuário (Configurações › Geral), aplicadas após o login. */
 const exibicao = { formato: "dd/MM/yyyy", fuso: "America/Sao_Paulo" };

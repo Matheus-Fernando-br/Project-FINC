@@ -18,7 +18,7 @@ const upload = (maxBytes: number) =>
 
 /* ======================= Certificado digital A1 ======================= */
 
-export interface InfoCertificado {
+interface InfoCertificado {
   titular: string | null;
   documento: string | null;
   emissor: string | null;

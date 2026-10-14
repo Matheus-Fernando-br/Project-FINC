@@ -12,7 +12,7 @@ Reconstruir a FINC a partir de três fontes:
 
 1. **Preservação:**
    - REA clonado em diretório separado (`refs/rea`), sem modificação;
-   - FINC original mantida intacta no repositório (`Back-End/`, `Front-End/`);
+   - FINC original mantida intacta no repositório durante a reconstrução (`Back-End/`, `Front-End/`; hoje removidas e disponíveis no histórico do Git);
    - auditoria dinâmica feita sobre uma **cópia** (`audit/`).
 2. **Análise estática:**
    - leitura de todo o código da FINC (27 arquivos de back-end e 60 de front-end), de configurações, rotas e controllers;

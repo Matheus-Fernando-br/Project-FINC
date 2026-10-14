@@ -8,6 +8,7 @@ import {
   isValidCpfCnpj,
   isValidEmail,
   isValidTelefone,
+  normalizarTelefone,
   onlyDigits,
 } from "./validators.js";
 
@@ -36,6 +37,20 @@ const digitsOpt = (pred: (s: string) => boolean, msg: string) =>
       return d === "" ? null : d;
     }, z.string().nullable())
     .refine((v) => v === null || pred(v), msg)
+    .optional();
+
+/** Telefone obrigatório: normalizado (sem +55, sem zero de discagem) e validado no padrão brasileiro. */
+const telefoneSchema = z
+  .preprocess((v) => normalizarTelefone(v), z.string())
+  .refine(isValidTelefone, "Telefone inválido. Use DDD + número, ex.: (31) 99999-9999");
+
+const telefoneOpt = (campo = "Telefone") =>
+  z
+    .preprocess((v) => {
+      const d = normalizarTelefone(v);
+      return d === "" ? null : d;
+    }, z.string().nullable())
+    .refine((v) => v === null || isValidTelefone(v), `${campo} inválido. Use DDD + número`)
     .optional();
 
 const numberFrom = (schema: z.ZodNumber) =>
@@ -122,9 +137,7 @@ export const registerSchema = z
     cpf_cnpj: docDigits,
     email: emailSchema,
     senha: senhaSchema,
-    telefone: z
-      .preprocess((v) => onlyDigits(v), z.string())
-      .refine(isValidTelefone, "Telefone inválido"),
+    telefone: telefoneSchema,
     aceite_termos: z.literal(true, {
       errorMap: () => ({ message: "É necessário aceitar os termos de uso" }),
     }),
@@ -152,9 +165,7 @@ export const changePasswordSchema = z.object({
 
 export const perfilSchema = z.object({
   nome: reqText(2, 200, "Nome social"),
-  telefone: z
-    .preprocess((v) => onlyDigits(v), z.string())
-    .refine(isValidTelefone, "Telefone inválido"),
+  telefone: telefoneSchema,
   inscricao_estadual: optText(30),
   inscricao_municipal: optText(30),
   ...enderecoShape,
@@ -169,8 +180,8 @@ export const clienteSchema = z
     cpf_cnpj: docDigits,
     inscricao_estadual: optText(30),
     email: emailOpt,
-    telefone: digitsOpt(isValidTelefone, "Telefone inválido"),
-    whatsapp: digitsOpt(isValidTelefone, "WhatsApp inválido"),
+    telefone: telefoneOpt(),
+    whatsapp: telefoneOpt("WhatsApp"),
     observacoes: optText(1000),
     ...enderecoShape,
   })
@@ -233,7 +244,7 @@ export const contadorSchema = z.object({
   email: emailSchema,
   cpf: digitsOpt(isValidCPF, "CPF inválido"),
   crc: optText(30),
-  telefone: digitsOpt(isValidTelefone, "Telefone inválido"),
+  telefone: telefoneOpt(),
 });
 
 export const estoqueMovimentoSchema = z.object({
@@ -403,7 +414,7 @@ export const fornecedorSchema = z
     inscricao_estadual: optText(30),
     contato: optText(120),
     email: emailOpt,
-    telefone: digitsOpt(isValidTelefone, "Telefone inválido"),
+    telefone: telefoneOpt(),
     observacoes: optText(1000),
     ...enderecoShape,
   })

@@ -4,10 +4,10 @@ import type { AppContext } from "../context.js";
 import { AppError } from "../http/errors.js";
 import { hmac, randomToken, safeEqual, sha256 } from "../security/tokens.js";
 
-export const SESSION_COOKIE = "finc_sessao";
+const SESSION_COOKIE = "finc_sessao";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
-export function sessionCookieOptions(ctx: AppContext): CookieOptions {
+function sessionCookieOptions(ctx: AppContext): CookieOptions {
   return {
     httpOnly: true,
     secure: cookieSecure(ctx.cfg),

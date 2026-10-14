@@ -21,7 +21,7 @@ import { criarPedido } from "./pedidos.js";
 
 const END = ["cep", "uf", "cidade", "logradouro", "bairro", "numero", "complemento"];
 
-export const fornecedoresDef: CrudDef = {
+const fornecedoresDef: CrudDef = {
   tabela: "fornecedores",
   entidade: "Fornecedor",
   schema: fornecedorSchema,

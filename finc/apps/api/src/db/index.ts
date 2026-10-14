@@ -40,7 +40,7 @@ function semSslNaUrl(url: string): string {
   return u.toString();
 }
 
-export interface DbOptions {
+interface DbOptions {
   ssl?: false | ConnectionOptions;
   /** Schema dedicado (ex.: "finc"): é criado se não existir e vira o search_path de cada conexão. */
   schema?: string;

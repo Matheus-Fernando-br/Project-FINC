@@ -65,7 +65,7 @@ async function chamadoComMensagens(q: Queryable, id: string, userId?: string) {
 }
 
 /** Ações da equipe de suporte (compartilhadas entre painel admin e bot do Telegram). */
-export async function acaoSuporte(
+async function acaoSuporte(
   ctx: AppContext,
   q: Queryable,
   req: Request | null,

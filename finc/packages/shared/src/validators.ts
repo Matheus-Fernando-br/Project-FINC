@@ -53,9 +53,31 @@ export function isStrongPassword(value: unknown): boolean {
   return value.length >= 8 && value.length <= 128 && /[a-zA-Z]/.test(value) && /\d/.test(value);
 }
 
+/**
+ * Telefone brasileiro só com dígitos: DDD + número. Remove o código do país (+55) e o zero
+ * de discagem interurbana, para que "+55 (31) 99999-9999" e "031 99999-9999" virem "31999999999".
+ */
+export function normalizarTelefone(value: unknown): string {
+  let s = onlyDigits(value);
+  if ((s.length === 12 || s.length === 13) && s.startsWith("55")) s = s.slice(2);
+  if ((s.length === 11 || s.length === 12) && s.startsWith("0")) s = s.slice(1);
+  return s;
+}
+
+/** Fixo: DDD + 8 dígitos começando de 2 a 5. Celular: DDD + 9 + 8 dígitos. DDD de 11 a 99, sem zero. */
 export function isValidTelefone(value: unknown): boolean {
-  const s = onlyDigits(value);
-  return s.length >= 10 && s.length <= 13;
+  const s = normalizarTelefone(value);
+  if (!/^[1-9][1-9]/.test(s)) return false;
+  if (s.length === 11) return s[2] === "9";
+  if (s.length === 10) return /[2-5]/.test(s[2] ?? "");
+  return false;
+}
+
+/** E-mail como é gravado: sem espaços nas pontas e em minúsculas. */
+export function normalizarEmail(value: unknown): string {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 export function isValidCEP(value: unknown): boolean {
@@ -70,7 +92,7 @@ export function formatCpfCnpj(value: unknown): string {
 }
 
 export function formatTelefone(value: unknown): string {
-  const s = onlyDigits(value);
+  const s = normalizarTelefone(value);
   if (s.length === 11) return s.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
   if (s.length === 10) return s.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
   return s;

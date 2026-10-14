@@ -10,7 +10,7 @@ export const setCsrfToken = (t: string) => {
   csrfToken = t;
 };
 
-export interface DetalheErro {
+interface DetalheErro {
   campo: string;
   mensagem: string;
 }
