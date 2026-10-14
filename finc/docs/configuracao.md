@@ -35,6 +35,7 @@ Toda a configuração da FINC é feita por variáveis de ambiente.
 | `DATABASE_URL` | `pglite://./.data/pglite` | Sim | Conexão com o banco (formatos abaixo) |
 | `MIGRATIONS_DIR` | vazio | Não | Pasta alternativa das migrações. Vazio significa `db/migrations` |
 | `DATABASE_SSL` | vazio | Em bancos gerenciados | Criptografia da conexão com o PostgreSQL. Vazio: segue o `sslmode` da URL. `no-verify`: conexão cifrada sem validar o certificado (use no **Supabase**, cuja CA própria faz o `sslmode=require` falhar com `self-signed certificate`). `verify`: cifra e valida o certificado (informe `DATABASE_SSL_CA` se a CA não for pública). `false`: sem SSL. Quando definida, prevalece sobre o `sslmode` da URL |
+| `DATABASE_SCHEMA` | vazio | No Supabase | Schema onde ficam as tabelas da FINC. Vazio: `public`. Use `finc` no Supabase: separa as tabelas da versão antiga e as deixa fora da Data API pública do Supabase. O schema é criado automaticamente |
 | `DATABASE_SSL_CA` | vazio | Não | Só com `DATABASE_SSL=verify`. Certificado da CA em PEM: o conteúdo (`-----BEGIN CERTIFICATE-----...`) ou o caminho do arquivo. No Supabase: *Project Settings › Database › SSL Configuration › Download certificate* |
 
 Formatos aceitos em `DATABASE_URL`:
@@ -45,7 +46,7 @@ Formatos aceitos em `DATABASE_URL`:
 | `pglite://memory` | Testes. Banco em memória, apagado ao encerrar |
 | `postgres://usuario:senha@host:5432/banco` | **Produção** (PostgreSQL 13 ou superior). Para SSL gerenciado, acrescente `?sslmode=require` ou use `DATABASE_SSL`. Caracteres especiais na senha (`@`, `#`, `/`, `?`, `%`) precisam ser codificados: `@` vira `%40`, `#` vira `%23` |
 
-**Render + Supabase:** veja o passo a passo em [deploy-render-supabase.md](deploy-render-supabase.md).
+**Vercel + Render + Supabase:** veja o passo a passo em [deploy-vercel-render-supabase.md](deploy-vercel-render-supabase.md).
 
 As migrações são aplicadas automaticamente quando a API inicia. Também podem ser aplicadas manualmente com `npm run migrate`.
 
@@ -143,7 +144,7 @@ Estas variáveis valem no **build** ou no `npm run dev` do site. Defina-as em `a
 | Variável | Padrão | O que faz |
 |---|---|---|
 | `VITE_API_URL` | vazio | URL da API, quando o site for hospedado separado dela. Vazio = mesma origem (recomendado) |
-| `VITE_API_PROXY` | `http://localhost:3333` | Para onde o `npm run dev` encaminha as chamadas `/api` |
+| `VITE_API_PROXY` | `http://localhost:3333` | Para onde o `npm run dev` (Vite) encaminha as chamadas `/api`. Pode ficar em `apps/web/.env.local` (modelo em `apps/web/.env.example`). Ex.: `https://project-finc.onrender.com` para usar o back-end do Render |
 
 ## 10. Testes
 

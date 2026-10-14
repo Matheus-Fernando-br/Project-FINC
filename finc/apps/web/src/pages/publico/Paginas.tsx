@@ -42,7 +42,7 @@ const RECURSOS = [
 export function Landing() {
   return (
     <main>
-      <section className="hero">
+      <section className="hero tema-escuro">
         <div className="eyebrow">
           <span className="dot lg" /> FINC
         </div>
@@ -61,7 +61,7 @@ export function Landing() {
         </div>
         <div className="palco" aria-hidden>
           <div className="orb" />
-          <div className="janela">
+          <div className="janela tema-claro">
             <div className="row" style={{ gap: 6, marginBottom: 18 }}>
               <span className="dot danger" />
               <span className="dot warning" />
@@ -97,58 +97,64 @@ export function Landing() {
           </div>
         </div>
       </section>
-      <section className="section" style={{ textAlign: "center" }}>
-        <h2>Do orçamento ao caixa, tudo conectado.</h2>
-        <p className="lead" style={{ margin: "0 auto" }}>
-          Cada etapa alimenta a próxima: a nota emitida baixa o estoque e lança a conta a receber
-          automaticamente.
-        </p>
-        <div className="fluxo">
-          {["Orçamento", "Pedido de venda", "Nota fiscal", "Estoque", "Contas a receber"].map(
-            (p, i, arr) => (
-              <span key={p} className="row" style={{ gap: 10 }}>
-                <span className="passo">
-                  <span className="dot" /> {p}
+      <div className="faixa branca">
+        <section className="section" style={{ textAlign: "center" }}>
+          <h2>Do orçamento ao caixa, tudo conectado.</h2>
+          <p className="lead" style={{ margin: "0 auto" }}>
+            Cada etapa alimenta a próxima: a nota emitida baixa o estoque e lança a conta a receber
+            automaticamente.
+          </p>
+          <div className="fluxo">
+            {["Orçamento", "Pedido de venda", "Nota fiscal", "Estoque", "Contas a receber"].map(
+              (p, i, arr) => (
+                <span key={p} className="row" style={{ gap: 10 }}>
+                  <span className="passo">
+                    <span className="dot" /> {p}
+                  </span>
+                  {i < arr.length - 1 && <i className="bi bi-arrow-right" aria-hidden />}
                 </span>
-                {i < arr.length - 1 && <i className="bi bi-arrow-right" aria-hidden />}
-              </span>
-            ),
-          )}
-        </div>
-      </section>
-      <section className="section">
-        <h2>Tudo o que o seu negócio precisa.</h2>
-        <p className="lead">
-          Módulos organizados como num ERP completo, com a simplicidade de um aplicativo.
-        </p>
-        <div className="grid grid-3 mt">
-          {RECURSOS.map((r) => (
-            <Card key={r.titulo}>
-              <div className="feature">
-                <span className="icone">
-                  <i className={`bi ${r.icon}`} aria-hidden />
-                </span>
-                <h3>{r.titulo}</h3>
-                <p className="muted">{r.texto}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </section>
-      <section className="section" style={{ textAlign: "center", paddingBottom: 96 }}>
-        <span
-          className="orb"
-          style={{ width: 64, height: 64, display: "inline-block" }}
-          aria-hidden
-        />
-        <h2 style={{ marginTop: 18 }}>Pronto para começar?</h2>
-        <p className="lead" style={{ margin: "0 auto 24px" }}>
-          Crie sua conta no plano BÁSICO e evolua para o BLACK quando o negócio crescer.
-        </p>
-        <Link to="/cadastro" className="btn lg">
-          Criar conta
-        </Link>
-      </section>
+              ),
+            )}
+          </div>
+        </section>
+      </div>
+      <div className="faixa cinza">
+        <section className="section">
+          <h2>Tudo o que o seu negócio precisa.</h2>
+          <p className="lead">
+            Módulos organizados como num ERP completo, com a simplicidade de um aplicativo.
+          </p>
+          <div className="grid grid-3 mt">
+            {RECURSOS.map((r) => (
+              <Card key={r.titulo}>
+                <div className="feature">
+                  <span className="icone">
+                    <i className={`bi ${r.icon}`} aria-hidden />
+                  </span>
+                  <h3>{r.titulo}</h3>
+                  <p className="muted">{r.texto}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      </div>
+      <div className="faixa escura tema-escuro">
+        <section className="section" style={{ textAlign: "center", paddingBottom: 96 }}>
+          <span
+            className="orb"
+            style={{ width: 64, height: 64, display: "inline-block" }}
+            aria-hidden
+          />
+          <h2 style={{ marginTop: 18 }}>Pronto para começar?</h2>
+          <p className="lead" style={{ margin: "0 auto 24px" }}>
+            Crie sua conta no plano BÁSICO e evolua para o BLACK quando o negócio crescer.
+          </p>
+          <Link to="/cadastro" className="btn lg">
+            Criar conta
+          </Link>
+        </section>
+      </div>
     </main>
   );
 }

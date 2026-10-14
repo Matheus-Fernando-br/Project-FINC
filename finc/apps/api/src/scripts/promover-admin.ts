@@ -1,4 +1,4 @@
-import { databaseSsl, parseConfig } from "../config.js";
+import { databaseOptions, parseConfig } from "../config.js";
 import { createDb } from "../db/index.js";
 import { loadEnvFile } from "../env.js";
 
@@ -10,7 +10,7 @@ if (!email) {
   process.exit(1);
 }
 const cfg = parseConfig(process.env);
-const db = await createDb(cfg.DATABASE_URL, databaseSsl(cfg));
+const db = await createDb(cfg.DATABASE_URL, databaseOptions(cfg));
 try {
   const { rowCount } = await db.query("UPDATE usuarios SET papel = 'admin' WHERE email = $1", [
     email,

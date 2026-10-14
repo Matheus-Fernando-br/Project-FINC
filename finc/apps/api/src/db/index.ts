@@ -40,7 +40,21 @@ function semSslNaUrl(url: string): string {
   return u.toString();
 }
 
-function createPg(url: string, ssl?: false | ConnectionOptions): Db {
+export interface DbOptions {
+  ssl?: false | ConnectionOptions;
+  /** Schema dedicado (ex.: "finc"): é criado se não existir e vira o search_path de cada conexão. */
+  schema?: string;
+}
+
+const schemaSql = (schema: string) => {
+  if (!/^[a-z_][a-z0-9_]{0,62}$/.test(schema)) throw new Error(`Schema inválido: ${schema}`);
+  return {
+    criar: `CREATE SCHEMA IF NOT EXISTS "${schema}"`,
+    usar: `SET search_path TO "${schema}"`,
+  };
+};
+
+async function createPg(url: string, { ssl, schema }: DbOptions = {}): Promise<Db> {
   const types = {
     getTypeParser: (oid: number, format?: "text" | "binary") => {
       if (oid === NUMERIC) return (v: string) => Number(v);
@@ -55,6 +69,15 @@ function createPg(url: string, ssl?: false | ConnectionOptions): Db {
     max: 10,
     types: types as pg.CustomTypesConfig,
   });
+  if (schema) {
+    const sql = schemaSql(schema);
+    // Registrado antes de qualquer consulta, para valer em todas as conexões do pool (inclusive a
+    // primeira). O client do pg enfileira os comandos: o SET roda antes da primeira consulta.
+    pool.on("connect", (c) => {
+      c.query(sql.usar).catch(() => undefined);
+    });
+    await pool.query(sql.criar);
+  }
   const wrap = (c: pg.Pool | pg.PoolClient): Queryable => ({
     async query<T>(sql: string, params: unknown[] = []) {
       const r = await c.query(sql, params);
@@ -87,7 +110,7 @@ function createPg(url: string, ssl?: false | ConnectionOptions): Db {
   };
 }
 
-async function createPglite(url: string): Promise<Db> {
+async function createPglite(url: string, schema?: string): Promise<Db> {
   const { PGlite } = await import("@electric-sql/pglite");
   const target = url.replace(/^pglite:\/\//, "");
   let dataDir: string | undefined;
@@ -97,6 +120,10 @@ async function createPglite(url: string): Promise<Db> {
   }
   const db = new PGlite(dataDir);
   await db.waitReady;
+  if (schema) {
+    const sql = schemaSql(schema);
+    await db.exec(`${sql.criar}; ${sql.usar}`);
+  }
   const wrap = (c: { query: typeof db.query; exec: typeof db.exec }): Queryable => ({
     async query<T>(sql: string, params: unknown[] = []) {
       const r = await c.query<Record<string, unknown>>(sql, params);
@@ -134,8 +161,8 @@ async function createPglite(url: string): Promise<Db> {
   };
 }
 
-export async function createDb(url: string, ssl?: false | ConnectionOptions): Promise<Db> {
-  if (url.startsWith("pglite:")) return createPglite(url);
-  if (url.startsWith("postgres://") || url.startsWith("postgresql://")) return createPg(url, ssl);
+export async function createDb(url: string, opts: DbOptions = {}): Promise<Db> {
+  if (url.startsWith("pglite:")) return createPglite(url, opts.schema);
+  if (url.startsWith("postgres://") || url.startsWith("postgresql://")) return createPg(url, opts);
   throw new Error("DATABASE_URL deve começar com postgres://, postgresql:// ou pglite://");
 }

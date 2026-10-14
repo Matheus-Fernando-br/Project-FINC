@@ -22,6 +22,11 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1).default("pglite://./.data/pglite"),
   // Vazio = segue o sslmode da URL. "false" | "no-verify" (cifra sem validar o certificado) | "verify".
   DATABASE_SSL: z.enum(["", "false", "no-verify", "verify"]).default(""),
+  // Schema do PostgreSQL onde ficam as tabelas da FINC (vazio = public). No Supabase use "finc".
+  DATABASE_SCHEMA: z
+    .string()
+    .regex(/^([a-z_][a-z0-9_]{0,62})?$/, "DATABASE_SCHEMA: use letras minúsculas, números e _")
+    .default(""),
   // CA para DATABASE_SSL=verify: conteúdo PEM ou caminho de arquivo (ex.: certificado do Supabase).
   DATABASE_SSL_CA: z.string().optional(),
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET deve ter ao menos 32 caracteres").optional(),
@@ -94,6 +99,11 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
 
 function cryptoRandom(): string {
   return randomBytes(32).toString("base64url");
+}
+
+/** Opções de conexão derivadas da configuração (SSL e schema). */
+export function databaseOptions(cfg: Config) {
+  return { ssl: databaseSsl(cfg), schema: cfg.DATABASE_SCHEMA || undefined };
 }
 
 /** Valor de "trust proxy" do Express: números viram contagem de saltos (ex.: "1" no Render). */

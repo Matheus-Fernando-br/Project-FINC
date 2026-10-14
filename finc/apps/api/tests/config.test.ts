@@ -31,3 +31,29 @@ describe("configuração de implantação", () => {
     expect(() => parseConfig({ DATABASE_SSL: "talvez" })).toThrow(ConfigError);
   });
 });
+
+describe("DATABASE_SCHEMA", () => {
+  it("cria as tabelas no schema dedicado sem tocar nas de mesmo nome em public", async () => {
+    const { createDb } = await import("../src/db/index.js");
+    const { migrate } = await import("../src/db/migrate.js");
+    const db = await createDb("pglite://memory", { schema: "finc" });
+    try {
+      // Simula o projeto antigo do Supabase: tabelas homônimas em public.
+      await db.exec("CREATE TABLE public.planos (id int); CREATE TABLE public.clientes (x text)");
+      const novas = await migrate(db);
+      expect(novas.length).toBeGreaterThan(0);
+      const { rows } = await db.query<{ table_schema: string }>(
+        "SELECT table_schema FROM information_schema.tables WHERE table_name = 'usuarios'",
+      );
+      expect(rows.map((r) => r.table_schema)).toEqual(["finc"]);
+      const antigas = await db.query("SELECT * FROM public.clientes");
+      expect(antigas.rowCount).toBe(0);
+    } finally {
+      await db.close();
+    }
+  });
+
+  it("recusa nomes de schema inválidos", () => {
+    expect(() => parseConfig({ DATABASE_SCHEMA: "finc; drop" })).toThrow(ConfigError);
+  });
+});

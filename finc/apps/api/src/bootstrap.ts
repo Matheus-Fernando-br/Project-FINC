@@ -1,5 +1,5 @@
 import pino from "pino";
-import { databaseSsl, parseConfig, type Config } from "./config.js";
+import { databaseOptions, parseConfig, type Config } from "./config.js";
 import type { AppContext } from "./context.js";
 import { createDb } from "./db/index.js";
 import { migrate } from "./db/migrate.js";
@@ -12,7 +12,7 @@ export async function buildContext(
 ): Promise<AppContext> {
   const cfg: Config = parseConfig(env);
   const logger = pino({ level: cfg.LOG_LEVEL, redact: ["*.senha", "*.password", "*.token"] });
-  const db = overrides.db ?? (await createDb(cfg.DATABASE_URL, databaseSsl(cfg)));
+  const db = overrides.db ?? (await createDb(cfg.DATABASE_URL, databaseOptions(cfg)));
   await migrate(db);
   return {
     cfg,

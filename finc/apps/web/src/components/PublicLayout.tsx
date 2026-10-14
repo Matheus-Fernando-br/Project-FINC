@@ -5,7 +5,7 @@ import { Logo } from "./ui";
 export function PublicLayout() {
   const { usuario } = useAuth();
   return (
-    <>
+    <div className="publico tema-claro">
       <header className="pub-header">
         <div className="inner">
           <Link to="/" aria-label="FINC — início">
@@ -55,6 +55,6 @@ export function PublicLayout() {
           </span>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
