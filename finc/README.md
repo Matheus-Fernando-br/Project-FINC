@@ -10,20 +10,41 @@ A FINC 2.0 é a reconstrução da plataforma FINC por engenharia reversa técnic
 
 ## Funcionalidades
 
-| Área | O que faz |
+A FINC é organizada como um ERP, com estes módulos no menu superior:
+
+| Módulo | O que faz |
 |---|---|
-| Acesso | Cadastro de pessoa física ou jurídica (CPF/CNPJ validados); login por e-mail ou CPF/CNPJ; recuperação de senha por e-mail; troca de senha; sessões revogáveis; bloqueio após tentativas falhas |
-| Cadastros | Clientes, produtos (NCM, CFOP, ICMS, PIS/COFINS, origem), serviços (CNAE, LC 116, ISS) e contadores, com busca, paginação, exportação CSV e importação `.xlsx`/`.csv` com relatório linha a linha |
-| Fiscal | NF-e, NFC-e e NFS-e: rascunho, emissão com numeração sequencial, PDF e XML, cancelamento com justificativa, envio ao contador por e-mail, configuração de série, numeração, ambiente e regime |
-| Estoque | Saldo, entradas, saídas e ajustes, baixa automática na emissão, estorno no cancelamento e alerta de estoque mínimo |
-| Vendas | Pedidos de venda que geram o rascunho da nota fiscal |
-| Financeiro | Contas a pagar e a receber, baixa, estorno, vencidas e saldo previsto. A nota emitida gera a conta a receber |
-| Painel | Faturamento de 12 meses, principais clientes e itens, estoque baixo, uso do plano e atalhos personalizáveis |
-| Planos | BÁSICO e BLACK, com limites aplicados no servidor, regra de downgrade e histórico de assinaturas |
-| Certificado A1 | Envio do `.pfx`/`.p12`, validação de senha, titular e validade, e armazenamento cifrado (AES-256-GCM) |
-| Comunicação | Notificações na plataforma e por e-mail; chamados de suporte com chat; painel da equipe; bot do Telegram; feedback |
-| Privacidade | Exportação de dados, trilha de atividades e exclusão da conta (LGPD) |
-| Aparência | Tema claro, escuro ou automático, tamanho da fonte, negrito, modo compacto e layout responsivo |
+| **Início** | Painel com faturamento de 12 meses, valores a receber e a pagar, uso do plano, principais clientes e itens, estoque baixo, documentos recentes e atalhos personalizáveis |
+| **Cadastros** | Clientes, fornecedores, produtos (NCM, CFOP, ICMS, PIS/COFINS, origem), serviços (CNAE, LC 116, ISS) e contadores. Todos com busca, paginação, exportação CSV e importação `.xlsx`/`.csv` com relatório linha a linha |
+| **Suprimentos** | Estoque (entradas, saídas, ajustes e mínimo) e pedidos de compra. No recebimento da compra, o estoque é atualizado e a conta a pagar é lançada |
+| **Vendas** | Frente de caixa (PDV) com NFC-e, troco e recebimento no ato; orçamentos (aprovação e conversão em pedido); pedidos de venda que geram a nota |
+| **Notas fiscais** | NF-e, NFC-e (inclusive para consumidor final) e NFS-e: rascunho, emissão numerada, PDF, XML, cancelamento, envio ao contador, configuração fiscal e certificado A1 |
+| **Finanças** | Contas a receber e a pagar, baixa, estorno, vencidos e saldo previsto |
+| **Relatórios** | Vendas (por dia, cliente, item ou tipo), DRE simplificado, fluxo de caixa e posição de estoque, com gráficos, CSV e impressão |
+
+Recursos que valem para toda a plataforma:
+
+- busca global (**Ctrl+K**);
+- notificações;
+- planos **BÁSICO** e **BLACK**, com limites aplicados no servidor;
+- suporte por chamados (painel da equipe e Telegram);
+- LGPD (exportação e exclusão de dados);
+- tema claro, escuro ou automático;
+- layout responsivo para desktop, tablet e celular.
+
+**Identidade visual:** interface minimalista, com tipografia do sistema, barra superior translúcida e cantos arredondados. A **bolinha verde** da marca aparece no logotipo, no indicador do módulo ativo, nos status e nos destaques.
+
+**Stack:** 100% TypeScript.
+
+| Camada | Tecnologia |
+|---|---|
+| Back-end | Node.js 22, Express 5 |
+| Front-end | React 19, Vite 7, React Router 7 |
+| Validação | Zod |
+| Banco | PostgreSQL (PGlite em desenvolvimento) |
+| Testes | Vitest e Playwright |
+
+> **Como usar cada tela:** [docs/guia-de-uso.md](docs/guia-de-uso.md). **Todas as variáveis de ambiente:** [docs/configuracao.md](docs/configuracao.md).
 
 ## Pré-requisitos (Linux)
 
@@ -102,17 +123,17 @@ docker compose exec app node apps/api/dist/scripts/promover-admin.js email@domin
 
 ## Variáveis de ambiente
 
-Todas estão comentadas em [.env.example](.env.example). As principais:
+Todas estão comentadas em [.env.example](.env.example) e explicadas, uma a uma, em **[docs/configuracao.md](docs/configuracao.md)**. O mínimo necessário:
 
-| Variável | Obrigatória | Descrição |
+| Variável | Desenvolvimento | Produção |
 |---|---|---|
-| `DATABASE_URL` | Sim | `postgres://…` (produção) ou `pglite://./.data/pglite` (desenvolvimento) |
-| `SESSION_SECRET` | Em produção | 32 caracteres ou mais. Assina os tokens CSRF |
-| `APP_URL` | Recomendada | URL pública (links de e-mail e CORS) |
-| `SERVE_WEB` | Em produção | `true` para a API servir o front-end compilado |
-| `CERT_ENCRYPTION_KEY` | Opcional | Habilita o cofre de certificados A1 |
-| `SMTP_*` | Opcional | Habilita e-mails |
-| `TELEGRAM_*` | Opcional | Habilita o bot de suporte |
+| `DATABASE_URL` | `pglite://./.data/pglite` (padrão) | `postgres://usuario:senha@host:5432/finc` |
+| `SESSION_SECRET` | Opcional | **Obrigatória** (32 caracteres ou mais: `openssl rand -base64 48`) |
+| `NODE_ENV` / `SERVE_WEB` | `development` / `false` | `production` / `true` |
+| `APP_URL` | `http://localhost:5173` | URL HTTPS pública |
+| `CERT_ENCRYPTION_KEY` | Opcional | Necessária para usar o certificado A1 (`openssl rand -base64 32`) |
+| `SMTP_*` | Opcional | Recomendada (recuperação de senha, envio ao contador) |
+| `POSTGRES_PASSWORD` | — | Obrigatória no Docker Compose |
 
 ## Estrutura
 
@@ -131,6 +152,8 @@ finc/
 
 | Documento | Assunto |
 |---|---|
+| [docs/guia-de-uso.md](docs/guia-de-uso.md) | **Manual do usuário:** passo a passo de cada módulo |
+| [docs/configuracao.md](docs/configuracao.md) | **Todas as variáveis de ambiente**, receitas por cenário (dev, Docker, Node + systemd) e checklist de produção |
 | [docs/arquitetura.md](docs/arquitetura.md) | Arquitetura, camadas, diagramas e fluxo de emissão |
 | [docs/api.md](docs/api.md) | Rotas REST e catálogo de erros |
 | [docs/banco-de-dados.md](docs/banco-de-dados.md) | Modelo de dados (ER), tabelas, planos e backup |

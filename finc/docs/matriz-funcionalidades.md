@@ -29,6 +29,13 @@ As colunas trazem a FINC original (**orig.**) e a FINC 2.0 (**2.0**).
 | PDF e XML do documento | ✅ | ◐ (gerado no navegador) | ✅ (servidor) | API + E2E |
 | Cancelamento com justificativa | ✅ | ❌ | ✅ (estorna estoque e financeiro) | API + E2E |
 | Transmissão SEFAZ/Prefeitura | ✅ | ❌ | ⏳ (provedor fiscal) | — |
+| Fornecedores | ✅ | ❌ | ✅ | API + E2E |
+| Pedidos de compra com entrada no estoque e conta a pagar | ✅ | ❌ | ✅ | API + E2E |
+| Orçamentos → pedido de venda | ✅ | ❌ | ✅ | API + E2E |
+| Frente de caixa (PDV) com NFC-e ao consumidor final | ✅ | ❌ | ✅ | API + E2E |
+| Relatórios (vendas, DRE, fluxo de caixa, estoque) com CSV | ✅ | ❌ | ✅ | API + E2E |
+| Busca global | ✅ | ❌ | ✅ (Ctrl+K) | API + E2E |
+| Navegação por módulos de ERP e layout responsivo | ✅ | ◐ (menu lateral simples) | ✅ (desktop, tablet, celular) | E2E |
 | Contas a pagar e a receber | ✅ | ❌ | ✅ | API + E2E |
 | Painel de indicadores | ✅ | ◐ (dados fictícios) | ✅ (dados reais) | API + E2E |
 | Contadores e envio de documentos | ✅ | ◐ (só cadastro) | ✅ (envio por e-mail) / ⏳ sem SMTP | API |
@@ -53,9 +60,9 @@ As colunas trazem a FINC original (**orig.**) e a FINC 2.0 (**2.0**).
 | Configuração validada | `parseConfig` (Zod) | Parcial | `parseConfig` (Zod), que falha cedo |
 | Erros | Tagueados, com catálogo | Mensagens soltas e vazamento interno | Catálogo de códigos, sem vazamento |
 | Banco e migrações | Sem banco | Supabase, sem migrações versionadas | PostgreSQL + migrações SQL + PGlite para desenvolvimento e testes |
-| Testes | Cerca de 1.240 arquivos (unitário, boundary, acceptance) | **Nenhum** | 65 testes em 6 arquivos (shared 13, API 47 — em PGlite e PostgreSQL 16 —, web 5) + 7 execuções E2E (Playwright) |
+| Testes | Cerca de 1.240 arquivos (unitário, boundary, acceptance) | **Nenhum** | 71 testes em 7 arquivos (shared 13, API 53 — em PGlite e PostgreSQL 16 —, web 5) + 9 execuções E2E (Playwright: desktop, celular e tablet) |
 | Lint e formatação | oxlint e oxfmt | ESLint do CRA | ESLint 9 + typescript-eslint + Prettier |
-| Duplicação (jscpd) | Abaixo de 3,5% (CI) | 9,64% | **0,60%** (`npm run jscpd`, limite de 5%) |
+| Duplicação (jscpd) | Abaixo de 3,5% (CI) | 9,64% | **1,51%** (`npm run jscpd`, limite de 5%) |
 | Licenças | Inventário verificado | ❌ | `docs/licencas-dependencias.md` (336 pacotes) |
 | Auditoria de dependências | `deps:check` | 11 (back) + 110 (front) vulnerabilidades | 1 alerta high (`node-forge`, sem correção disponível, função não usada) |
 | Empacotamento | npm com provenance | Vercel e Render manuais | Docker multi-stage + compose, scripts Linux |

@@ -108,6 +108,35 @@ Importação:
 | POST | `/pedidos/:id/cancelar` | Cancela o pedido em aberto |
 | POST | `/pedidos/:id/gerar-nota` | `{tipo}`. Gera o rascunho da nota e marca o pedido como faturado |
 
+## Suprimentos e vendas (ERP)
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET/POST/PUT/DELETE | `/fornecedores` | CRUD de fornecedores (mesma fábrica dos cadastros: busca, paginação, `exportar.csv`) |
+| GET | `/compras?status=` | Pedidos de compra (`aberta`, `recebida`, `cancelada`) |
+| POST | `/compras` | `{fornecedor_id, previsao?, itens:[{produto_id, quantidade, custo_unitario}], frete?, desconto?, observacoes?}` |
+| GET / PUT | `/compras/:id` | Detalhe / edição (só abertas) |
+| POST | `/compras/:id/receber` | `{gerar_conta?, vencimento?}` — entrada no estoque + conta a pagar ao fornecedor |
+| POST | `/compras/:id/cancelar` | Cancela compra aberta |
+| GET | `/orcamentos?status=` | Orçamentos (`aberto`, `aprovado`, `recusado`, `convertido`; campo `vencido`) |
+| POST | `/orcamentos` | `{cliente_id, validade?, itens:[{produto_id\|servico_id, quantidade, valor_unitario?}], desconto?, condicoes?, observacoes?}` |
+| GET / PUT | `/orcamentos/:id` | Detalhe / edição (só abertos) |
+| POST | `/orcamentos/:id/{aprovar\|recusar\|reabrir}` | Muda o status |
+| POST | `/orcamentos/:id/converter` | Gera pedido de venda (`{pedido_id}`) |
+| POST | `/notas` com `tipo:"NFC-e"` | `cliente_id` opcional (consumidor final); `forma_pagamento` (Dinheiro, PIX, Cartão de débito/crédito, Boleto, Transferência) faz a conta a receber nascer **paga** — usado pelo PDV |
+
+## Relatórios e busca
+
+Todos aceitam `?formato=csv` para exportação (separador `;`, BOM UTF-8). Período máximo: 2 anos.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/relatorios/vendas?de=&ate=&agrupar=dia\|cliente\|item\|tipo` | Vendas emitidas no período (`{linhas, total}`) |
+| GET | `/relatorios/dre?de=&ate=` | DRE simplificado por regime de caixa (`{linhas, receitas, despesas, resultado}`) |
+| GET | `/relatorios/fluxo-caixa?de=&ate=` | Por dia: entradas/saídas realizadas e previstas + saldo acumulado (`{linhas, saldo_final}`) |
+| GET | `/relatorios/estoque` | Posição valorizada pelo preço de venda (`{linhas, valor_total}`) |
+| GET | `/busca?q=` | Busca global (≥ 2 caracteres): clientes, produtos, serviços, fornecedores e notas |
+
 ## Financeiro e painel
 
 | Método | Rota | Descrição |

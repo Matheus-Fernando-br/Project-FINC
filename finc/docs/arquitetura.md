@@ -19,7 +19,8 @@ Na produção, um único processo Node serve a API (`/api/*`) e o front-end comp
                  │   ├─ /api/health, /api/planos, /api/auth/*        (públicas)                             │
                  │   ├─ /api/integracoes/telegram/webhook            (segredo + chat autorizado)            │
                  │   ├─ requireAuth (sessão opaca + CSRF) ─▶ módulos de negócio                             │
-                 │   │     cadastros · notas · pedidos · financeiro · dashboard · suporte · certificado …   │
+                 │   │     cadastros · fornecedores · compras · orçamentos · pedidos · notas/PDV ·          │
+                 │   │     financeiro · relatórios · busca · dashboard · suporte · certificado …            │
                  │   └─ estático: apps/web/dist (SPA)                                                       │
                  │                    │                                                                     │
                  │             Camada Db (interface única)                                                  │
@@ -79,10 +80,12 @@ sequenceDiagram
 ## Front-end
 
 - `api/client.ts`: wrapper de `fetch` com `credentials: include` e token CSRF em memória. Converte os erros em `ApiError` (código, mensagem e erros por campo). Também faz download e abertura autenticada de PDF e XML.
+- `nav.ts`: mapa único dos módulos de ERP (Início, Cadastros, Suprimentos, Vendas, Notas fiscais, Finanças, Relatórios). Alimenta a barra superior com painéis por módulo, o submenu do módulo ativo, o menu móvel e o rótulo acima dos títulos.
+- `components/AppLayout.tsx`: barra superior translúcida, busca global (Ctrl+K), notificações, menu da conta e menu lateral no celular.
 - `auth/AuthContext.tsx`: sessão via `/auth/me`. `RequireAuth` protege as rotas, com `?voltar=` para retornar à página de origem após o login.
 - `components/Cadastro.tsx`: formulário e lista **declarativos**, reaproveitados por clientes, produtos, serviços e contadores. Na FINC original havia clones de até 330 linhas.
 - `hooks/useForm.ts`: valida com os mesmos schemas Zod da API e destaca os erros devolvidos pelo servidor.
-- Identidade visual própria: tokens CSS em `styles/global.css`, temas claro, escuro e automático, escala de fonte e modo compacto.
+- Identidade visual própria e minimalista: tokens CSS em `styles/global.css`, tipografia do sistema, translucidez, botões em pílula e a **bolinha verde** da marca como elemento recorrente (logo, indicador do módulo ativo, status, estados vazios). Temas claro, escuro e automático, escala de fonte, modo compacto e layout responsivo (verificado por E2E em desktop, tablet e celular).
 
 ## Estrutura de diretórios
 

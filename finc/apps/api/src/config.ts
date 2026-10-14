@@ -59,6 +59,11 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
   const problemas: string[] = [];
   if (cfg.NODE_ENV === "production") {
     if (!cfg.SESSION_SECRET) problemas.push("SESSION_SECRET é obrigatório em produção");
+    if (cfg.RATE_LIMIT_DESATIVADO) {
+      problemas.push(
+        "RATE_LIMIT_DESATIVADO=true não é permitido em produção (use apenas em testes)",
+      );
+    }
     if (cfg.DATABASE_URL.startsWith("pglite:")) {
       problemas.push(
         "Em produção use PostgreSQL (DATABASE_URL=postgres://...); PGlite é apenas para desenvolvimento/testes",

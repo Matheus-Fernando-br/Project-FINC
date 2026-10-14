@@ -1,7 +1,7 @@
 # Banco de dados
 
 - **SGBD:** PostgreSQL 13 ou superior, validado com o 16.15 e o 16.10 (Docker). Em desenvolvimento e nos testes pode-se usar o PGlite, que roda o mesmo SQL.
-- **Migrações:** os arquivos `db/migrations/NNN_nome.sql` são aplicados em ordem dentro de transações. O controle fica na tabela `schema_migrations`. Para aplicar, rode `npm run migrate`; a API também aplica as pendentes ao iniciar.
+- **Migrações:** `001` schema, `002` pedidos de venda, `003` planos, `004` fornecedores/compras/orçamentos/PDV. Os arquivos `db/migrations/NNN_nome.sql` são aplicados em ordem dentro de transações. O controle fica na tabela `schema_migrations`. Para aplicar, rode `npm run migrate`; a API também aplica as pendentes ao iniciar.
 - **Multi-tenant:** toda tabela de negócio tem `usuario_id` com `ON DELETE CASCADE`, e todas as consultas filtram por esse campo. Isso substitui o RLS do Supabase que a FINC original usava.
 
 ## Diagrama entidade-relacionamento
@@ -38,6 +38,16 @@ erDiagram
   pedidos ||--|{ pedido_itens : ""
   pedidos |o--o| notas : "nota_id"
   chamados ||--|{ chamado_mensagens : ""
+  usuarios ||--o{ fornecedores : ""
+  fornecedores ||--o{ compras : ""
+  compras ||--|{ compra_itens : ""
+  produtos ||--o{ compra_itens : "SET NULL"
+  fornecedores ||--o{ contas : "fornecedor_id"
+  compras ||--o{ contas : "compra_id"
+  usuarios ||--o{ orcamentos : ""
+  clientes ||--o{ orcamentos : ""
+  orcamentos ||--|{ orcamento_itens : ""
+  orcamentos |o--o| pedidos : "pedido_id"
 ```
 
 ## Tabelas
@@ -60,6 +70,11 @@ erDiagram
 | `estoque_movimentos` | Entradas, saídas e ajustes, com `saldo_apos` e referência à nota |
 | `contas` | Contas a receber e a pagar (`aberta`, `paga` ou `cancelada`). Pode referenciar cliente e nota |
 | `pedidos`, `pedido_itens` | Pedido de venda com número sequencial por conta. Status `aberto`, `faturado` ou `cancelado` |
+| `fornecedores` | PF/PJ, `UNIQUE(usuario_id, cpf_cnpj)`, contato e endereço (migração 004) |
+| `compras`, `compra_itens` | Pedido de compra numerado por conta; status `aberta`/`recebida`/`cancelada`; frete, desconto, total; itens com custo unitário |
+| `orcamentos`, `orcamento_itens` | Proposta numerada por conta; status `aberto`/`aprovado`/`recusado`/`convertido`; validade, condições; `pedido_id` após conversão |
+| `notas.forma_pagamento` | Forma de pagamento da venda (PDV); quando presente, a conta a receber nasce paga |
+| `contas.fornecedor_id`, `contas.compra_id` | Vínculo da conta a pagar com fornecedor e compra |
 | `notificacoes` | Notificações internas (lida ou não lida) |
 | `chamados`, `chamado_mensagens` | Suporte. Autor `cliente` ou `suporte` |
 | `feedbacks` | Feedback dos usuários |

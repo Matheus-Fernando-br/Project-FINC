@@ -24,7 +24,7 @@ test("layout responsivo: páginas públicas e área logada sem rolagem horizonta
     expect(await sobra(page), `rolagem horizontal em ${rota}`).toBeLessThanOrEqual(1);
   }
   const seed = (Date.now() + Math.floor(Math.random() * 1000)) % 1_000_000;
-  await page.request.post("/api/auth/cadastro", {
+  const cadastro = await page.request.post("/api/auth/cadastro", {
     data: {
       nome: "Loja Responsiva",
       tipo_pessoa: "FISICA",
@@ -35,6 +35,9 @@ test("layout responsivo: páginas públicas e área logada sem rolagem horizonta
       aceite_termos: true,
     },
   });
+  expect(cadastro.status(), "cadastro (em produção há limite de 10 cadastros/hora por IP)").toBe(
+    201,
+  );
   for (const rota of [
     "/app",
     "/pdv",
@@ -49,6 +52,7 @@ test("layout responsivo: páginas públicas e área logada sem rolagem horizonta
   ]) {
     await page.goto(rota);
     await expect(page.locator("h1").first()).toBeVisible();
+    expect(page.url(), `sessão perdida em ${rota}`).not.toContain("/login");
     expect(await sobra(page), `rolagem horizontal em ${rota}`).toBeLessThanOrEqual(1);
   }
   const vw = page.viewportSize()!.width;

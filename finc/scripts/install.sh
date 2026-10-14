@@ -25,9 +25,11 @@ if [ ! -f .env ]; then
   SECRET=$(node -e "console.log(require('crypto').randomBytes(48).toString('base64'))")
   CERTKEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
   sed -i "s|^SESSION_SECRET=.*|SESSION_SECRET=${SECRET}|" .env
+  PGPASS=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
   sed -i "s|^CERT_ENCRYPTION_KEY=.*|CERT_ENCRYPTION_KEY=${CERTKEY}|" .env
+  sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${PGPASS}|" .env
   chmod 600 .env
-  echo "    .env criado com segredos aleatórios (permissão 600)."
+  echo "    .env criado com SESSION_SECRET, CERT_ENCRYPTION_KEY e POSTGRES_PASSWORD aleatórios (permissão 600)."
 else
   echo "==> .env já existe — mantido."
 fi

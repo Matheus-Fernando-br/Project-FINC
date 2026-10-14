@@ -39,6 +39,7 @@ test("ERP: fornecedor, compra, orçamento → pedido, PDV, relatórios e busca",
       aceite_termos: true,
     },
   });
+  expect(r.status(), "cadastro (em produção há limite de 10 cadastros/hora por IP)").toBe(201);
   const { csrfToken } = await r.json();
   const H = { "X-CSRF-Token": csrfToken };
   await page.request.put("/api/perfil", {

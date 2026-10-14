@@ -15,12 +15,13 @@
 - Emissão de boletos.
 - Matriz e filial (várias empresas por conta) e múltiplos usuários por empresa (equipe com permissões).
 - Acesso do contador com login próprio. Hoje ele recebe os documentos por e-mail.
-- Relatórios avançados exportáveis (DRE, fluxo de caixa por período). Já existem painel, financeiro e exportações CSV.
+- Custo médio e margem por produto (as compras registram o custo, mas ainda não alimentam a margem).
+- Devolução e troca no PDV (hoje feitas cancelando a NFC-e).
 - Internacionalização. A interface é só em pt-BR.
 
 ## Limitações conhecidas
 
-- **Seleção de itens na emissão:** os seletores carregam até 200 clientes, produtos e serviços ativos. Contas no BLACK com catálogos maiores precisarão de busca incremental no seletor.
+- **Seleção de itens na emissão, no PDV, em compras e em orçamentos:** os seletores carregam até 200 clientes, produtos e serviços ativos. Contas no BLACK com catálogos maiores precisarão de busca incremental no seletor.
 - **"Modo responder" do Telegram:** fica em memória por 15 minutos. Com várias instâncias da API, use o painel web de chamados.
 - **Notificações:** são atualizadas por consulta periódica (60 s no sino e 15 s no chat), sem WebSocket.
 - **`node-forge`:** há um alerta high sem correção publicada (função não utilizada). Acompanhe novas versões.
