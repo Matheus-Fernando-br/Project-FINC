@@ -1,5 +1,6 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+import type { ConnectionOptions } from "node:tls";
 import pg from "pg";
 
 /**
@@ -30,7 +31,16 @@ const NUMERIC = 1700;
 const INT8 = 20;
 const DATE = 1082;
 
-function createPg(url: string): Db {
+/** Remove parâmetros de SSL da URL para que a opção explícita prevaleça (o driver dá precedência à URL). */
+function semSslNaUrl(url: string): string {
+  const u = new URL(url);
+  for (const k of ["sslmode", "ssl", "sslcert", "sslkey", "sslrootcert", "uselibpqcompat"]) {
+    u.searchParams.delete(k);
+  }
+  return u.toString();
+}
+
+function createPg(url: string, ssl?: false | ConnectionOptions): Db {
   const types = {
     getTypeParser: (oid: number, format?: "text" | "binary") => {
       if (oid === NUMERIC) return (v: string) => Number(v);
@@ -40,7 +50,8 @@ function createPg(url: string): Db {
     },
   };
   const pool = new pg.Pool({
-    connectionString: url,
+    connectionString: ssl === undefined ? url : semSslNaUrl(url),
+    ...(ssl === undefined ? {} : { ssl }),
     max: 10,
     types: types as pg.CustomTypesConfig,
   });
@@ -123,8 +134,8 @@ async function createPglite(url: string): Promise<Db> {
   };
 }
 
-export async function createDb(url: string): Promise<Db> {
+export async function createDb(url: string, ssl?: false | ConnectionOptions): Promise<Db> {
   if (url.startsWith("pglite:")) return createPglite(url);
-  if (url.startsWith("postgres://") || url.startsWith("postgresql://")) return createPg(url);
+  if (url.startsWith("postgres://") || url.startsWith("postgresql://")) return createPg(url, ssl);
   throw new Error("DATABASE_URL deve começar com postgres://, postgresql:// ou pglite://");
 }

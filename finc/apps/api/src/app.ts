@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
-import { cookieSecure } from "./config.js";
+import { cookieSecure, trustProxy } from "./config.js";
 import type { AppContext } from "./context.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
 import { requireAdmin, requireAuth } from "./middleware/auth.js";
@@ -40,10 +40,7 @@ export function createApp(ctx: AppContext) {
   const app = express();
   const { cfg } = ctx;
   app.disable("x-powered-by");
-  app.set(
-    "trust proxy",
-    cfg.TRUST_PROXY === "true" ? true : cfg.TRUST_PROXY === "false" ? false : cfg.TRUST_PROXY,
-  );
+  app.set("trust proxy", trustProxy(cfg));
 
   app.use(
     helmet({

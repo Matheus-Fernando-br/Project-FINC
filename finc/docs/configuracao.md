@@ -22,7 +22,7 @@ Toda a configuração da FINC é feita por variáveis de ambiente.
 | `NODE_ENV` | `development` | Sim, em produção | Valores: `development`, `test` ou `production`. Em `production` acontece o seguinte: os cookies passam a ser `Secure`, HSTS e `upgrade-insecure-requests` são ativados, `SESSION_SECRET` vira obrigatório, PGlite e `RATE_LIMIT_DESATIVADO=true` são recusados, e o link de redefinição de senha nunca é gravado no log |
 | `PORT` | `3333` | Não | Porta HTTP da API. Com `SERVE_WEB=true`, também é a porta do site |
 | `HOST` | `0.0.0.0` | Não | Interface de escuta. Use `127.0.0.1` quando houver um proxy reverso na mesma máquina |
-| `APP_URL` | `http://localhost:5173` | Recomendada | Endereço público do site, **sem barra no final**. Usado nos links dos e-mails (redefinição de senha, notificações) e como origem liberada no CORS. Em produção: `https://finc.seudominio.com.br` |
+| `APP_URL` | `http://localhost:5173` | Recomendada | Endereço público do site, **sem barra no final**. Usado nos links dos e-mails (redefinição de senha, notificações) e como origem liberada no CORS. Em produção: `https://finc.seudominio.com.br`. No Render, se ficar vazia, a FINC usa a `RENDER_EXTERNAL_URL` que o próprio Render fornece |
 | `SERVE_WEB` | `false` | Sim, em produção | `true` faz a API entregar o site compilado (`apps/web/dist`) na mesma origem. É a configuração recomendada: cookies `SameSite=Lax` e CSRF funcionam sem ajustes |
 | `WEB_DIST_DIR` | vazio | Não | Caminho alternativo do build do site. Vazio significa `apps/web/dist` |
 | `TRUST_PROXY` | `loopback` | Atrás de proxy | Diz ao Express quem é o proxy, para ele usar o IP real do cliente (rate limit e auditoria). Valores: `true` (confia em qualquer proxy; use só se a API **não** estiver exposta diretamente), `false`, `loopback` (proxy na mesma máquina) ou um número de saltos, como `1` |
@@ -34,6 +34,8 @@ Toda a configuração da FINC é feita por variáveis de ambiente.
 |---|---|---|---|
 | `DATABASE_URL` | `pglite://./.data/pglite` | Sim | Conexão com o banco (formatos abaixo) |
 | `MIGRATIONS_DIR` | vazio | Não | Pasta alternativa das migrações. Vazio significa `db/migrations` |
+| `DATABASE_SSL` | vazio | Em bancos gerenciados | Criptografia da conexão com o PostgreSQL. Vazio: segue o `sslmode` da URL. `no-verify`: conexão cifrada sem validar o certificado (use no **Supabase**, cuja CA própria faz o `sslmode=require` falhar com `self-signed certificate`). `verify`: cifra e valida o certificado (informe `DATABASE_SSL_CA` se a CA não for pública). `false`: sem SSL. Quando definida, prevalece sobre o `sslmode` da URL |
+| `DATABASE_SSL_CA` | vazio | Não | Só com `DATABASE_SSL=verify`. Certificado da CA em PEM: o conteúdo (`-----BEGIN CERTIFICATE-----...`) ou o caminho do arquivo. No Supabase: *Project Settings › Database › SSL Configuration › Download certificate* |
 
 Formatos aceitos em `DATABASE_URL`:
 
@@ -41,7 +43,9 @@ Formatos aceitos em `DATABASE_URL`:
 |---|---|
 | `pglite://./.data/pglite` | **Desenvolvimento.** PostgreSQL embarcado, gravado em disco. O caminho é relativo à pasta do `.env`. Não exige instalar nada |
 | `pglite://memory` | Testes. Banco em memória, apagado ao encerrar |
-| `postgres://usuario:senha@host:5432/banco` | **Produção** (PostgreSQL 13 ou superior). Para SSL gerenciado, acrescente `?sslmode=require` |
+| `postgres://usuario:senha@host:5432/banco` | **Produção** (PostgreSQL 13 ou superior). Para SSL gerenciado, acrescente `?sslmode=require` ou use `DATABASE_SSL`. Caracteres especiais na senha (`@`, `#`, `/`, `?`, `%`) precisam ser codificados: `@` vira `%40`, `#` vira `%23` |
+
+**Render + Supabase:** veja o passo a passo em [deploy-render-supabase.md](deploy-render-supabase.md).
 
 As migrações são aplicadas automaticamente quando a API inicia. Também podem ser aplicadas manualmente com `npm run migrate`.
 

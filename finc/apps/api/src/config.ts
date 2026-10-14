@@ -1,4 +1,6 @@
 import { randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
+import type { ConnectionOptions } from "node:tls";
 import { z } from "zod";
 
 /**
@@ -18,6 +20,10 @@ const envSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   APP_URL: z.string().url().default("http://localhost:5173"),
   DATABASE_URL: z.string().min(1).default("pglite://./.data/pglite"),
+  // Vazio = segue o sslmode da URL. "false" | "no-verify" (cifra sem validar o certificado) | "verify".
+  DATABASE_SSL: z.enum(["", "false", "no-verify", "verify"]).default(""),
+  // CA para DATABASE_SSL=verify: conteúdo PEM ou caminho de arquivo (ex.: certificado do Supabase).
+  DATABASE_SSL_CA: z.string().optional(),
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET deve ter ao menos 32 caracteres").optional(),
   SESSION_TTL_HORAS: z.coerce.number().min(1).max(720).default(8),
   // Vazio = automático (Secure em produção). "false" permite testar em rede local sem TLS.
@@ -51,7 +57,9 @@ export class ConfigError extends Error {
 }
 
 export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | undefined>): Config {
-  const parsed = envSchema.safeParse(env);
+  // No Render, a URL pública do serviço vem pronta em RENDER_EXTERNAL_URL.
+  const appUrl = env.APP_URL || env.RENDER_EXTERNAL_URL || undefined;
+  const parsed = envSchema.safeParse({ ...env, APP_URL: appUrl });
   if (!parsed.success) {
     throw new ConfigError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`));
   }
@@ -75,6 +83,9 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
       "CERT_ENCRYPTION_KEY deve ser 32 bytes codificados em base64 (openssl rand -base64 32)",
     );
   }
+  if (cfg.DATABASE_SSL === "verify" && cfg.DATABASE_SSL_CA !== undefined && !cfg.DATABASE_SSL_CA) {
+    problemas.push("DATABASE_SSL_CA está vazio; remova-o ou informe o certificado PEM");
+  }
   if (problemas.length) throw new ConfigError(problemas);
   // Em desenvolvimento/teste, um segredo efêmero é aceitável (sessões caem ao reiniciar).
   const sessionSecret = cfg.SESSION_SECRET ?? `dev-${cryptoRandom()}`;
@@ -83,6 +94,33 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
 
 function cryptoRandom(): string {
   return randomBytes(32).toString("base64url");
+}
+
+/** Valor de "trust proxy" do Express: números viram contagem de saltos (ex.: "1" no Render). */
+export function trustProxy(cfg: Config): boolean | number | string {
+  const v = cfg.TRUST_PROXY.trim();
+  if (v === "true") return true;
+  if (v === "false") return false;
+  if (/^\d+$/.test(v)) return Number(v);
+  return v;
+}
+
+/**
+ * Opções de TLS do PostgreSQL. Quando DATABASE_SSL é definido, ele prevalece sobre o sslmode da URL
+ * (no driver pg, sslmode=require passou a validar o certificado, o que falha com a CA do Supabase).
+ */
+export function databaseSsl(cfg: Config): false | ConnectionOptions | undefined {
+  if (cfg.DATABASE_SSL === "false") return false;
+  if (cfg.DATABASE_SSL === "no-verify") return { rejectUnauthorized: false };
+  if (cfg.DATABASE_SSL === "verify") {
+    const ca = cfg.DATABASE_SSL_CA;
+    if (!ca) return { rejectUnauthorized: true };
+    return {
+      rejectUnauthorized: true,
+      ca: ca.includes("-----BEGIN") ? ca : readFileSync(ca, "utf8"),
+    };
+  }
+  return undefined;
 }
 
 /** Cookies Secure: explícito via COOKIE_SECURE ou, por padrão, ligado em produção. */

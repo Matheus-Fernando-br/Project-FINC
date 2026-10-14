@@ -96,6 +96,10 @@ bash scripts/prod.sh      # build + migrações + servidor (a API serve o front-
 
 Atrás de um proxy reverso HTTPS, defina `TRUST_PROXY=true` (ou o número de saltos). Em produção, os cookies saem automaticamente como `Secure`.
 
+### Opção C: Render + Supabase
+
+O arquivo `render.yaml` (na raiz do repositório) cria o serviço no Render. O banco fica no Supabase. Passo a passo completo: **[docs/deploy-render-supabase.md](docs/deploy-render-supabase.md)**.
+
 ### Administrador do suporte
 
 ```bash
@@ -153,6 +157,7 @@ finc/
 | Documento | Assunto |
 |---|---|
 | [docs/guia-de-uso.md](docs/guia-de-uso.md) | **Manual do usuário:** passo a passo de cada módulo |
+| [docs/deploy-render-supabase.md](docs/deploy-render-supabase.md) | **Publicar no Render com banco no Supabase** |
 | [docs/configuracao.md](docs/configuracao.md) | **Todas as variáveis de ambiente**, receitas por cenário (dev, Docker, Node + systemd) e checklist de produção |
 | [docs/arquitetura.md](docs/arquitetura.md) | Arquitetura, camadas, diagramas e fluxo de emissão |
 | [docs/api.md](docs/api.md) | Rotas REST e catálogo de erros |

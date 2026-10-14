@@ -1,0 +1,31 @@
+# Blueprint do Render para a FINC 2.0 (passo a passo: finc/docs/deploy-render-supabase.md).
+# Um único serviço entrega a API (/api) e o site, na mesma origem. O banco fica no Supabase.
+services:
+  - type: web
+    name: finc
+    runtime: node
+    plan: free
+    region: virginia
+    branch: claude/finc-reverse-engineering-q5jp2l
+    rootDir: finc
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_WEB
+        value: "true"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: no-verify
+      - key: CERT_ENCRYPTION_KEY
+        sync: false
