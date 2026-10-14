@@ -7,6 +7,8 @@ export function loadEnvFile(): void {
   for (const arquivo of candidatos) {
     if (existsSync(arquivo)) {
       process.loadEnvFile(arquivo);
+      // Caminhos relativos (ex.: DATABASE_URL=pglite://./.data/pglite) passam a ser relativos ao .env.
+      process.env.FINC_ROOT ??= path.dirname(arquivo);
       return;
     }
   }

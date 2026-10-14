@@ -22,15 +22,18 @@ type Status = "aberto" | "aceito" | "fechado";
 
 function teclado(id: string, status: Status): InlineKeyboard {
   if (status === "fechado") return { inline_keyboard: [] };
-  const primeiro = status === "aceito"
-    ? { text: "📝 Responder", callback_data: `RESPONDER:${id}` }
-    : { text: "✅ Aceitar", callback_data: `ACEITAR:${id}` };
+  const primeiro =
+    status === "aceito"
+      ? { text: "📝 Responder", callback_data: `RESPONDER:${id}` }
+      : { text: "✅ Aceitar", callback_data: `ACEITAR:${id}` };
   return { inline_keyboard: [[primeiro, { text: "🔒 Encerrar", callback_data: `FECHAR:${id}` }]] };
 }
 
 async function avisarTelegram(ctx: AppContext, texto: string, keyboard?: InlineKeyboard) {
   if (!ctx.telegram.enabled) return;
-  await ctx.telegram.sendMessage(texto, keyboard).catch((err) => ctx.logger.warn({ err }, "falha ao notificar Telegram"));
+  await ctx.telegram
+    .sendMessage(texto, keyboard)
+    .catch((err) => ctx.logger.warn({ err }, "falha ao notificar Telegram"));
 }
 
 async function gerarProtocolo(q: Queryable): Promise<string> {
@@ -52,33 +55,59 @@ async function chamadoComMensagens(q: Queryable, id: string, userId?: string) {
   );
   const c = rows[0];
   if (!c) throw naoEncontrado("Chamado");
-  c.mensagens = (await q.query("SELECT id, autor, mensagem, criado_em FROM chamado_mensagens WHERE chamado_id = $1 ORDER BY criado_em", [id])).rows;
+  c.mensagens = (
+    await q.query(
+      "SELECT id, autor, mensagem, criado_em FROM chamado_mensagens WHERE chamado_id = $1 ORDER BY criado_em",
+      [id],
+    )
+  ).rows;
   return c;
 }
 
 /** Ações da equipe de suporte (compartilhadas entre painel admin e bot do Telegram). */
-export async function acaoSuporte(ctx: AppContext, q: Queryable, req: Request | null, chamadoId: string, acao: "aceitar" | "fechar" | "responder", texto?: string) {
-  const { rows } = await q.query<{ id: string; usuario_id: string; status: Status; protocolo: string }>(
-    "SELECT id, usuario_id, status, protocolo FROM chamados WHERE id = $1 FOR UPDATE",
-    [chamadoId],
-  );
+export async function acaoSuporte(
+  ctx: AppContext,
+  q: Queryable,
+  req: Request | null,
+  chamadoId: string,
+  acao: "aceitar" | "fechar" | "responder",
+  texto?: string,
+) {
+  const { rows } = await q.query<{
+    id: string;
+    usuario_id: string;
+    status: Status;
+    protocolo: string;
+  }>("SELECT id, usuario_id, status, protocolo FROM chamados WHERE id = $1 FOR UPDATE", [
+    chamadoId,
+  ]);
   const c = rows[0];
   if (!c) throw naoEncontrado("Chamado");
   if (c.status === "fechado") throw regra("Chamado encerrado.");
   let mensagem: string;
   if (acao === "aceitar") {
-    await q.query("UPDATE chamados SET status='aceito', atualizado_em=now() WHERE id=$1", [chamadoId]);
+    await q.query("UPDATE chamados SET status='aceito', atualizado_em=now() WHERE id=$1", [
+      chamadoId,
+    ]);
     mensagem = "✅ Chamado aceito pelo atendente.";
   } else if (acao === "fechar") {
-    await q.query("UPDATE chamados SET status='fechado', atualizado_em=now() WHERE id=$1", [chamadoId]);
+    await q.query("UPDATE chamados SET status='fechado', atualizado_em=now() WHERE id=$1", [
+      chamadoId,
+    ]);
     mensagem = "🔒 Chamado encerrado pelo atendente.";
   } else {
     if (!texto?.trim()) throw regra("Mensagem vazia.");
-    if (c.status === "aberto") await q.query("UPDATE chamados SET status='aceito', atualizado_em=now() WHERE id=$1", [chamadoId]);
+    if (c.status === "aberto")
+      await q.query("UPDATE chamados SET status='aceito', atualizado_em=now() WHERE id=$1", [
+        chamadoId,
+      ]);
     else await q.query("UPDATE chamados SET atualizado_em=now() WHERE id=$1", [chamadoId]);
     mensagem = texto.trim().slice(0, 4000);
   }
-  await q.query("INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'suporte', $2)", [chamadoId, mensagem]);
+  await q.query(
+    "INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'suporte', $2)",
+    [chamadoId, mensagem],
+  );
   await notificar(ctx, q, c.usuario_id, {
     tipo: "suporte",
     titulo: `Chamado ${c.protocolo} atualizado`,
@@ -111,7 +140,10 @@ export function suporteRoutes(ctx: AppContext) {
         "INSERT INTO chamados (usuario_id, protocolo, categoria, assunto) VALUES ($1,$2,$3,$4) RETURNING id, protocolo",
         [uid(req), protocolo, input.categoria, input.assunto],
       );
-      await q.query("INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'cliente', $2)", [rows[0]!.id, input.mensagem]);
+      await q.query(
+        "INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'cliente', $2)",
+        [rows[0]!.id, input.mensagem],
+      );
       await audit(q, req, uid(req), "suporte.abrir", "chamados", rows[0]!.id);
       return rows[0]!;
     });
@@ -123,23 +155,37 @@ export function suporteRoutes(ctx: AppContext) {
     res.status(201).json(await chamadoComMensagens(db, chamado.id, uid(req)));
   });
 
-  r.get("/chamados/:id", async (req, res) => res.json(await chamadoComMensagens(db, req.params.id, uid(req))));
+  r.get("/chamados/:id", async (req, res) =>
+    res.json(await chamadoComMensagens(db, req.params.id, uid(req))),
+  );
 
   r.post("/chamados/:id/mensagens", async (req, res) => {
     const { mensagem } = parse(mensagemSchema, req.body);
     const c = await chamadoComMensagens(db, req.params.id, uid(req));
     if (c.status === "fechado") throw regra("Chamado encerrado. Abra um novo chamado se precisar.");
-    await db.query("INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'cliente', $2)", [req.params.id, mensagem]);
+    await db.query(
+      "INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'cliente', $2)",
+      [req.params.id, mensagem],
+    );
     await db.query("UPDATE chamados SET atualizado_em = now() WHERE id = $1", [req.params.id]);
-    await avisarTelegram(ctx, `📩 Nova mensagem no chamado #${c.protocolo}\n👤 ${req.auth!.nome}\n\n💬 ${mensagem}`, teclado(req.params.id, c.status as Status));
+    await avisarTelegram(
+      ctx,
+      `📩 Nova mensagem no chamado #${c.protocolo}\n👤 ${req.auth!.nome}\n\n💬 ${mensagem}`,
+      teclado(req.params.id, c.status as Status),
+    );
     res.status(201).json(await chamadoComMensagens(db, req.params.id, uid(req)));
   });
 
   r.post("/chamados/:id/encerrar", async (req, res) => {
     const c = await chamadoComMensagens(db, req.params.id, uid(req));
     if (c.status !== "fechado") {
-      await db.query("UPDATE chamados SET status='fechado', atualizado_em=now() WHERE id=$1", [req.params.id]);
-      await db.query("INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'cliente', $2)", [req.params.id, "🔒 Chamado encerrado pelo cliente."]);
+      await db.query("UPDATE chamados SET status='fechado', atualizado_em=now() WHERE id=$1", [
+        req.params.id,
+      ]);
+      await db.query(
+        "INSERT INTO chamado_mensagens (chamado_id, autor, mensagem) VALUES ($1, 'cliente', $2)",
+        [req.params.id, "🔒 Chamado encerrado pelo cliente."],
+      );
       await avisarTelegram(ctx, `🔒 Chamado #${c.protocolo} encerrado pelo cliente.`);
       await audit(db, req, uid(req), "suporte.encerrar", "chamados", req.params.id);
     }
@@ -148,8 +194,14 @@ export function suporteRoutes(ctx: AppContext) {
 
   r.post("/feedback", async (req, res) => {
     const { mensagem } = parse(feedbackSchema, req.body);
-    await db.query("INSERT INTO feedbacks (usuario_id, mensagem) VALUES ($1, $2)", [uid(req), mensagem]);
-    await avisarTelegram(ctx, `💡 FEEDBACK\n👤 ${req.auth!.nome} <${req.auth!.email}>\n\n${mensagem}`);
+    await db.query("INSERT INTO feedbacks (usuario_id, mensagem) VALUES ($1, $2)", [
+      uid(req),
+      mensagem,
+    ]);
+    await avisarTelegram(
+      ctx,
+      `💡 FEEDBACK\n👤 ${req.auth!.nome} <${req.auth!.email}>\n\n${mensagem}`,
+    );
     res.status(201).json({ ok: true, message: "Obrigado! Seu feedback foi registrado." });
   });
 
@@ -162,7 +214,10 @@ export function adminRoutes(ctx: AppContext) {
   const { db } = ctx;
 
   r.get("/chamados", async (req, res) => {
-    const status = z.enum(["aberto", "aceito", "fechado"]).optional().parse(req.query.status || undefined);
+    const status = z
+      .enum(["aberto", "aceito", "fechado"])
+      .optional()
+      .parse(req.query.status || undefined);
     const { rows } = await db.query(
       `SELECT c.id, c.protocolo, c.categoria, c.assunto, c.status, c.criado_em, c.atualizado_em, u.nome AS usuario_nome, u.email AS usuario_email
          FROM chamados c JOIN usuarios u ON u.id = c.usuario_id ${status ? "WHERE c.status = $1" : ""}
@@ -172,7 +227,9 @@ export function adminRoutes(ctx: AppContext) {
     res.json(rows);
   });
 
-  r.get("/chamados/:id", async (req, res) => res.json(await chamadoComMensagens(db, req.params.id)));
+  r.get("/chamados/:id", async (req, res) =>
+    res.json(await chamadoComMensagens(db, req.params.id)),
+  );
 
   r.post("/chamados/:id/:acao", async (req, res) => {
     const acao = z.enum(["aceitar", "fechar", "responder"]).parse(req.params.acao);
@@ -202,11 +259,15 @@ export function telegramWebhookRoutes(ctx: AppContext) {
   r.post("/", async (req, res) => {
     const secret = ctx.cfg.TELEGRAM_WEBHOOK_SECRET;
     if (!secret || !ctx.cfg.TELEGRAM_BOT_TOKEN) throw new AppError("INTEGRACAO_NAO_CONFIGURADA");
-    if (!safeEqual(req.get("x-telegram-bot-api-secret-token") ?? "", secret)) throw new AppError("PROIBIDO");
+    if (!safeEqual(req.get("x-telegram-bot-api-secret-token") ?? "", secret))
+      throw new AppError("PROIBIDO");
     const update = req.body ?? {};
     // Só aceita comandos vindos do chat configurado da equipe.
-    const chatOrigem = String(update.callback_query?.message?.chat?.id ?? update.message?.chat?.id ?? "");
-    if (ctx.cfg.TELEGRAM_CHAT_ID && chatOrigem !== String(ctx.cfg.TELEGRAM_CHAT_ID)) return res.json({ ok: true, ignorado: true });
+    const chatOrigem = String(
+      update.callback_query?.message?.chat?.id ?? update.message?.chat?.id ?? "",
+    );
+    if (ctx.cfg.TELEGRAM_CHAT_ID && chatOrigem !== String(ctx.cfg.TELEGRAM_CHAT_ID))
+      return res.json({ ok: true, ignorado: true });
 
     try {
       if (update.callback_query) {
@@ -223,9 +284,16 @@ export function telegramWebhookRoutes(ctx: AppContext) {
         if (!a) return res.json({ ok: true });
         const novo = await ctx.db.tx((q) => acaoSuporte(ctx, q, null, chamadoId, a));
         if (cq.message?.chat?.id && cq.message?.message_id) {
-          await ctx.telegram.editKeyboard(cq.message.chat.id, cq.message.message_id, teclado(chamadoId, novo));
+          await ctx.telegram.editKeyboard(
+            cq.message.chat.id,
+            cq.message.message_id,
+            teclado(chamadoId, novo),
+          );
         }
-        await ctx.telegram.answerCallback(cq.id, a === "aceitar" ? "Chamado aceito ✅" : "Chamado encerrado 🔒");
+        await ctx.telegram.answerCallback(
+          cq.id,
+          a === "aceitar" ? "Chamado aceito ✅" : "Chamado encerrado 🔒",
+        );
         return res.json({ ok: true });
       }
       const msg = update.message;

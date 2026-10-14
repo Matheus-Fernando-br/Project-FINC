@@ -6,7 +6,10 @@ import { migrate } from "./db/migrate.js";
 import { createMailer } from "./services/email.js";
 import { createTelegram } from "./services/telegram.js";
 
-export async function buildContext(env: Record<string, string | undefined>, overrides: Partial<AppContext> = {}): Promise<AppContext> {
+export async function buildContext(
+  env: Record<string, string | undefined>,
+  overrides: Partial<AppContext> = {},
+): Promise<AppContext> {
   const cfg: Config = parseConfig(env);
   const logger = pino({ level: cfg.LOG_LEVEL, redact: ["*.senha", "*.password", "*.token"] });
   const db = overrides.db ?? (await createDb(cfg.DATABASE_URL));

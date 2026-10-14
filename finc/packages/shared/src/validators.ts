@@ -23,7 +23,8 @@ export function isValidCNPJ(value: unknown): boolean {
   const s = onlyDigits(value);
   if (s.length !== 14 || /^(\d)\1{13}$/.test(s)) return false;
   const calc = (len: number) => {
-    const weights = len === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const weights =
+      len === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
     let sum = 0;
     for (let i = 0; i < len; i++) sum += Number(s[i]) * (weights[i] ?? 0);
     const rest = sum % 11;

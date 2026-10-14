@@ -91,17 +91,26 @@ export function nomeArquivo(n: NotaCompleta, ext: "pdf" | "xml"): string {
 
 function endereco(p: Parte): string {
   const linha1 = [p.logradouro, p.numero, p.complemento].filter(Boolean).join(", ");
-  const linha2 = [p.bairro, p.cidade && p.uf ? `${p.cidade}/${p.uf}` : p.cidade ?? p.uf, p.cep ? `CEP ${formatCEP(p.cep)}` : ""]
+  const linha2 = [
+    p.bairro,
+    p.cidade && p.uf ? `${p.cidade}/${p.uf}` : (p.cidade ?? p.uf),
+    p.cep ? `CEP ${formatCEP(p.cep)}` : "",
+  ]
     .filter(Boolean)
     .join(" — ");
   return [linha1, linha2].filter(Boolean).join("\n") || "Endereço não informado";
 }
 
-const dataBR = (d: Date | string | null) => (d ? new Date(d).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "—");
+const dataBR = (d: Date | string | null) =>
+  d ? new Date(d).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "—";
 
 export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 36, info: { Title: `${n.tipo} ${numeroFormatado(n)}`, Producer: "FINC" } });
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: 36,
+      info: { Title: `${n.tipo} ${numeroFormatado(n)}`, Producer: "FINC" },
+    });
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -113,7 +122,11 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
     const marcaDagua = (texto: string, cor: string) => {
       doc.save();
       doc.rotate(-35, { origin: [doc.page.width / 2, doc.page.height / 2] });
-      doc.fontSize(54).fillColor(cor).opacity(0.12).text(texto, 0, doc.page.height / 2 - 30, { width: doc.page.width, align: "center" });
+      doc
+        .fontSize(54)
+        .fillColor(cor)
+        .opacity(0.12)
+        .text(texto, 0, doc.page.height / 2 - 30, { width: doc.page.width, align: "center" });
       doc.restore();
       doc.opacity(1);
     };
@@ -124,14 +137,27 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
     doc.rect(36, 36, W, 56).fill(verde);
     doc.fillColor("#ffffff").fontSize(20).text("FINC", 48, 48);
     doc.fontSize(10).text(`Documento auxiliar de ${n.tipo}`, 48, 72);
-    doc.fontSize(12).text(`Nº ${numeroFormatado(n)}  ·  Série ${n.serie}`, 300, 48, { width: W - 276, align: "right" });
-    doc.fontSize(9).text(`Status: ${n.status.toUpperCase()}  ·  Ambiente: ${n.ambiente}`, 300, 68, { width: W - 276, align: "right" });
+    doc.fontSize(12).text(`Nº ${numeroFormatado(n)}  ·  Série ${n.serie}`, 300, 48, {
+      width: W - 276,
+      align: "right",
+    });
+    doc.fontSize(9).text(`Status: ${n.status.toUpperCase()}  ·  Ambiente: ${n.ambiente}`, 300, 68, {
+      width: W - 276,
+      align: "right",
+    });
 
-    doc.fillColor("#b45309").fontSize(8).text(AVISO_SEM_VALOR, 36, 100, { width: W, align: "center" });
+    doc
+      .fillColor("#b45309")
+      .fontSize(8)
+      .text(AVISO_SEM_VALOR, 36, 100, { width: W, align: "center" });
 
     const bloco = (titulo: string, p: Parte, y: number) => {
       doc.fillColor(verde).fontSize(10).text(titulo, 36, y);
-      doc.moveTo(36, y + 13).lineTo(36 + W, y + 13).strokeColor("#cbd5e1").stroke();
+      doc
+        .moveTo(36, y + 13)
+        .lineTo(36 + W, y + 13)
+        .strokeColor("#cbd5e1")
+        .stroke();
       doc.fillColor("#0f172a").fontSize(9);
       doc.text(`${p.nome ?? "—"}`, 36, y + 18, { continued: false });
       const ids = [
@@ -148,12 +174,15 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
 
     let y = bloco("EMITENTE", n.emitente, 118);
     y = bloco("DESTINATÁRIO / TOMADOR", n.destinatario, y);
-    doc.fillColor("#0f172a").fontSize(9).text(
-      `Natureza da operação: ${n.natureza_operacao ?? "—"}     Emissão: ${dataBR(n.data_emissao)}`,
-      36,
-      y,
-      { width: W },
-    );
+    doc
+      .fillColor("#0f172a")
+      .fontSize(9)
+      .text(
+        `Natureza da operação: ${n.natureza_operacao ?? "—"}     Emissão: ${dataBR(n.data_emissao)}`,
+        36,
+        y,
+        { width: W },
+      );
     y = doc.y + 12;
 
     // Tabela de itens
@@ -172,27 +201,48 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
       doc.fontSize(8).fillColor(header ? "#ffffff" : "#0f172a");
       vals.forEach((v, i) => {
         const c = cols[i]!;
-        doc.text(v, x + 2, yy + 3, { width: c.w - 4, align: i >= 4 ? "right" : "left", lineBreak: !header && i === 1 });
+        doc.text(v, x + 2, yy + 3, {
+          width: c.w - 4,
+          align: i >= 4 ? "right" : "left",
+          lineBreak: !header && i === 1,
+        });
         x += c.w;
       });
     };
     doc.rect(36, y, W, 16).fill(verde);
-    linha(cols.map((c) => c.t), y, true);
+    linha(
+      cols.map((c) => c.t),
+      y,
+      true,
+    );
     y += 18;
     for (const it of n.itens) {
       if (y > doc.page.height - 200) {
         doc.addPage();
         y = 36;
       }
-      const fiscal = it.tipo === "servico" ? it.codigo_servico ?? "" : `${it.ncm ?? ""}/${it.cfop ?? ""}`;
+      const fiscal =
+        it.tipo === "servico" ? (it.codigo_servico ?? "") : `${it.ncm ?? ""}/${it.cfop ?? ""}`;
       const aliq = it.tipo === "servico" ? it.aliquota_iss : it.icms;
       linha(
-        [String(it.ordem), it.descricao + (it.info ? ` — ${it.info}` : ""), fiscal, it.unidade ?? "", String(it.quantidade),
-          formatBRL(it.valor_unitario), aliq === null ? "—" : String(aliq), formatBRL(it.subtotal)],
+        [
+          String(it.ordem),
+          it.descricao + (it.info ? ` — ${it.info}` : ""),
+          fiscal,
+          it.unidade ?? "",
+          String(it.quantidade),
+          formatBRL(it.valor_unitario),
+          aliq === null ? "—" : String(aliq),
+          formatBRL(it.subtotal),
+        ],
         y,
       );
       y = Math.max(doc.y, y + 14) + 2;
-      doc.moveTo(36, y).lineTo(36 + W, y).strokeColor("#e2e8f0").stroke();
+      doc
+        .moveTo(36, y)
+        .lineTo(36 + W, y)
+        .strokeColor("#e2e8f0")
+        .stroke();
       y += 2;
     }
 
@@ -216,7 +266,10 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
       y += 13;
     }
     doc.rect(300, y + 2, W - 264, 20).fill(verde);
-    doc.fillColor("#ffffff").fontSize(11).text("TOTAL DO DOCUMENTO", 306, y + 7);
+    doc
+      .fillColor("#ffffff")
+      .fontSize(11)
+      .text("TOTAL DO DOCUMENTO", 306, y + 7);
     doc.text(formatBRL(n.total), 450, y + 7, { width: W - 420, align: "right" });
     y += 32;
 
@@ -224,12 +277,14 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
     const t = n.transporte ?? {};
     if (n.tipo !== "NFS-e") {
       doc.fillColor(verde).text("TRANSPORTE", 36, y);
-      doc.fillColor("#0f172a").text(
-        t.incluir_frete
-          ? `Modalidade: 0 - Por conta do remetente · Transportador: ${t.nome ?? "—"} ${t.cpf_cnpj ? `(${formatCpfCnpj(t.cpf_cnpj)})` : ""} · Placa: ${t.placa ?? "—"} · Peso bruto: ${t.peso_bruto ?? "—"} · Peso líquido: ${t.peso_liquido ?? "—"}${t.info ? `\n${t.info}` : ""}`
-          : "Modalidade: 9 - Sem frete",
-        { width: W },
-      );
+      doc
+        .fillColor("#0f172a")
+        .text(
+          t.incluir_frete
+            ? `Modalidade: 0 - Por conta do remetente · Transportador: ${t.nome ?? "—"} ${t.cpf_cnpj ? `(${formatCpfCnpj(t.cpf_cnpj)})` : ""} · Placa: ${t.placa ?? "—"} · Peso bruto: ${t.peso_bruto ?? "—"} · Peso líquido: ${t.peso_liquido ?? "—"}${t.info ? `\n${t.info}` : ""}`
+            : "Modalidade: 9 - Sem frete",
+          { width: W },
+        );
       y = doc.y + 8;
     }
     if (n.observacoes) {
@@ -238,12 +293,22 @@ export function gerarPdf(n: NotaCompleta): Promise<Buffer> {
       y = doc.y + 8;
     }
     if (n.status === "cancelada" && n.motivo_cancelamento) {
-      doc.fillColor("#b91c1c").text(`Cancelada. Justificativa: ${n.motivo_cancelamento}`, 36, y, { width: W });
+      doc
+        .fillColor("#b91c1c")
+        .text(`Cancelada. Justificativa: ${n.motivo_cancelamento}`, 36, y, { width: W });
     }
-    doc.fillColor("#64748b").fontSize(7).text(`Identificador interno: ${n.id} · Gerado pela FINC em ${dataBR(new Date())}`, 36, doc.page.height - 50, {
-      width: W,
-      align: "center",
-    });
+    doc
+      .fillColor("#64748b")
+      .fontSize(7)
+      .text(
+        `Identificador interno: ${n.id} · Gerado pela FINC em ${dataBR(new Date())}`,
+        36,
+        doc.page.height - 50,
+        {
+          width: W,
+          align: "center",
+        },
+      );
     doc.end();
   });
 }

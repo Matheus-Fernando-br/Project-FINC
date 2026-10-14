@@ -26,12 +26,22 @@ async function carregar(q: Queryable, userId: string, id: string, lock = false) 
   );
   const p = rows[0];
   if (!p) throw naoEncontrado("Pedido");
-  p.itens = (await q.query("SELECT * FROM pedido_itens WHERE pedido_id = $1 ORDER BY ordem", [id])).rows;
+  p.itens = (
+    await q.query("SELECT * FROM pedido_itens WHERE pedido_id = $1 ORDER BY ordem", [id])
+  ).rows;
   return p;
 }
 
-async function gravarItens(q: Queryable, userId: string, pedidoId: string, input: z.infer<typeof pedidoSchema>) {
-  const { rows: cli } = await q.query("SELECT id FROM clientes WHERE id = $1 AND usuario_id = $2", [input.cliente_id, userId]);
+async function gravarItens(
+  q: Queryable,
+  userId: string,
+  pedidoId: string,
+  input: z.infer<typeof pedidoSchema>,
+) {
+  const { rows: cli } = await q.query("SELECT id FROM clientes WHERE id = $1 AND usuario_id = $2", [
+    input.cliente_id,
+    userId,
+  ]);
   if (!cli[0]) throw regra("Cliente não encontrado.");
   const itens = await resolverItens(q, userId, null, input.itens);
   await q.query("DELETE FROM pedido_itens WHERE pedido_id = $1", [pedidoId]);
@@ -39,14 +49,32 @@ async function gravarItens(q: Queryable, userId: string, pedidoId: string, input
     await q.query(
       `INSERT INTO pedido_itens (pedido_id, ordem, tipo, produto_id, servico_id, descricao, quantidade, valor_unitario, subtotal)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [pedidoId, i.ordem, i.tipo, i.produto_id, i.servico_id, i.descricao, i.quantidade, i.valor_unitario, i.subtotal],
+      [
+        pedidoId,
+        i.ordem,
+        i.tipo,
+        i.produto_id,
+        i.servico_id,
+        i.descricao,
+        i.quantidade,
+        i.valor_unitario,
+        i.subtotal,
+      ],
     );
   }
   const bruto = itens.reduce((s, i) => s + i.subtotal, 0);
   const total = Math.max(0, Math.round((bruto - (input.desconto ?? 0)) * 100) / 100);
   await q.query(
     "UPDATE pedidos SET cliente_id=$3, data_pedido=COALESCE($4::date, data_pedido), desconto=$5, observacoes=$6, total=$7, atualizado_em=now() WHERE id=$1 AND usuario_id=$2",
-    [pedidoId, userId, input.cliente_id, input.data_pedido ?? null, input.desconto ?? 0, input.observacoes ?? null, total],
+    [
+      pedidoId,
+      userId,
+      input.cliente_id,
+      input.data_pedido ?? null,
+      input.desconto ?? 0,
+      input.observacoes ?? null,
+      total,
+    ],
   );
 }
 
@@ -57,7 +85,10 @@ export function pedidosRoutes(ctx: AppContext) {
   r.get("/", async (req, res) => {
     const params: unknown[] = [uid(req)];
     let filtro = "";
-    if (typeof req.query.status === "string" && ["aberto", "faturado", "cancelado"].includes(req.query.status)) {
+    if (
+      typeof req.query.status === "string" &&
+      ["aberto", "faturado", "cancelado"].includes(req.query.status)
+    ) {
       params.push(req.query.status);
       filtro = "AND p.status = $2";
     }
@@ -104,7 +135,9 @@ export function pedidosRoutes(ctx: AppContext) {
     await db.tx(async (q) => {
       const p = await carregar(q, uid(req), req.params.id, true);
       if (p.status !== "aberto") throw regra("Somente pedidos em aberto podem ser cancelados.");
-      await q.query("UPDATE pedidos SET status='cancelado', atualizado_em=now() WHERE id=$1", [req.params.id]);
+      await q.query("UPDATE pedidos SET status='cancelado', atualizado_em=now() WHERE id=$1", [
+        req.params.id,
+      ]);
       await audit(q, req, uid(req), "pedidos.cancelar", "pedidos", req.params.id);
     });
     res.json(await carregar(db, uid(req), req.params.id));
@@ -116,24 +149,44 @@ export function pedidosRoutes(ctx: AppContext) {
     const notaId = await db.tx(async (q) => {
       const p = await carregar(q, uid(req), req.params.id, true);
       if (p.status !== "aberto") throw regra("Este pedido já foi faturado ou cancelado.");
-      const itens = p.itens as { tipo: "produto" | "servico"; produto_id: string | null; servico_id: string | null; quantidade: number; valor_unitario: number }[];
+      const itens = p.itens as {
+        tipo: "produto" | "servico";
+        produto_id: string | null;
+        servico_id: string | null;
+        quantidade: number;
+        valor_unitario: number;
+      }[];
       const incompat = itens.filter((i) => !tipoItemPermitido(tipo, i.tipo));
       if (incompat.length) {
-        throw regra(tipo === "NFS-e" ? "NFS-e aceita apenas serviços: o pedido contém produtos." : `${tipo} aceita apenas produtos: o pedido contém serviços.`);
+        throw regra(
+          tipo === "NFS-e"
+            ? "NFS-e aceita apenas serviços: o pedido contém produtos."
+            : `${tipo} aceita apenas produtos: o pedido contém serviços.`,
+        );
       }
       if (!p.cliente_id) throw regra("O cliente deste pedido foi excluído.");
       const body = {
         tipo,
         cliente_id: p.cliente_id,
-        itens: itens.map((i) => ({ produto_id: i.produto_id, servico_id: i.servico_id, quantidade: Number(i.quantidade), valor_unitario: Number(i.valor_unitario) })),
+        itens: itens.map((i) => ({
+          produto_id: i.produto_id,
+          servico_id: i.servico_id,
+          quantidade: Number(i.quantidade),
+          valor_unitario: Number(i.valor_unitario),
+        })),
         desconto_incondicional: Number(p.desconto),
         observacoes: `Referente ao pedido nº ${p.numero}${p.observacoes ? `. ${p.observacoes}` : ""}`,
         gerar_financeiro: true,
       };
       // Reaproveita o fluxo de rascunho de nota (mesmas validações).
       const nid = await criarRascunho(q, uid(req), body);
-      await q.query("UPDATE pedidos SET status='faturado', nota_id=$2, atualizado_em=now() WHERE id=$1", [req.params.id, nid]);
-      await audit(q, req, uid(req), "pedidos.gerar_nota", "pedidos", req.params.id, { nota_id: nid });
+      await q.query(
+        "UPDATE pedidos SET status='faturado', nota_id=$2, atualizado_em=now() WHERE id=$1",
+        [req.params.id, nid],
+      );
+      await audit(q, req, uid(req), "pedidos.gerar_nota", "pedidos", req.params.id, {
+        nota_id: nid,
+      });
       return nid;
     });
     res.status(201).json({ nota_id: notaId });

@@ -59,11 +59,15 @@ export function parseConfig(env: NodeJS.ProcessEnv | Record<string, string | und
   if (cfg.NODE_ENV === "production") {
     if (!cfg.SESSION_SECRET) problemas.push("SESSION_SECRET é obrigatório em produção");
     if (cfg.DATABASE_URL.startsWith("pglite:")) {
-      problemas.push("Em produção use PostgreSQL (DATABASE_URL=postgres://...); PGlite é apenas para desenvolvimento/testes");
+      problemas.push(
+        "Em produção use PostgreSQL (DATABASE_URL=postgres://...); PGlite é apenas para desenvolvimento/testes",
+      );
     }
   }
   if (cfg.CERT_ENCRYPTION_KEY && Buffer.from(cfg.CERT_ENCRYPTION_KEY, "base64").length !== 32) {
-    problemas.push("CERT_ENCRYPTION_KEY deve ser 32 bytes codificados em base64 (openssl rand -base64 32)");
+    problemas.push(
+      "CERT_ENCRYPTION_KEY deve ser 32 bytes codificados em base64 (openssl rand -base64 32)",
+    );
   }
   if (problemas.length) throw new ConfigError(problemas);
   // Em desenvolvimento/teste, um segredo efêmero é aceitável (sessões caem ao reiniciar).

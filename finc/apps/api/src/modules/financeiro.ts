@@ -61,19 +61,35 @@ export function financeiroRoutes(ctx: AppContext) {
       [uid(req)],
     );
     const s = rows[0] as Record<string, number>;
-    res.json({ ...s, saldo_previsto: Number(s.a_receber) - Number(s.a_pagar), saldo_mes: Number(s.recebido_mes) - Number(s.pago_mes) });
+    res.json({
+      ...s,
+      saldo_previsto: Number(s.a_receber) - Number(s.a_pagar),
+      saldo_mes: Number(s.recebido_mes) - Number(s.pago_mes),
+    });
   });
 
   r.post("/contas", async (req, res) => {
     const c = parse(contaSchema, req.body);
     if (c.cliente_id) {
-      const ok = await db.query("SELECT 1 FROM clientes WHERE id = $1 AND usuario_id = $2", [c.cliente_id, uid(req)]);
+      const ok = await db.query("SELECT 1 FROM clientes WHERE id = $1 AND usuario_id = $2", [
+        c.cliente_id,
+        uid(req),
+      ]);
       if (!ok.rows[0]) throw regra("Cliente não encontrado.");
     }
     const { rows } = await db.query<{ id: string }>(
       `INSERT INTO contas (usuario_id, tipo, descricao, valor, vencimento, categoria, cliente_id, observacoes)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [uid(req), c.tipo, c.descricao, c.valor, c.vencimento, c.categoria ?? null, c.cliente_id ?? null, c.observacoes ?? null],
+      [
+        uid(req),
+        c.tipo,
+        c.descricao,
+        c.valor,
+        c.vencimento,
+        c.categoria ?? null,
+        c.cliente_id ?? null,
+        c.observacoes ?? null,
+      ],
     );
     await audit(db, req, uid(req), "contas.criar", "contas", rows[0]!.id);
     res.status(201).json(rows[0]);
@@ -83,12 +99,24 @@ export function financeiroRoutes(ctx: AppContext) {
     const c = parse(contaSchema, req.body);
     const out = await db.tx(async (q) => {
       const atual = await contaDoUsuario(q, uid(req), req.params.id);
-      if (atual.status !== "aberta") throw regra("Somente lançamentos em aberto podem ser editados.");
-      if (atual.nota_id) throw regra("Lançamentos gerados por documento fiscal só podem ter a baixa registrada.");
+      if (atual.status !== "aberta")
+        throw regra("Somente lançamentos em aberto podem ser editados.");
+      if (atual.nota_id)
+        throw regra("Lançamentos gerados por documento fiscal só podem ter a baixa registrada.");
       const { rows } = await q.query(
         `UPDATE contas SET tipo=$3, descricao=$4, valor=$5, vencimento=$6, categoria=$7, cliente_id=$8, observacoes=$9, atualizado_em=now()
           WHERE id=$1 AND usuario_id=$2 RETURNING *`,
-        [req.params.id, uid(req), c.tipo, c.descricao, c.valor, c.vencimento, c.categoria ?? null, c.cliente_id ?? null, c.observacoes ?? null],
+        [
+          req.params.id,
+          uid(req),
+          c.tipo,
+          c.descricao,
+          c.valor,
+          c.vencimento,
+          c.categoria ?? null,
+          c.cliente_id ?? null,
+          c.observacoes ?? null,
+        ],
       );
       return rows[0];
     });
@@ -100,7 +128,8 @@ export function financeiroRoutes(ctx: AppContext) {
     const b = parse(baixaContaSchema, req.body ?? {});
     await db.tx(async (q) => {
       const atual = await contaDoUsuario(q, uid(req), req.params.id);
-      if (atual.status !== "aberta") throw regra("Somente lançamentos em aberto podem ser baixados.");
+      if (atual.status !== "aberta")
+        throw regra("Somente lançamentos em aberto podem ser baixados.");
       await q.query(
         "UPDATE contas SET status='paga', data_pagamento=COALESCE($3::date, CURRENT_DATE), forma_pagamento=$4, atualizado_em=now() WHERE id=$1 AND usuario_id=$2",
         [req.params.id, uid(req), b.data_pagamento ?? null, b.forma_pagamento ?? null],
@@ -114,7 +143,10 @@ export function financeiroRoutes(ctx: AppContext) {
     await db.tx(async (q) => {
       const atual = await contaDoUsuario(q, uid(req), req.params.id);
       if (atual.status !== "paga") throw regra("Somente lançamentos pagos podem ser estornados.");
-      await q.query("UPDATE contas SET status='aberta', data_pagamento=NULL, forma_pagamento=NULL, atualizado_em=now() WHERE id=$1", [req.params.id]);
+      await q.query(
+        "UPDATE contas SET status='aberta', data_pagamento=NULL, forma_pagamento=NULL, atualizado_em=now() WHERE id=$1",
+        [req.params.id],
+      );
       await audit(q, req, uid(req), "contas.estornar", "contas", req.params.id);
     });
     res.json({ ok: true });
@@ -123,7 +155,8 @@ export function financeiroRoutes(ctx: AppContext) {
   r.delete("/contas/:id", async (req, res) => {
     await db.tx(async (q) => {
       const atual = await contaDoUsuario(q, uid(req), req.params.id);
-      if (atual.nota_id) throw regra("Lançamentos de documento fiscal são cancelados junto com o documento.");
+      if (atual.nota_id)
+        throw regra("Lançamentos de documento fiscal são cancelados junto com o documento.");
       if (atual.status === "paga") throw regra("Estorne o lançamento antes de excluí-lo.");
       await q.query("DELETE FROM contas WHERE id = $1", [req.params.id]);
       await audit(q, req, uid(req), "contas.excluir", "contas", req.params.id);
@@ -140,7 +173,17 @@ export function dashboardRoutes(ctx: AppContext) {
   const { db } = ctx;
   r.get("/", async (req, res) => {
     const id = uid(req);
-    const [faturamento, topClientes, topItens, porTipo, financeiro, estoqueBaixo, plano, uso, recentes] = await Promise.all([
+    const [
+      faturamento,
+      topClientes,
+      topItens,
+      porTipo,
+      financeiro,
+      estoqueBaixo,
+      plano,
+      uso,
+      recentes,
+    ] = await Promise.all([
       db.query(
         `SELECT to_char(m, 'YYYY-MM') AS mes, COALESCE(sum(n.total), 0) AS total, count(n.id)::int AS quantidade
            FROM generate_series(date_trunc('month', now()) - interval '11 months', date_trunc('month', now()), interval '1 month') m

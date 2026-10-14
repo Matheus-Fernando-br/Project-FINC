@@ -20,7 +20,11 @@ export interface Plano {
 }
 
 /** null = ilimitado */
-export function dentroDoLimite(limite: number | null | undefined, usoAtual: number, acrescimo = 1): boolean {
+export function dentroDoLimite(
+  limite: number | null | undefined,
+  usoAtual: number,
+  acrescimo = 1,
+): boolean {
   if (limite === null || limite === undefined) return true;
   return usoAtual + acrescimo <= limite;
 }

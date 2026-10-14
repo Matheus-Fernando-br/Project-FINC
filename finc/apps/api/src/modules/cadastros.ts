@@ -21,7 +21,17 @@ export const clientesDef: CrudDef = {
   tabela: "clientes",
   entidade: "Cliente",
   schema: clienteSchema,
-  colunas: ["nome_social", "tipo_pessoa", "cpf_cnpj", "inscricao_estadual", "email", "telefone", "whatsapp", "observacoes", ...END],
+  colunas: [
+    "nome_social",
+    "tipo_pessoa",
+    "cpf_cnpj",
+    "inscricao_estadual",
+    "email",
+    "telefone",
+    "whatsapp",
+    "observacoes",
+    ...END,
+  ],
   ordem: "nome_social ASC",
   busca: ["nome_social", "cpf_cnpj", "email", "cidade"],
   recurso: "clientes",
@@ -38,8 +48,21 @@ export const clientesDef: CrudDef = {
 };
 
 const PRODUTO_COLS = [
-  "nome", "fabricante", "categoria", "descricao", "sku", "unidade_medida", "preco_unitario", "ncm", "cfop",
-  "icms", "pis_cofins", "origem", "controla_estoque", "estoque_minimo", "ativo",
+  "nome",
+  "fabricante",
+  "categoria",
+  "descricao",
+  "sku",
+  "unidade_medida",
+  "preco_unitario",
+  "ncm",
+  "cfop",
+  "icms",
+  "pis_cofins",
+  "origem",
+  "controla_estoque",
+  "estoque_minimo",
+  "ativo",
 ];
 
 export const produtosDef: CrudDef = {
@@ -52,9 +75,13 @@ export const produtosDef: CrudDef = {
   busca: ["nome", "sku", "categoria", "fabricante", "ncm"],
   recurso: "produtos",
   csv: [...PRODUTO_COLS, "estoque_atual"].map((c) => ({ coluna: c, titulo: c })),
-  filtros: (req) => (req.query.estoque_baixo === "1"
-    ? { sql: "controla_estoque AND estoque_minimo IS NOT NULL AND estoque_atual <= estoque_minimo", params: [] }
-    : { sql: "", params: [] }),
+  filtros: (req) =>
+    req.query.estoque_baixo === "1"
+      ? {
+          sql: "controla_estoque AND estoque_minimo IS NOT NULL AND estoque_atual <= estoque_minimo",
+          params: [],
+        }
+      : { sql: "", params: [] },
   async afterInsert(q, userId, row, input) {
     const inicial = Number(input.estoque_inicial ?? 0);
     if (row.controla_estoque && inicial > 0) {
@@ -64,8 +91,20 @@ export const produtosDef: CrudDef = {
 };
 
 const SERVICO_COLS = [
-  "nome", "categoria", "codigo_interno", "descricao_detalhada", "preco", "unidade_medida", "cnae", "codigo_servico",
-  "item_lista", "aliquota_iss", "cst_pis_cofins", "regime_especial", "municipio", "ativo",
+  "nome",
+  "categoria",
+  "codigo_interno",
+  "descricao_detalhada",
+  "preco",
+  "unidade_medida",
+  "cnae",
+  "codigo_servico",
+  "item_lista",
+  "aliquota_iss",
+  "cst_pis_cofins",
+  "regime_especial",
+  "municipio",
+  "ativo",
 ];
 
 export const servicosDef: CrudDef = {
@@ -103,7 +142,12 @@ export async function movimentar(
   motivo: string | null,
   notaId: string | null = null,
 ) {
-  const { rows } = await q.query<{ estoque_atual: number; nome: string; controla_estoque: boolean; estoque_minimo: number | null }>(
+  const { rows } = await q.query<{
+    estoque_atual: number;
+    nome: string;
+    controla_estoque: boolean;
+    estoque_minimo: number | null;
+  }>(
     "SELECT estoque_atual, nome, controla_estoque, estoque_minimo FROM produtos WHERE id = $1 AND usuario_id = $2 FOR UPDATE",
     [produtoId, userId],
   );
@@ -111,15 +155,30 @@ export async function movimentar(
   if (!p) throw naoEncontrado("Produto");
   if (!p.controla_estoque) throw regra(`O produto "${p.nome}" não controla estoque.`);
   const atual = Number(p.estoque_atual);
-  const novo = tipo === "entrada" ? atual + quantidade : tipo === "saida" ? atual - quantidade : quantidade;
-  if (novo < 0) throw regra(`Estoque insuficiente para "${p.nome}" (disponível: ${atual}).`, { produto_id: produtoId, disponivel: atual });
-  await q.query("UPDATE produtos SET estoque_atual = $3, atualizado_em = now() WHERE id = $1 AND usuario_id = $2", [produtoId, userId, novo]);
+  const novo =
+    tipo === "entrada" ? atual + quantidade : tipo === "saida" ? atual - quantidade : quantidade;
+  if (novo < 0)
+    throw regra(`Estoque insuficiente para "${p.nome}" (disponível: ${atual}).`, {
+      produto_id: produtoId,
+      disponivel: atual,
+    });
+  await q.query(
+    "UPDATE produtos SET estoque_atual = $3, atualizado_em = now() WHERE id = $1 AND usuario_id = $2",
+    [produtoId, userId, novo],
+  );
   await q.query(
     `INSERT INTO estoque_movimentos (usuario_id, produto_id, tipo, quantidade, saldo_apos, motivo, nota_id)
      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
     [userId, produtoId, tipo, quantidade, novo, motivo, notaId],
   );
-  return { saldo: novo, nome: p.nome, abaixoDoMinimo: p.estoque_minimo !== null && novo <= Number(p.estoque_minimo) && atual > Number(p.estoque_minimo) };
+  return {
+    saldo: novo,
+    nome: p.nome,
+    abaixoDoMinimo:
+      p.estoque_minimo !== null &&
+      novo <= Number(p.estoque_minimo) &&
+      atual > Number(p.estoque_minimo),
+  };
 }
 
 export function estoqueRoutes(ctx: AppContext) {
@@ -141,9 +200,17 @@ export function estoqueRoutes(ctx: AppContext) {
 
   r.post("/movimentos", async (req, res) => {
     const input = parse(estoqueMovimentoSchema, req.body);
-    if (input.tipo !== "ajuste" && input.quantidade <= 0) throw regra("Quantidade deve ser maior que zero.");
+    if (input.tipo !== "ajuste" && input.quantidade <= 0)
+      throw regra("Quantidade deve ser maior que zero.");
     const out = await ctx.db.tx(async (q) => {
-      const m = await movimentar(q, uid(req), input.produto_id, input.tipo, input.quantidade, input.motivo ?? null);
+      const m = await movimentar(
+        q,
+        uid(req),
+        input.produto_id,
+        input.tipo,
+        input.quantidade,
+        input.motivo ?? null,
+      );
       if (m.abaixoDoMinimo) {
         await notificar(ctx, q, uid(req), {
           tipo: "estoque",
@@ -152,7 +219,10 @@ export function estoqueRoutes(ctx: AppContext) {
           link: "/estoque",
         });
       }
-      await audit(q, req, uid(req), "estoque.movimentar", "produtos", input.produto_id, { tipo: input.tipo, quantidade: input.quantidade });
+      await audit(q, req, uid(req), "estoque.movimentar", "produtos", input.produto_id, {
+        tipo: input.tipo,
+        quantidade: input.quantidade,
+      });
       return m;
     });
     res.status(201).json({ saldo: out.saldo });

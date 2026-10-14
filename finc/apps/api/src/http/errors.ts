@@ -16,8 +16,10 @@ export class AppError extends Error {
   }
 }
 
-export const naoEncontrado = (entidade = "Registro") => new AppError("NAO_ENCONTRADO", `${entidade} não encontrado.`);
-export const regra = (msg: string, details?: unknown) => new AppError("REGRA_NEGOCIO", msg, details);
+export const naoEncontrado = (entidade = "Registro") =>
+  new AppError("NAO_ENCONTRADO", `${entidade} não encontrado.`);
+export const regra = (msg: string, details?: unknown) =>
+  new AppError("REGRA_NEGOCIO", msg, details);
 
 export function zodDetails(e: ZodError) {
   return e.issues.map((i) => ({ campo: i.path.join("."), mensagem: i.message }));
@@ -48,8 +50,10 @@ function fromPg(err: unknown): AppError | null {
             : undefined;
     return new AppError("CONFLITO", msg);
   }
-  if (e?.code === "23514" || e?.code === "22P02" || e?.code === "23502") return new AppError("VALIDACAO");
-  if (e?.code === "23503") return new AppError("REGRA_NEGOCIO", "Registro relacionado inexistente ou em uso.");
+  if (e?.code === "23514" || e?.code === "22P02" || e?.code === "23502")
+    return new AppError("VALIDACAO");
+  if (e?.code === "23503")
+    return new AppError("REGRA_NEGOCIO", "Registro relacionado inexistente ou em uso.");
   return null;
 }
 
@@ -61,16 +65,24 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
   return (err, req, res, _next) => {
     let appErr: AppError;
     if (err instanceof AppError) appErr = err;
-    else if (err instanceof ZodError) appErr = new AppError("VALIDACAO", undefined, zodDetails(err));
-    else if ((err as { type?: string })?.type === "entity.parse.failed") appErr = new AppError("VALIDACAO", "JSON inválido.");
-    else if ((err as { type?: string })?.type === "entity.too.large") appErr = new AppError("VALIDACAO", "Corpo da requisição muito grande.");
-    else if ((err as { code?: string })?.code === "LIMIT_FILE_SIZE") appErr = new AppError("VALIDACAO", "Arquivo muito grande.");
+    else if (err instanceof ZodError)
+      appErr = new AppError("VALIDACAO", undefined, zodDetails(err));
+    else if ((err as { type?: string })?.type === "entity.parse.failed")
+      appErr = new AppError("VALIDACAO", "JSON inválido.");
+    else if ((err as { type?: string })?.type === "entity.too.large")
+      appErr = new AppError("VALIDACAO", "Corpo da requisição muito grande.");
+    else if ((err as { code?: string })?.code === "LIMIT_FILE_SIZE")
+      appErr = new AppError("VALIDACAO", "Arquivo muito grande.");
     else appErr = fromPg(err) ?? new AppError("INTERNO");
 
     if (appErr.status >= 500) logger.error({ err, path: req.path }, "erro não tratado");
     // Mensagens internas nunca são repassadas ao cliente (corrige vazamento observado na FINC original).
     res.status(appErr.status).json({
-      error: { code: appErr.code, message: appErr.message, ...(appErr.details ? { details: appErr.details } : {}) },
+      error: {
+        code: appErr.code,
+        message: appErr.message,
+        ...(appErr.details ? { details: appErr.details } : {}),
+      },
     });
   };
 }

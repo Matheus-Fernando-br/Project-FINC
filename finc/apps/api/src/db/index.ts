@@ -39,7 +39,11 @@ function createPg(url: string): Db {
       return pg.types.getTypeParser(oid, format as "text");
     },
   };
-  const pool = new pg.Pool({ connectionString: url, max: 10, types: types as pg.CustomTypesConfig });
+  const pool = new pg.Pool({
+    connectionString: url,
+    max: 10,
+    types: types as pg.CustomTypesConfig,
+  });
   const wrap = (c: pg.Pool | pg.PoolClient): Queryable => ({
     async query<T>(sql: string, params: unknown[] = []) {
       const r = await c.query(sql, params);
@@ -77,7 +81,7 @@ async function createPglite(url: string): Promise<Db> {
   const target = url.replace(/^pglite:\/\//, "");
   let dataDir: string | undefined;
   if (target && target !== "memory") {
-    dataDir = path.resolve(target);
+    dataDir = path.resolve(process.env.FINC_ROOT ?? process.cwd(), target);
     mkdirSync(dataDir, { recursive: true });
   }
   const db = new PGlite(dataDir);
@@ -86,13 +90,20 @@ async function createPglite(url: string): Promise<Db> {
     async query<T>(sql: string, params: unknown[] = []) {
       const r = await c.query<Record<string, unknown>>(sql, params);
       // Normaliza tipos para o mesmo formato do driver pg configurado acima.
-      const conv = r.fields.filter((f) => f.dataTypeID === NUMERIC || f.dataTypeID === INT8 || f.dataTypeID === DATE);
+      const conv = r.fields.filter(
+        (f) => f.dataTypeID === NUMERIC || f.dataTypeID === INT8 || f.dataTypeID === DATE,
+      );
       if (conv.length) {
         for (const row of r.rows) {
           for (const f of conv) {
             const v = row[f.name];
             if (v === null || v === undefined) continue;
-            row[f.name] = f.dataTypeID === DATE ? (v instanceof Date ? v.toISOString().slice(0, 10) : String(v)) : Number(v);
+            row[f.name] =
+              f.dataTypeID === DATE
+                ? v instanceof Date
+                  ? v.toISOString().slice(0, 10)
+                  : String(v)
+                : Number(v);
           }
         }
       }

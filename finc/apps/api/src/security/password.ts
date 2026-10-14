@@ -23,7 +23,10 @@ export async function verifyPassword(senha: string, armazenado: string): Promise
   if (alg !== "scrypt" || !n || !r || !p || !saltB64 || !keyB64) return false;
   const expected = Buffer.from(keyB64, "base64");
   const key = await scrypt(senha, Buffer.from(saltB64, "base64"), expected.length, {
-    N: Number(n), r: Number(r), p: Number(p), maxmem: MAXMEM,
+    N: Number(n),
+    r: Number(r),
+    p: Number(p),
+    maxmem: MAXMEM,
   });
   return key.length === expected.length && timingSafeEqual(key, expected);
 }

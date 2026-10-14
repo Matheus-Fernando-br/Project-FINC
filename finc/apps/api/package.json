@@ -8,7 +8,7 @@
     "build": "tsup",
     "start": "node dist/server.js",
     "migrate": "tsx src/db/migrate-cli.ts",
-    "migrate:prod": "node dist/migrate-cli.js",
+    "migrate:prod": "node dist/db/migrate-cli.js",
     "admin:promover": "tsx src/scripts/promover-admin.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

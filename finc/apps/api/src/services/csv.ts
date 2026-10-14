@@ -2,23 +2,28 @@
 
 function cell(v: unknown): string {
   if (v === null || v === undefined) return "";
-  const s = v instanceof Date ? v.toISOString() : typeof v === "object" ? JSON.stringify(v) : String(v);
+  const s =
+    v instanceof Date ? v.toISOString() : typeof v === "object" ? JSON.stringify(v) : String(v);
   // Neutraliza injeção de fórmulas em planilhas (CSV injection).
   const safe = /^[=+\-@\t\r]/.test(s) && !/^-?\d+([.,]\d+)?$/.test(s) ? `'${s}` : s;
   return /[";\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
-export function toCsv(rows: Record<string, unknown>[], cols: { coluna: string; titulo: string }[]): string {
+export function toCsv(
+  rows: Record<string, unknown>[],
+  cols: { coluna: string; titulo: string }[],
+): string {
   const header = cols.map((c) => cell(c.titulo)).join(";");
   const body = rows.map((r) => cols.map((c) => cell(r[c.coluna])).join(";"));
-  return "﻿" + [header, ...body].join("\r\n") + "\r\n";
+  return "\uFEFF" + [header, ...body].join("\r\n") + "\r\n";
 }
 
 /** Parser CSV com suporte a aspas, separador ";" ou "," (detectado pelo cabeçalho). */
 export function parseCsv(text: string): string[][] {
-  const src = text.replace(/^﻿/, "");
+  const src = text.replace(/^\uFEFF/, "");
   const firstLine = src.split(/\r?\n/, 1)[0] ?? "";
-  const sep = (firstLine.match(/;/g)?.length ?? 0) >= (firstLine.match(/,/g)?.length ?? 0) ? ";" : ",";
+  const sep =
+    (firstLine.match(/;/g)?.length ?? 0) >= (firstLine.match(/,/g)?.length ?? 0) ? ";" : ",";
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";

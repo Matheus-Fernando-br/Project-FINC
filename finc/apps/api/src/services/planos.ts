@@ -50,7 +50,10 @@ const CONTAGEM: Record<RecursoLimitado, string> = {
                AND data_emissao >= date_trunc('month', now())`,
 };
 
-export async function usoAtual(q: Queryable, usuarioId: string): Promise<Record<RecursoLimitado, number>> {
+export async function usoAtual(
+  q: Queryable,
+  usuarioId: string,
+): Promise<Record<RecursoLimitado, number>> {
   const entries = await Promise.all(
     (Object.keys(CONTAGEM) as RecursoLimitado[]).map(async (k) => {
       const { rows } = await q.query<{ n: number }>(CONTAGEM[k], [usuarioId]);
@@ -69,7 +72,12 @@ const NOMES: Record<RecursoLimitado, string> = {
 };
 
 /** Garante, no servidor, que a operação respeita o limite do plano (antes só existia no front). */
-export async function assertLimite(q: Queryable, usuarioId: string, recurso: RecursoLimitado, acrescimo = 1) {
+export async function assertLimite(
+  q: Queryable,
+  usuarioId: string,
+  recurso: RecursoLimitado,
+  acrescimo = 1,
+) {
   const plano = await planoDoUsuario(q, usuarioId);
   const limite = plano.limites[recurso as keyof LimitesPlano];
   if (limite === null) return;

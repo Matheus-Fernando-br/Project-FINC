@@ -124,7 +124,7 @@ export const CATEGORIAS = [
   "Idiomas",
   "Tecnologia",
   "Cloud",
-  "Serviços digitais"
+  "Serviços digitais",
 ] as const;
 
 export const UNIDADES_MEDIDA = [
@@ -167,7 +167,7 @@ export const UNIDADES_MEDIDA = [
   "Dia",
   "Saca",
   "Arroba",
-  "Hectare"
+  "Hectare",
 ] as const;
 
 export const ORIGENS_PRODUTO = [
@@ -177,14 +177,49 @@ export const ORIGENS_PRODUTO = [
   { codigo: "3", descricao: "Nacional com conteúdo de importação superior a 40%" },
   { codigo: "4", descricao: "Nacional conforme processos produtivos básicos (PPB)" },
   { codigo: "5", descricao: "Nacional com conteúdo de importação inferior ou igual a 40%" },
-  { codigo: "6", descricao: "Estrangeira - Importação direta, sem similar nacional, constante em lista da CAMEX" },
-  { codigo: "7", descricao: "Estrangeira - Adquirida no mercado interno, sem similar nacional, constante em lista da CAMEX" },
-  { codigo: "8", descricao: "Nacional - Mercadoria ou bem com Conteúdo de Importação superior a 70%" },
+  {
+    codigo: "6",
+    descricao: "Estrangeira - Importação direta, sem similar nacional, constante em lista da CAMEX",
+  },
+  {
+    codigo: "7",
+    descricao:
+      "Estrangeira - Adquirida no mercado interno, sem similar nacional, constante em lista da CAMEX",
+  },
+  {
+    codigo: "8",
+    descricao: "Nacional - Mercadoria ou bem com Conteúdo de Importação superior a 70%",
+  },
 ] as const;
 
 export const UFS = [
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
-  "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
 ] as const;
 
 export const TIPOS_NOTA = ["NF-e", "NFC-e", "NFS-e"] as const;
@@ -197,9 +232,24 @@ export const REGIMES_TRIBUTARIOS = [
   { codigo: "real", descricao: "Lucro Real" },
 ] as const;
 
-export const CATEGORIAS_CHAMADO = ["Financeiro", "Notas fiscais", "Cadastros", "Acesso e conta", "Planos", "Outros"] as const;
+export const CATEGORIAS_CHAMADO = [
+  "Financeiro",
+  "Notas fiscais",
+  "Cadastros",
+  "Acesso e conta",
+  "Planos",
+  "Outros",
+] as const;
 
 export const CATEGORIAS_FINANCEIRO = [
-  "Vendas", "Serviços prestados", "Fornecedores", "Impostos", "Aluguel", "Salários e pró-labore",
-  "Água, luz e internet", "Marketing", "Transporte", "Outros",
+  "Vendas",
+  "Serviços prestados",
+  "Fornecedores",
+  "Impostos",
+  "Aluguel",
+  "Salários e pró-labore",
+  "Água, luz e internet",
+  "Marketing",
+  "Transporte",
+  "Outros",
 ] as const;

@@ -14,7 +14,14 @@ import type { Queryable } from "../db/index.js";
 import { AppError, naoEncontrado, parse, regra } from "../http/errors.js";
 import { uid } from "../middleware/auth.js";
 import { audit } from "../services/audit.js";
-import { gerarPdf, gerarXml, nomeArquivo, numeroFormatado, type NotaCompleta, type Parte } from "../services/documentos.js";
+import {
+  gerarPdf,
+  gerarXml,
+  nomeArquivo,
+  numeroFormatado,
+  type NotaCompleta,
+  type Parte,
+} from "../services/documentos.js";
 import { notificar } from "../services/notificacoes.js";
 import { assertLimite } from "../services/planos.js";
 import { movimentar } from "./cadastros.js";
@@ -42,10 +49,21 @@ interface ItemResolvido {
   controla_estoque: boolean;
 }
 
-type ItemEntrada = { produto_id?: string | null; servico_id?: string | null; quantidade: number; valor_unitario?: number; info?: string | null };
+type ItemEntrada = {
+  produto_id?: string | null;
+  servico_id?: string | null;
+  quantidade: number;
+  valor_unitario?: number;
+  info?: string | null;
+};
 
 /** Resolve os itens no catálogo do próprio usuário e aplica a regra NFS-e = serviços / NF-e e NFC-e = produtos. */
-export async function resolverItens(q: Queryable, userId: string, tipoNota: TipoNota | null, itens: ItemEntrada[]) {
+export async function resolverItens(
+  q: Queryable,
+  userId: string,
+  tipoNota: TipoNota | null,
+  itens: ItemEntrada[],
+) {
   const out: ItemResolvido[] = [];
   for (const [idx, it] of itens.entries()) {
     const tipo: "produto" | "servico" = it.produto_id ? "produto" : "servico";
@@ -66,27 +84,55 @@ export async function resolverItens(q: Queryable, userId: string, tipoNota: Tipo
       if (!p.ativo) throw regra(`Item ${idx + 1}: o produto "${p.nome}" está inativo.`);
       const valor = it.valor_unitario ?? Number(p.preco_unitario);
       out.push({
-        ordem: idx + 1, tipo, produto_id: String(p.id), servico_id: null, descricao: String(p.nome), codigo: String(p.sku),
-        categoria: (p.categoria as string) ?? null, unidade: (p.unidade_medida as string) ?? null, ncm: (p.ncm as string) ?? null,
-        cfop: (p.cfop as string) ?? null, codigo_servico: null, quantidade: it.quantidade, valor_unitario: valor,
-        subtotal: Math.round(it.quantidade * valor * 100) / 100, icms: Number(p.icms), pis_cofins: Number(p.pis_cofins),
-        aliquota_iss: null, info: it.info ?? null, controla_estoque: Boolean(p.controla_estoque),
+        ordem: idx + 1,
+        tipo,
+        produto_id: String(p.id),
+        servico_id: null,
+        descricao: String(p.nome),
+        codigo: String(p.sku),
+        categoria: (p.categoria as string) ?? null,
+        unidade: (p.unidade_medida as string) ?? null,
+        ncm: (p.ncm as string) ?? null,
+        cfop: (p.cfop as string) ?? null,
+        codigo_servico: null,
+        quantidade: it.quantidade,
+        valor_unitario: valor,
+        subtotal: Math.round(it.quantidade * valor * 100) / 100,
+        icms: Number(p.icms),
+        pis_cofins: Number(p.pis_cofins),
+        aliquota_iss: null,
+        info: it.info ?? null,
+        controla_estoque: Boolean(p.controla_estoque),
       });
     } else {
-      const { rows } = await q.query<Record<string, unknown>>("SELECT * FROM servicos WHERE id = $1 AND usuario_id = $2", [
-        it.servico_id, userId,
-      ]);
+      const { rows } = await q.query<Record<string, unknown>>(
+        "SELECT * FROM servicos WHERE id = $1 AND usuario_id = $2",
+        [it.servico_id, userId],
+      );
       const s = rows[0];
       if (!s) throw regra(`Item ${idx + 1}: serviço não encontrado.`);
       if (!s.ativo) throw regra(`Item ${idx + 1}: o serviço "${s.nome}" está inativo.`);
       const valor = it.valor_unitario ?? Number(s.preco);
       out.push({
-        ordem: idx + 1, tipo, produto_id: null, servico_id: String(s.id), descricao: String(s.nome),
-        codigo: (s.codigo_interno as string) ?? null, categoria: (s.categoria as string) ?? null,
-        unidade: (s.unidade_medida as string) ?? null, ncm: null, cfop: null, codigo_servico: (s.codigo_servico as string) ?? null,
-        quantidade: it.quantidade, valor_unitario: valor, subtotal: Math.round(it.quantidade * valor * 100) / 100,
-        icms: null, pis_cofins: null, aliquota_iss: s.aliquota_iss === null ? null : Number(s.aliquota_iss),
-        info: it.info ?? null, controla_estoque: false,
+        ordem: idx + 1,
+        tipo,
+        produto_id: null,
+        servico_id: String(s.id),
+        descricao: String(s.nome),
+        codigo: (s.codigo_interno as string) ?? null,
+        categoria: (s.categoria as string) ?? null,
+        unidade: (s.unidade_medida as string) ?? null,
+        ncm: null,
+        cfop: null,
+        codigo_servico: (s.codigo_servico as string) ?? null,
+        quantidade: it.quantidade,
+        valor_unitario: valor,
+        subtotal: Math.round(it.quantidade * valor * 100) / 100,
+        icms: null,
+        pis_cofins: null,
+        aliquota_iss: s.aliquota_iss === null ? null : Number(s.aliquota_iss),
+        info: it.info ?? null,
+        controla_estoque: false,
       });
     }
   }
@@ -103,7 +149,11 @@ async function snapshotEmitente(q: Queryable, userId: string): Promise<Parte> {
   return rows[0]!;
 }
 
-async function snapshotDestinatario(q: Queryable, userId: string, clienteId: string): Promise<Parte> {
+async function snapshotDestinatario(
+  q: Queryable,
+  userId: string,
+  clienteId: string,
+): Promise<Parte> {
   const { rows } = await q.query<Parte & { nome_social: string }>(
     `SELECT nome_social, email, inscricao_estadual, ${PARTE_COLS} FROM clientes WHERE id = $1 AND usuario_id = $2`,
     [clienteId, userId],
@@ -116,7 +166,11 @@ async function snapshotDestinatario(q: Queryable, userId: string, clienteId: str
 
 async function configFiscal(q: Queryable, userId: string, lock = false) {
   const { rows } = await q.query<{
-    ambiente: string; serie: number; proximo_numero: number; natureza_operacao: string | null; somar_impostos: boolean;
+    ambiente: string;
+    serie: number;
+    proximo_numero: number;
+    natureza_operacao: string | null;
+    somar_impostos: boolean;
   }>(`SELECT * FROM config_fiscal WHERE usuario_id = $1 ${lock ? "FOR UPDATE" : ""}`, [userId]);
   if (!rows[0]) throw new AppError("INTERNO", "Configuração fiscal ausente.");
   return rows[0];
@@ -127,20 +181,45 @@ async function salvarRascunho(q: Queryable, userId: string, input: NotaInput, no
   const cfg = await configFiscal(q, userId);
   const itens = await resolverItens(q, userId, input.tipo, input.itens);
   const totais = calcularTotais(
-    itens.map((i) => ({ tipo: i.tipo, quantidade: i.quantidade, valorUnitario: i.valor_unitario, icms: i.icms, pisCofins: i.pis_cofins, aliquotaIss: i.aliquota_iss })),
+    itens.map((i) => ({
+      tipo: i.tipo,
+      quantidade: i.quantidade,
+      valorUnitario: i.valor_unitario,
+      icms: i.icms,
+      pisCofins: i.pis_cofins,
+      aliquotaIss: i.aliquota_iss,
+    })),
     input.desconto_incondicional ?? 0,
     input.desconto_condicional ?? 0,
     cfg.somar_impostos,
   );
   const emitente = await snapshotEmitente(q, userId);
   const destinatario = await snapshotDestinatario(q, userId, input.cliente_id);
-  const transporte = input.tipo === "NFS-e" ? {} : input.transporte ?? { incluir_frete: false };
+  const transporte = input.tipo === "NFS-e" ? {} : (input.transporte ?? { incluir_frete: false });
   const valores = [
-    input.cliente_id, input.tipo, cfg.serie, cfg.ambiente, input.natureza_operacao ?? cfg.natureza_operacao,
-    JSON.stringify(emitente), JSON.stringify(destinatario), JSON.stringify(transporte),
-    totais.valorProdutos, totais.valorServicos, totais.baseIcms, totais.valorIcms, totais.baseIss, totais.valorIss,
-    totais.valorPisCofins, totais.descontoIncondicional, totais.descontoCondicional, totais.valorTributos, totais.totalNota,
-    cfg.somar_impostos, input.gerar_financeiro ?? true, input.vencimento ?? null, input.observacoes ?? null,
+    input.cliente_id,
+    input.tipo,
+    cfg.serie,
+    cfg.ambiente,
+    input.natureza_operacao ?? cfg.natureza_operacao,
+    JSON.stringify(emitente),
+    JSON.stringify(destinatario),
+    JSON.stringify(transporte),
+    totais.valorProdutos,
+    totais.valorServicos,
+    totais.baseIcms,
+    totais.valorIcms,
+    totais.baseIss,
+    totais.valorIss,
+    totais.valorPisCofins,
+    totais.descontoIncondicional,
+    totais.descontoCondicional,
+    totais.valorTributos,
+    totais.totalNota,
+    cfg.somar_impostos,
+    input.gerar_financeiro ?? true,
+    input.vencimento ?? null,
+    input.observacoes ?? null,
   ];
   let id = notaId;
   if (id) {
@@ -168,8 +247,27 @@ async function salvarRascunho(q: Queryable, userId: string, input: NotaInput, no
       `INSERT INTO nota_itens (nota_id, ordem, tipo, produto_id, servico_id, descricao, codigo, categoria, unidade, ncm, cfop,
          codigo_servico, quantidade, valor_unitario, subtotal, icms, pis_cofins, aliquota_iss, info)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
-      [id, i.ordem, i.tipo, i.produto_id, i.servico_id, i.descricao, i.codigo, i.categoria, i.unidade, i.ncm, i.cfop,
-        i.codigo_servico, i.quantidade, i.valor_unitario, i.subtotal, i.icms, i.pis_cofins, i.aliquota_iss, i.info],
+      [
+        id,
+        i.ordem,
+        i.tipo,
+        i.produto_id,
+        i.servico_id,
+        i.descricao,
+        i.codigo,
+        i.categoria,
+        i.unidade,
+        i.ncm,
+        i.cfop,
+        i.codigo_servico,
+        i.quantidade,
+        i.valor_unitario,
+        i.subtotal,
+        i.icms,
+        i.pis_cofins,
+        i.aliquota_iss,
+        i.info,
+      ],
     );
   }
   return id;
@@ -179,7 +277,12 @@ export function criarRascunho(q: Queryable, userId: string, body: unknown) {
   return salvarRascunho(q, userId, parse(notaSchema, body));
 }
 
-export async function carregarNota(q: Queryable, userId: string, id: string, lock = false): Promise<NotaCompleta & Record<string, unknown>> {
+export async function carregarNota(
+  q: Queryable,
+  userId: string,
+  id: string,
+  lock = false,
+): Promise<NotaCompleta & Record<string, unknown>> {
   if (!UUID_RE.test(id)) throw naoEncontrado("Documento");
   const { rows } = await q.query<NotaCompleta & Record<string, unknown>>(
     `SELECT * FROM notas WHERE id = $1 AND usuario_id = $2 ${lock ? "FOR UPDATE" : ""}`,
@@ -187,7 +290,10 @@ export async function carregarNota(q: Queryable, userId: string, id: string, loc
   );
   const n = rows[0];
   if (!n) throw naoEncontrado("Documento");
-  const itens = await q.query<NotaCompleta["itens"][number]>("SELECT * FROM nota_itens WHERE nota_id = $1 ORDER BY ordem", [id]);
+  const itens = await q.query<NotaCompleta["itens"][number]>(
+    "SELECT * FROM nota_itens WHERE nota_id = $1 ORDER BY ordem",
+    [id],
+  );
   n.itens = itens.rows;
   return n;
 }
@@ -207,7 +313,8 @@ async function emitir(ctx: AppContext, q: Queryable, req: Request, userId: strin
   // Snapshot do emitente atualizado no momento da emissão.
   const emitente = await snapshotEmitente(q, userId);
   const faltando = ENDERECO_OBRIGATORIO.filter((k) => !emitente[k]);
-  if (faltando.length) throw regra("Complete o endereço do emitente em Meus Dados antes de emitir.", { faltando });
+  if (faltando.length)
+    throw regra("Complete o endereço do emitente em Meus Dados antes de emitir.", { faltando });
 
   await assertLimite(q, userId, "notas_mes");
   const cfg = await configFiscal(q, userId, true);
@@ -218,7 +325,10 @@ async function emitir(ctx: AppContext, q: Queryable, req: Request, userId: strin
     [userId, nota.serie],
   );
   if (maxRows[0]?.max && numero <= maxRows[0].max) numero = maxRows[0].max + 1;
-  await q.query("UPDATE config_fiscal SET proximo_numero = $2, atualizado_em = now() WHERE usuario_id = $1", [userId, numero + 1]);
+  await q.query(
+    "UPDATE config_fiscal SET proximo_numero = $2, atualizado_em = now() WHERE usuario_id = $1",
+    [userId, numero + 1],
+  );
   await q.query(
     "UPDATE notas SET status = 'emitida', numero = $3, data_emissao = now(), emitente = $4, atualizado_em = now() WHERE id = $1 AND usuario_id = $2",
     [notaId, userId, numero, JSON.stringify(emitente)],
@@ -226,11 +336,27 @@ async function emitir(ctx: AppContext, q: Queryable, req: Request, userId: strin
 
   for (const it of nota.itens as unknown as { produto_id: string | null; quantidade: number }[]) {
     if (!it.produto_id) continue;
-    const { rows } = await q.query<{ controla_estoque: boolean }>("SELECT controla_estoque FROM produtos WHERE id = $1", [it.produto_id]);
+    const { rows } = await q.query<{ controla_estoque: boolean }>(
+      "SELECT controla_estoque FROM produtos WHERE id = $1",
+      [it.produto_id],
+    );
     if (rows[0]?.controla_estoque) {
-      const m = await movimentar(q, userId, it.produto_id, "saida", Number(it.quantidade), `Saída pelo documento ${nota.tipo} nº ${numero}`, notaId);
+      const m = await movimentar(
+        q,
+        userId,
+        it.produto_id,
+        "saida",
+        Number(it.quantidade),
+        `Saída pelo documento ${nota.tipo} nº ${numero}`,
+        notaId,
+      );
       if (m.abaixoDoMinimo) {
-        await notificar(ctx, q, userId, { tipo: "estoque", titulo: "Estoque baixo", mensagem: `O produto "${m.nome}" atingiu o estoque mínimo (saldo: ${m.saldo}).`, link: "/estoque" });
+        await notificar(ctx, q, userId, {
+          tipo: "estoque",
+          titulo: "Estoque baixo",
+          mensagem: `O produto "${m.nome}" atingiu o estoque mínimo (saldo: ${m.saldo}).`,
+          link: "/estoque",
+        });
       }
     }
   }
@@ -239,8 +365,15 @@ async function emitir(ctx: AppContext, q: Queryable, req: Request, userId: strin
     await q.query(
       `INSERT INTO contas (usuario_id, tipo, descricao, valor, vencimento, categoria, cliente_id, nota_id)
        VALUES ($1, 'receber', $2, $3, COALESCE($4::date, CURRENT_DATE + 30), $5, $6, $7)`,
-      [userId, `${nota.tipo} nº ${numero} — ${(nota.destinatario as Parte).nome ?? "cliente"}`, nota.total, nota.vencimento ?? null,
-        nota.tipo === "NFS-e" ? "Serviços prestados" : "Vendas", nota.cliente_id, notaId],
+      [
+        userId,
+        `${nota.tipo} nº ${numero} — ${(nota.destinatario as Parte).nome ?? "cliente"}`,
+        nota.total,
+        nota.vencimento ?? null,
+        nota.tipo === "NFS-e" ? "Serviços prestados" : "Vendas",
+        nota.cliente_id,
+        notaId,
+      ],
     );
   }
   await notificar(ctx, q, userId, {
@@ -283,10 +416,15 @@ export function notasRoutes(ctx: AppContext) {
     if (f.q) {
       params.push(`%${f.q}%`, f.q.replace(/\D/g, ""));
       const a = params.length - 1;
-      conds.push(`(destinatario->>'nome' ILIKE $${a} OR destinatario->>'cpf_cnpj' = NULLIF($${a + 1}, '') OR numero::text = NULLIF($${a + 1}, ''))`);
+      conds.push(
+        `(destinatario->>'nome' ILIKE $${a} OR destinatario->>'cpf_cnpj' = NULLIF($${a + 1}, '') OR numero::text = NULLIF($${a + 1}, ''))`,
+      );
     }
     const where = conds.join(" AND ");
-    const total = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM notas WHERE ${where}`, params);
+    const total = await db.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM notas WHERE ${where}`,
+      params,
+    );
     const { rows } = await db.query(
       `SELECT id, tipo, serie, numero, status, ambiente, data_emissao, criado_em, total, destinatario->>'nome' AS cliente_nome,
               destinatario->>'cpf_cnpj' AS cliente_cpf_cnpj
@@ -317,7 +455,8 @@ export function notasRoutes(ctx: AppContext) {
     const input = parse(notaSchema, req.body);
     await db.tx(async (q) => {
       const nota = await carregarNota(q, uid(req), req.params.id, true);
-      if (nota.status !== "rascunho") throw regra("Documentos emitidos não podem ser alterados. Cancele e emita outro.");
+      if (nota.status !== "rascunho")
+        throw regra("Documentos emitidos não podem ser alterados. Cancele e emita outro.");
       await salvarRascunho(q, uid(req), input, req.params.id);
       await audit(q, req, uid(req), "notas.atualizar", "notas", req.params.id);
     });
@@ -327,9 +466,18 @@ export function notasRoutes(ctx: AppContext) {
   r.delete("/:id", async (req, res) => {
     await db.tx(async (q) => {
       const nota = await carregarNota(q, uid(req), req.params.id, true);
-      if (nota.status !== "rascunho") throw regra("Somente rascunhos podem ser excluídos. Documentos emitidos devem ser cancelados.");
-      await q.query("UPDATE pedidos SET status = 'aberto', nota_id = NULL WHERE nota_id = $1 AND usuario_id = $2", [req.params.id, uid(req)]);
-      await q.query("DELETE FROM notas WHERE id = $1 AND usuario_id = $2", [req.params.id, uid(req)]);
+      if (nota.status !== "rascunho")
+        throw regra(
+          "Somente rascunhos podem ser excluídos. Documentos emitidos devem ser cancelados.",
+        );
+      await q.query(
+        "UPDATE pedidos SET status = 'aberto', nota_id = NULL WHERE nota_id = $1 AND usuario_id = $2",
+        [req.params.id, uid(req)],
+      );
+      await q.query("DELETE FROM notas WHERE id = $1 AND usuario_id = $2", [
+        req.params.id,
+        uid(req),
+      ]);
       await audit(q, req, uid(req), "notas.excluir", "notas", req.params.id);
     });
     res.json({ ok: true });
@@ -344,23 +492,36 @@ export function notasRoutes(ctx: AppContext) {
     const { motivo } = parse(cancelarNotaSchema, req.body);
     await db.tx(async (q) => {
       const nota = await carregarNota(q, uid(req), req.params.id, true);
-      if (nota.status !== "emitida") throw regra("Somente documentos emitidos podem ser cancelados.");
-      const contas = await q.query<{ id: string; status: string }>("SELECT id, status FROM contas WHERE nota_id = $1 AND usuario_id = $2", [
-        req.params.id, uid(req),
-      ]);
+      if (nota.status !== "emitida")
+        throw regra("Somente documentos emitidos podem ser cancelados.");
+      const contas = await q.query<{ id: string; status: string }>(
+        "SELECT id, status FROM contas WHERE nota_id = $1 AND usuario_id = $2",
+        [req.params.id, uid(req)],
+      );
       if (contas.rows.some((c) => c.status === "paga")) {
-        throw regra("Há recebimento baixado para este documento. Estorne o recebimento no Financeiro antes de cancelar.");
+        throw regra(
+          "Há recebimento baixado para este documento. Estorne o recebimento no Financeiro antes de cancelar.",
+        );
       }
-      await q.query("UPDATE contas SET status = 'cancelada', atualizado_em = now() WHERE nota_id = $1 AND usuario_id = $2 AND status = 'aberta'", [
-        req.params.id, uid(req),
-      ]);
+      await q.query(
+        "UPDATE contas SET status = 'cancelada', atualizado_em = now() WHERE nota_id = $1 AND usuario_id = $2 AND status = 'aberta'",
+        [req.params.id, uid(req)],
+      );
       // Estorna o estoque baixado na emissão.
       const movs = await q.query<{ produto_id: string; quantidade: number }>(
         "SELECT produto_id, quantidade FROM estoque_movimentos WHERE nota_id = $1 AND usuario_id = $2 AND tipo = 'saida'",
         [req.params.id, uid(req)],
       );
       for (const m of movs.rows) {
-        await movimentar(q, uid(req), m.produto_id, "entrada", Number(m.quantidade), `Estorno do cancelamento do documento nº ${nota.numero}`, req.params.id);
+        await movimentar(
+          q,
+          uid(req),
+          m.produto_id,
+          "entrada",
+          Number(m.quantidade),
+          `Estorno do cancelamento do documento nº ${nota.numero}`,
+          req.params.id,
+        );
       }
       await q.query(
         "UPDATE notas SET status = 'cancelada', motivo_cancelamento = $3, cancelada_em = now(), atualizado_em = now() WHERE id = $1 AND usuario_id = $2",
@@ -381,7 +542,10 @@ export function notasRoutes(ctx: AppContext) {
     const nota = await carregarNota(db, uid(req), req.params.id);
     const pdf = await gerarPdf(nota);
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `${req.query.download === "1" ? "attachment" : "inline"}; filename="${nomeArquivo(nota, "pdf")}"`);
+    res.setHeader(
+      "Content-Disposition",
+      `${req.query.download === "1" ? "attachment" : "inline"}; filename="${nomeArquivo(nota, "pdf")}"`,
+    );
     res.send(pdf);
   });
 
@@ -394,15 +558,22 @@ export function notasRoutes(ctx: AppContext) {
 
   /** Envio dos arquivos ao contador por e-mail (recurso inspirado no envio automático ao contador de ERPs). */
   r.post("/:id/enviar-contador", async (req, res) => {
-    const { contador_id } = parse(z.object({ contador_id: z.string().uuid("Selecione um contador") }), req.body);
+    const { contador_id } = parse(
+      z.object({ contador_id: z.string().uuid("Selecione um contador") }),
+      req.body,
+    );
     if (!ctx.mailer.enabled) {
-      throw new AppError("INTEGRACAO_NAO_CONFIGURADA", "O envio por e-mail requer SMTP configurado no servidor (SMTP_HOST, SMTP_FROM).");
+      throw new AppError(
+        "INTEGRACAO_NAO_CONFIGURADA",
+        "O envio por e-mail requer SMTP configurado no servidor (SMTP_HOST, SMTP_FROM).",
+      );
     }
     const nota = await carregarNota(db, uid(req), req.params.id);
     if (nota.status === "rascunho") throw regra("Emita o documento antes de enviá-lo ao contador.");
-    const { rows } = await db.query<{ nome: string; email: string }>("SELECT nome, email FROM contadores WHERE id = $1 AND usuario_id = $2", [
-      contador_id, uid(req),
-    ]);
+    const { rows } = await db.query<{ nome: string; email: string }>(
+      "SELECT nome, email FROM contadores WHERE id = $1 AND usuario_id = $2",
+      [contador_id, uid(req)],
+    );
     const contador = rows[0];
     if (!contador) throw naoEncontrado("Contador");
     try {
@@ -411,15 +582,28 @@ export function notasRoutes(ctx: AppContext) {
         subject: `FINC — ${nota.tipo} nº ${numeroFormatado(nota)} (${(nota.emitente as Parte).nome ?? ""})`,
         text: `Olá, ${contador.nome}.\n\nSegue em anexo o documento ${nota.tipo} nº ${numeroFormatado(nota)} (status: ${nota.status}), enviado por ${req.auth!.nome} pela plataforma FINC.`,
         attachments: [
-          { filename: nomeArquivo(nota, "pdf"), content: await gerarPdf(nota), contentType: "application/pdf" },
-          { filename: nomeArquivo(nota, "xml"), content: gerarXml(nota), contentType: "application/xml" },
+          {
+            filename: nomeArquivo(nota, "pdf"),
+            content: await gerarPdf(nota),
+            contentType: "application/pdf",
+          },
+          {
+            filename: nomeArquivo(nota, "xml"),
+            content: gerarXml(nota),
+            contentType: "application/xml",
+          },
         ],
       });
     } catch (err) {
       ctx.logger.error({ err }, "falha no envio ao contador");
-      throw new AppError("INTEGRACAO_FALHOU", "Não foi possível enviar o e-mail. Verifique a configuração SMTP.");
+      throw new AppError(
+        "INTEGRACAO_FALHOU",
+        "Não foi possível enviar o e-mail. Verifique a configuração SMTP.",
+      );
     }
-    await audit(db, req, uid(req), "notas.enviar_contador", "notas", req.params.id, { contador_id });
+    await audit(db, req, uid(req), "notas.enviar_contador", "notas", req.params.id, {
+      contador_id,
+    });
     res.json({ ok: true, message: `Documento enviado para ${contador.email}.` });
   });
 

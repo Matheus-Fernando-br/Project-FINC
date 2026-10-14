@@ -8,7 +8,9 @@ const cfg = parseConfig(process.env);
 const db = await createDb(cfg.DATABASE_URL);
 try {
   const novas = await migrate(db);
-  console.log(novas.length ? `Migrações aplicadas: ${novas.join(", ")}` : "Banco já está atualizado.");
+  console.log(
+    novas.length ? `Migrações aplicadas: ${novas.join(", ")}` : "Banco já está atualizado.",
+  );
 } finally {
   await db.close();
 }

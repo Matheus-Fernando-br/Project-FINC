@@ -28,7 +28,9 @@ export function perfilRoutes(ctx: AppContext) {
   const { db } = ctx;
 
   r.get("/", async (req, res) => {
-    const { rows } = await db.query(`SELECT ${PERFIL_COLS} FROM usuarios WHERE id = $1`, [uid(req)]);
+    const { rows } = await db.query(`SELECT ${PERFIL_COLS} FROM usuarios WHERE id = $1`, [
+      uid(req),
+    ]);
     if (!rows[0]) throw naoEncontrado("Perfil");
     res.json(rows[0]);
   });
@@ -39,8 +41,20 @@ export function perfilRoutes(ctx: AppContext) {
     const { rows } = await db.query(
       `UPDATE usuarios SET nome=$2, telefone=$3, inscricao_estadual=$4, inscricao_municipal=$5, cep=$6, uf=$7, cidade=$8,
          logradouro=$9, bairro=$10, numero=$11, complemento=$12, atualizado_em=now() WHERE id=$1 RETURNING ${PERFIL_COLS}`,
-      [uid(req), p.nome, p.telefone, p.inscricao_estadual ?? null, p.inscricao_municipal ?? null, p.cep ?? null, p.uf ?? null,
-        p.cidade ?? null, p.logradouro ?? null, p.bairro ?? null, p.numero ?? null, p.complemento ?? null],
+      [
+        uid(req),
+        p.nome,
+        p.telefone,
+        p.inscricao_estadual ?? null,
+        p.inscricao_municipal ?? null,
+        p.cep ?? null,
+        p.uf ?? null,
+        p.cidade ?? null,
+        p.logradouro ?? null,
+        p.bairro ?? null,
+        p.numero ?? null,
+        p.complemento ?? null,
+      ],
     );
     await audit(db, req, uid(req), "perfil.atualizar", "usuarios", uid(req));
     res.json(rows[0]);
@@ -81,7 +95,13 @@ export function assinaturaRoutes(ctx: AppContext) {
       ),
       db.query<PlanoRow>("SELECT * FROM planos ORDER BY ordem, valor"),
     ]);
-    res.json({ plano, uso, historico: historico.rows, disponiveis: todos.rows.map(mapPlano).filter((p) => p.id !== plano.id), gatewayPagamento: false });
+    res.json({
+      plano,
+      uso,
+      historico: historico.rows,
+      disponiveis: todos.rows.map(mapPlano).filter((p) => p.id !== plano.id),
+      gatewayPagamento: false,
+    });
   });
 
   /**
@@ -93,7 +113,9 @@ export function assinaturaRoutes(ctx: AppContext) {
     const resultado = await db.tx(async (q) => {
       const atual = await planoDoUsuario(q, uid(req));
       if (atual.codigo === plano_codigo) throw regra("Você já está neste plano.");
-      const { rows } = await q.query<PlanoRow>("SELECT * FROM planos WHERE codigo = $1", [plano_codigo]);
+      const { rows } = await q.query<PlanoRow>("SELECT * FROM planos WHERE codigo = $1", [
+        plano_codigo,
+      ]);
       if (!rows[0]) throw naoEncontrado("Plano");
       const novo = mapPlano(rows[0]);
       // Downgrade só é permitido se o uso atual couber nos limites do novo plano.
@@ -108,13 +130,28 @@ export function assinaturaRoutes(ctx: AppContext) {
           { excedidos },
         );
       }
-      await q.query("UPDATE assinaturas SET status='encerrada', fim=now() WHERE usuario_id=$1 AND status='ativa'", [uid(req)]);
-      await q.query("INSERT INTO assinaturas (usuario_id, plano_id, valor, observacao) VALUES ($1,$2,$3,$4)", [
-        uid(req), novo.id, novo.valor, `Troca de ${atual.nome} para ${novo.nome}`,
+      await q.query(
+        "UPDATE assinaturas SET status='encerrada', fim=now() WHERE usuario_id=$1 AND status='ativa'",
+        [uid(req)],
+      );
+      await q.query(
+        "INSERT INTO assinaturas (usuario_id, plano_id, valor, observacao) VALUES ($1,$2,$3,$4)",
+        [uid(req), novo.id, novo.valor, `Troca de ${atual.nome} para ${novo.nome}`],
+      );
+      await q.query("UPDATE usuarios SET plano_id=$2, atualizado_em=now() WHERE id=$1", [
+        uid(req),
+        novo.id,
       ]);
-      await q.query("UPDATE usuarios SET plano_id=$2, atualizado_em=now() WHERE id=$1", [uid(req), novo.id]);
-      await notificar(ctx, q, uid(req), { tipo: "plano", titulo: `Plano alterado para ${novo.nome}`, mensagem: `Seu plano foi alterado de ${atual.nome} para ${novo.nome}.`, link: "/planos" });
-      await audit(q, req, uid(req), "plano.trocar", "planos", novo.id, { de: atual.codigo, para: novo.codigo });
+      await notificar(ctx, q, uid(req), {
+        tipo: "plano",
+        titulo: `Plano alterado para ${novo.nome}`,
+        mensagem: `Seu plano foi alterado de ${atual.nome} para ${novo.nome}.`,
+        link: "/planos",
+      });
+      await audit(q, req, uid(req), "plano.trocar", "planos", novo.id, {
+        de: atual.codigo,
+        para: novo.codigo,
+      });
       return novo;
     });
     res.json({ ok: true, plano: resultado });
@@ -127,7 +164,9 @@ export function configRoutes(ctx: AppContext) {
   const { db } = ctx;
 
   r.get("/fiscal", async (req, res) => {
-    const { rows } = await db.query("SELECT * FROM config_fiscal WHERE usuario_id = $1", [uid(req)]);
+    const { rows } = await db.query("SELECT * FROM config_fiscal WHERE usuario_id = $1", [
+      uid(req),
+    ]);
     res.json(rows[0]);
   });
 
@@ -136,15 +175,28 @@ export function configRoutes(ctx: AppContext) {
     const { rows } = await db.query(
       `UPDATE config_fiscal SET ambiente=$2, tipo_emissao=$3, natureza_operacao=$4, cfop_padrao=$5, serie=$6, proximo_numero=$7,
          numeracao_automatica=$8, regime_tributario=$9, somar_impostos=$10, atualizado_em=now() WHERE usuario_id=$1 RETURNING *`,
-      [uid(req), c.ambiente, c.tipo_emissao, c.natureza_operacao ?? null, c.cfop_padrao ?? null, c.serie, c.proximo_numero,
-        c.numeracao_automatica, c.regime_tributario, c.somar_impostos],
+      [
+        uid(req),
+        c.ambiente,
+        c.tipo_emissao,
+        c.natureza_operacao ?? null,
+        c.cfop_padrao ?? null,
+        c.serie,
+        c.proximo_numero,
+        c.numeracao_automatica,
+        c.regime_tributario,
+        c.somar_impostos,
+      ],
     );
     await audit(db, req, uid(req), "config.fiscal", "config_fiscal", uid(req));
     res.json(rows[0]);
   });
 
   r.get("/preferencias", async (req, res) => {
-    const { rows } = await db.query<{ dados: Record<string, unknown> }>("SELECT dados FROM preferencias WHERE usuario_id = $1", [uid(req)]);
+    const { rows } = await db.query<{ dados: Record<string, unknown> }>(
+      "SELECT dados FROM preferencias WHERE usuario_id = $1",
+      [uid(req)],
+    );
     res.json({ ...PREFERENCIAS_PADRAO, ...(rows[0]?.dados ?? {}) });
   });
 
@@ -170,25 +222,37 @@ export function notificacoesRoutes(ctx: AppContext) {
       `SELECT * FROM notificacoes WHERE usuario_id = $1 ${somenteNaoLidas ? "AND lida_em IS NULL" : ""} ORDER BY criado_em DESC LIMIT 100`,
       [uid(req)],
     );
-    const naoLidas = await db.query<{ n: number }>("SELECT count(*)::int AS n FROM notificacoes WHERE usuario_id = $1 AND lida_em IS NULL", [uid(req)]);
+    const naoLidas = await db.query<{ n: number }>(
+      "SELECT count(*)::int AS n FROM notificacoes WHERE usuario_id = $1 AND lida_em IS NULL",
+      [uid(req)],
+    );
     res.json({ items: rows, naoLidas: naoLidas.rows[0]?.n ?? 0 });
   });
 
   r.post("/lidas", async (req, res) => {
-    await db.query("UPDATE notificacoes SET lida_em = now() WHERE usuario_id = $1 AND lida_em IS NULL", [uid(req)]);
+    await db.query(
+      "UPDATE notificacoes SET lida_em = now() WHERE usuario_id = $1 AND lida_em IS NULL",
+      [uid(req)],
+    );
     res.json({ ok: true });
   });
 
   r.post("/:id/lida", async (req, res) => {
     if (!UUID_RE.test(req.params.id)) throw naoEncontrado("Notificação");
-    const { rowCount } = await db.query("UPDATE notificacoes SET lida_em = COALESCE(lida_em, now()) WHERE id = $1 AND usuario_id = $2", [req.params.id, uid(req)]);
+    const { rowCount } = await db.query(
+      "UPDATE notificacoes SET lida_em = COALESCE(lida_em, now()) WHERE id = $1 AND usuario_id = $2",
+      [req.params.id, uid(req)],
+    );
     if (!rowCount) throw naoEncontrado("Notificação");
     res.json({ ok: true });
   });
 
   r.delete("/:id", async (req, res) => {
     if (!UUID_RE.test(req.params.id)) throw naoEncontrado("Notificação");
-    const { rowCount } = await db.query("DELETE FROM notificacoes WHERE id = $1 AND usuario_id = $2", [req.params.id, uid(req)]);
+    const { rowCount } = await db.query(
+      "DELETE FROM notificacoes WHERE id = $1 AND usuario_id = $2",
+      [req.params.id, uid(req)],
+    );
     if (!rowCount) throw naoEncontrado("Notificação");
     res.json({ ok: true });
   });
@@ -196,20 +260,35 @@ export function notificacoesRoutes(ctx: AppContext) {
   /** Canais realmente suportados e seu estado de configuração (sem dados simulados). */
   r.get("/canais", async (req, res) => {
     const integ = integracoes(ctx.cfg);
-    const { rows } = await db.query<{ dados: Record<string, unknown> }>("SELECT dados FROM preferencias WHERE usuario_id = $1", [uid(req)]);
+    const { rows } = await db.query<{ dados: Record<string, unknown> }>(
+      "SELECT dados FROM preferencias WHERE usuario_id = $1",
+      [uid(req)],
+    );
     res.json({
       interno: { disponivel: true, ativo: true },
-      email: { disponivel: integ.smtp, ativo: Boolean(rows[0]?.dados?.notificar_email ?? true), destino: req.auth!.email },
+      email: {
+        disponivel: integ.smtp,
+        ativo: Boolean(rows[0]?.dados?.notificar_email ?? true),
+        destino: req.auth!.email,
+      },
     });
   });
 
   r.post("/canais/email/teste", async (req, res) => {
-    if (!ctx.mailer.enabled) throw new AppError("INTEGRACAO_NAO_CONFIGURADA", "SMTP não configurado no servidor.");
+    if (!ctx.mailer.enabled)
+      throw new AppError("INTEGRACAO_NAO_CONFIGURADA", "SMTP não configurado no servidor.");
     try {
-      await ctx.mailer.send({ to: req.auth!.email, subject: "FINC — e-mail de teste", text: "Este é um e-mail de teste das notificações da FINC. Tudo certo!" });
+      await ctx.mailer.send({
+        to: req.auth!.email,
+        subject: "FINC — e-mail de teste",
+        text: "Este é um e-mail de teste das notificações da FINC. Tudo certo!",
+      });
     } catch (err) {
       ctx.logger.error({ err }, "falha no e-mail de teste");
-      throw new AppError("INTEGRACAO_FALHOU", "Falha ao enviar o e-mail de teste. Verifique a configuração SMTP.");
+      throw new AppError(
+        "INTEGRACAO_FALHOU",
+        "Falha ao enviar o e-mail de teste. Verifique a configuração SMTP.",
+      );
     }
     res.json({ ok: true, message: `E-mail de teste enviado para ${req.auth!.email}.` });
   });
@@ -231,22 +310,49 @@ export function lgpdRoutes(ctx: AppContext) {
 
   r.get("/exportar", async (req, res) => {
     const id = uid(req);
-    const tabelas = ["clientes", "produtos", "servicos", "contadores", "notas", "contas", "pedidos", "notificacoes", "chamados", "estoque_movimentos", "assinaturas"];
+    const tabelas = [
+      "clientes",
+      "produtos",
+      "servicos",
+      "contadores",
+      "notas",
+      "contas",
+      "pedidos",
+      "notificacoes",
+      "chamados",
+      "estoque_movimentos",
+      "assinaturas",
+    ];
     const dados: Record<string, unknown> = {};
     const perfil = await db.query(`SELECT ${PERFIL_COLS} FROM usuarios WHERE id = $1`, [id]);
     dados.perfil = perfil.rows[0];
-    for (const t of tabelas) dados[t] = (await db.query(`SELECT * FROM ${t} WHERE usuario_id = $1`, [id])).rows;
-    dados.nota_itens = (await db.query("SELECT i.* FROM nota_itens i JOIN notas n ON n.id = i.nota_id WHERE n.usuario_id = $1", [id])).rows;
-    dados.config_fiscal = (await db.query("SELECT * FROM config_fiscal WHERE usuario_id = $1", [id])).rows[0];
+    for (const t of tabelas)
+      dados[t] = (await db.query(`SELECT * FROM ${t} WHERE usuario_id = $1`, [id])).rows;
+    dados.nota_itens = (
+      await db.query(
+        "SELECT i.* FROM nota_itens i JOIN notas n ON n.id = i.nota_id WHERE n.usuario_id = $1",
+        [id],
+      )
+    ).rows;
+    dados.config_fiscal = (
+      await db.query("SELECT * FROM config_fiscal WHERE usuario_id = $1", [id])
+    ).rows[0];
     await audit(db, req, id, "lgpd.exportar");
     res.setHeader("Content-Disposition", 'attachment; filename="finc-meus-dados.json"');
     res.json({ exportado_em: new Date().toISOString(), ...dados });
   });
 
   r.post("/excluir", async (req, res) => {
-    const { senha, confirmacao } = parse(z.object({ senha: z.string().min(1), confirmacao: z.literal("EXCLUIR") }), req.body);
-    const { rows } = await db.query<{ senha_hash: string }>("SELECT senha_hash FROM usuarios WHERE id = $1", [uid(req)]);
-    if (!rows[0] || !(await verifyPassword(senha, rows[0].senha_hash))) throw new AppError("VALIDACAO", "Senha incorreta.");
+    const { senha } = parse(
+      z.object({ senha: z.string().min(1), confirmacao: z.literal("EXCLUIR") }),
+      req.body,
+    );
+    const { rows } = await db.query<{ senha_hash: string }>(
+      "SELECT senha_hash FROM usuarios WHERE id = $1",
+      [uid(req)],
+    );
+    if (!rows[0] || !(await verifyPassword(senha, rows[0].senha_hash)))
+      throw new AppError("VALIDACAO", "Senha incorreta.");
     await db.query("DELETE FROM usuarios WHERE id = $1", [uid(req)]);
     limparCookieSessao(ctx, res);
     res.json({ ok: true });
@@ -262,15 +368,27 @@ export function utilRoutes(ctx: AppContext) {
     if (!isValidCEP(cep)) throw new AppError("VALIDACAO", "CEP inválido.");
     let data: Record<string, string>;
     try {
-      const resp = await ctx.fetchImpl(`${ctx.cfg.VIACEP_URL}/${cep}/json/`, { signal: AbortSignal.timeout(6000) });
+      const resp = await ctx.fetchImpl(`${ctx.cfg.VIACEP_URL}/${cep}/json/`, {
+        signal: AbortSignal.timeout(6000),
+      });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       data = (await resp.json()) as Record<string, string>;
     } catch (err) {
       ctx.logger.warn({ err }, "falha na consulta de CEP");
-      throw new AppError("INTEGRACAO_FALHOU", "Serviço de CEP indisponível. Preencha o endereço manualmente.");
+      throw new AppError(
+        "INTEGRACAO_FALHOU",
+        "Serviço de CEP indisponível. Preencha o endereço manualmente.",
+      );
     }
     if (data.erro) throw new AppError("NAO_ENCONTRADO", "CEP não encontrado.");
-    res.json({ cep, uf: data.uf, cidade: data.localidade, logradouro: data.logradouro, bairro: data.bairro, complemento: data.complemento });
+    res.json({
+      cep,
+      uf: data.uf,
+      cidade: data.localidade,
+      logradouro: data.logradouro,
+      bairro: data.bairro,
+      complemento: data.complemento,
+    });
   });
   return r;
 }

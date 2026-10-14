@@ -25,7 +25,12 @@ export interface CrudDef {
   recurso?: RecursoLimitado;
   csv: { coluna: string; titulo: string }[];
   /** Ganchos opcionais executados na mesma transação. */
-  afterInsert?: (q: Queryable, userId: string, row: Record<string, unknown>, input: Record<string, unknown>) => Promise<void>;
+  afterInsert?: (
+    q: Queryable,
+    userId: string,
+    row: Record<string, unknown>,
+    input: Record<string, unknown>,
+  ) => Promise<void>;
   filtros?: (req: Request) => { sql: string; params: unknown[] };
 }
 
@@ -36,7 +41,12 @@ export function pick(obj: Record<string, unknown>, cols: string[]) {
   return cols.filter((c) => obj[c] !== undefined).map((c) => [c, obj[c]] as const);
 }
 
-export async function inserir(q: Queryable, def: CrudDef, userId: string, data: Record<string, unknown>) {
+export async function inserir(
+  q: Queryable,
+  def: CrudDef,
+  userId: string,
+  data: Record<string, unknown>,
+) {
   const pares = pick(data, def.colunas);
   const cols = ["usuario_id", ...pares.map(([c]) => c)];
   const vals = [userId, ...pares.map(([, v]) => v)];
@@ -79,7 +89,10 @@ export function crudRoutes(ctx: AppContext, def: CrudDef) {
     const page = Math.max(1, Number(req.query.page) || 1);
     const pageSize = Math.min(PAGE_MAX, Math.max(1, Number(req.query.pageSize) || 20));
     const w = where(req);
-    const total = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM ${def.tabela} WHERE ${w.sql}`, w.params);
+    const total = await db.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM ${def.tabela} WHERE ${w.sql}`,
+      w.params,
+    );
     const { rows } = await db.query(
       `SELECT * FROM ${def.tabela} WHERE ${w.sql} ORDER BY ${def.ordem} LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`,
       w.params,
@@ -99,7 +112,10 @@ export function crudRoutes(ctx: AppContext, def: CrudDef) {
   });
 
   r.get("/:id", async (req, res) => {
-    const { rows } = await db.query(`SELECT * FROM ${def.tabela} WHERE id = $1 AND usuario_id = $2`, [req.params.id, uid(req)]);
+    const { rows } = await db.query(
+      `SELECT * FROM ${def.tabela} WHERE id = $1 AND usuario_id = $2`,
+      [req.params.id, uid(req)],
+    );
     if (!rows[0]) throw naoEncontrado(def.entidade);
     res.json(rows[0]);
   });
@@ -130,7 +146,10 @@ export function crudRoutes(ctx: AppContext, def: CrudDef) {
   });
 
   r.delete("/:id", async (req, res) => {
-    const { rowCount } = await db.query(`DELETE FROM ${def.tabela} WHERE id = $1 AND usuario_id = $2`, [req.params.id, uid(req)]);
+    const { rowCount } = await db.query(
+      `DELETE FROM ${def.tabela} WHERE id = $1 AND usuario_id = $2`,
+      [req.params.id, uid(req)],
+    );
     if (!rowCount) throw naoEncontrado(def.entidade);
     await audit(db, req, uid(req), `${def.tabela}.excluir`, def.tabela, req.params.id);
     res.json({ ok: true });

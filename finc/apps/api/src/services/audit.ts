@@ -13,6 +13,13 @@ export async function audit(
 ) {
   await q.query(
     "INSERT INTO auditoria (usuario_id, acao, entidade, entidade_id, ip, detalhes) VALUES ($1, $2, $3, $4, $5, $6)",
-    [usuarioId, acao, entidade ?? null, entidadeId ?? null, req?.ip ?? null, detalhes ? JSON.stringify(detalhes) : null],
+    [
+      usuarioId,
+      acao,
+      entidade ?? null,
+      entidadeId ?? null,
+      req?.ip ?? null,
+      detalhes ? JSON.stringify(detalhes) : null,
+    ],
   );
 }

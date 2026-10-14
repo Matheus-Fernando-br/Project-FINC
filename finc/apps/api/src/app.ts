@@ -32,7 +32,10 @@ export function createApp(ctx: AppContext) {
   const app = express();
   const { cfg } = ctx;
   app.disable("x-powered-by");
-  app.set("trust proxy", cfg.TRUST_PROXY === "true" ? true : cfg.TRUST_PROXY === "false" ? false : cfg.TRUST_PROXY);
+  app.set(
+    "trust proxy",
+    cfg.TRUST_PROXY === "true" ? true : cfg.TRUST_PROXY === "false" ? false : cfg.TRUST_PROXY,
+  );
 
   app.use(
     helmet({
@@ -54,7 +57,12 @@ export function createApp(ctx: AppContext) {
   );
 
   // CORS restrito a origens explícitas (só necessário quando web e API estão em domínios diferentes).
-  const origens = new Set([cfg.APP_URL, ...cfg.CORS_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)]);
+  const origens = new Set([
+    cfg.APP_URL,
+    ...cfg.CORS_ORIGINS.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+  ]);
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin && origens.has(origin)) {

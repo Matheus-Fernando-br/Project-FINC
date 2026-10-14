@@ -18,7 +18,10 @@ export interface TestEnv {
 
 export const CERT_KEY = Buffer.alloc(32, 7).toString("base64");
 
-export async function setup(extraEnv: Record<string, string> = {}, opts: { smtp?: boolean } = {}): Promise<TestEnv> {
+export async function setup(
+  extraEnv: Record<string, string> = {},
+  opts: { smtp?: boolean } = {},
+): Promise<TestEnv> {
   const emails: EmailMessage[] = [];
   const telegramMsgs: string[] = [];
   const mailer: Mailer = {
@@ -37,12 +40,24 @@ export async function setup(extraEnv: Record<string, string> = {}, opts: { smtp?
   };
   const fakeFetch = (async (url: string) => {
     if (String(url).includes("01001000")) {
-      return new Response(JSON.stringify({ uf: "SP", localidade: "São Paulo", logradouro: "Praça da Sé", bairro: "Sé", complemento: "lado ímpar" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          uf: "SP",
+          localidade: "São Paulo",
+          logradouro: "Praça da Sé",
+          bairro: "Sé",
+          complemento: "lado ímpar",
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
-    return new Response(JSON.stringify({ erro: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ erro: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }) as typeof fetch;
   // TEST_DATABASE_URL=postgres://... executa a suíte contra um PostgreSQL real (um banco novo por arquivo de teste).
   const { url, drop } = await bancoDeTeste();
@@ -100,7 +115,10 @@ let seq = 0;
 /** Gera CPFs válidos determinísticos para os testes. */
 export function gerarCpf(): string {
   seq++;
-  const base = String(100000000 + seq * 7919).slice(-9).split("").map(Number);
+  const base = String(100000000 + seq * 7919)
+    .slice(-9)
+    .split("")
+    .map(Number);
   const dv = (nums: number[]) => {
     const soma = nums.reduce((s, n, i) => s + n * (nums.length + 1 - i), 0);
     const r = (soma * 10) % 11;
@@ -133,19 +151,35 @@ export async function registrar(env: TestEnv, nome = "Empresa Teste"): Promise<U
     telefone: "11988887777",
     aceite_termos: true,
   });
-  if (res.status !== 201) throw new Error(`cadastro falhou: ${res.status} ${JSON.stringify(res.body)}`);
+  if (res.status !== 201)
+    throw new Error(`cadastro falhou: ${res.status} ${JSON.stringify(res.body)}`);
   return { agent, csrf: res.body.csrfToken, email, cpf, senha };
 }
 
 /** Helpers que incluem o header CSRF automaticamente. */
 export const api = (u: Usuario) => ({
   get: (p: string) => u.agent.get(`/api${p}`),
-  post: (p: string, body?: unknown) => u.agent.post(`/api${p}`).set("X-CSRF-Token", u.csrf).send(body as object),
-  put: (p: string, body?: unknown) => u.agent.put(`/api${p}`).set("X-CSRF-Token", u.csrf).send(body as object),
+  post: (p: string, body?: unknown) =>
+    u.agent
+      .post(`/api${p}`)
+      .set("X-CSRF-Token", u.csrf)
+      .send(body as object),
+  put: (p: string, body?: unknown) =>
+    u.agent
+      .put(`/api${p}`)
+      .set("X-CSRF-Token", u.csrf)
+      .send(body as object),
   del: (p: string) => u.agent.delete(`/api${p}`).set("X-CSRF-Token", u.csrf),
 });
 
-export const ENDERECO = { cep: "01001000", uf: "SP", cidade: "São Paulo", logradouro: "Praça da Sé", bairro: "Sé", numero: "100" };
+export const ENDERECO = {
+  cep: "01001000",
+  uf: "SP",
+  cidade: "São Paulo",
+  logradouro: "Praça da Sé",
+  bairro: "Sé",
+  numero: "100",
+};
 
 export const PRODUTO = {
   nome: "Caneta Azul",
@@ -172,4 +206,10 @@ export const SERVICO = {
   aliquota_iss: 5,
 };
 
-export const CLIENTE = { nome_social: "Cliente Alfa LTDA", tipo_pessoa: "JURIDICA", cpf_cnpj: "11222333000181", email: "alfa@cliente.com", ...ENDERECO };
+export const CLIENTE = {
+  nome_social: "Cliente Alfa LTDA",
+  tipo_pessoa: "JURIDICA",
+  cpf_cnpj: "11222333000181",
+  email: "alfa@cliente.com",
+  ...ENDERECO,
+};

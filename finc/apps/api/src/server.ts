@@ -9,7 +9,10 @@ try {
   const ctx = await buildContext(process.env);
   const app = createApp(ctx);
   const server = app.listen(ctx.cfg.PORT, ctx.cfg.HOST, () => {
-    ctx.logger.info({ porta: ctx.cfg.PORT, banco: ctx.db.kind, servirWeb: ctx.cfg.SERVE_WEB }, "API FINC iniciada");
+    ctx.logger.info(
+      { porta: ctx.cfg.PORT, banco: ctx.db.kind, servirWeb: ctx.cfg.SERVE_WEB },
+      "API FINC iniciada",
+    );
   });
   const encerrar = (sinal: string) => {
     ctx.logger.info({ sinal }, "encerrando");

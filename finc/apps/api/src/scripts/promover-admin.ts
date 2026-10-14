@@ -12,8 +12,12 @@ if (!email) {
 const cfg = parseConfig(process.env);
 const db = await createDb(cfg.DATABASE_URL);
 try {
-  const { rowCount } = await db.query("UPDATE usuarios SET papel = 'admin' WHERE email = $1", [email]);
-  console.log(rowCount ? `Usuário ${email} agora é administrador.` : `Usuário ${email} não encontrado.`);
+  const { rowCount } = await db.query("UPDATE usuarios SET papel = 'admin' WHERE email = $1", [
+    email,
+  ]);
+  console.log(
+    rowCount ? `Usuário ${email} agora é administrador.` : `Usuário ${email} não encontrado.`,
+  );
   process.exitCode = rowCount ? 0 : 1;
 } finally {
   await db.close();

@@ -11,7 +11,13 @@ import {
 import type { AppContext } from "../context.js";
 import { AppError, parse } from "../http/errors.js";
 import { createLimiters } from "../middleware/rateLimit.js";
-import { criarSessao, csrfTokenFor, limparCookieSessao, requireAuth, uid } from "../middleware/auth.js";
+import {
+  criarSessao,
+  csrfTokenFor,
+  limparCookieSessao,
+  requireAuth,
+  uid,
+} from "../middleware/auth.js";
 import { DUMMY_HASH, hashPassword, verifyPassword } from "../security/password.js";
 import { randomToken, sha256 } from "../security/tokens.js";
 import { audit } from "../services/audit.js";
@@ -35,21 +41,37 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
         "SELECT email, cpf_cnpj FROM usuarios WHERE email = $1 OR cpf_cnpj = $2",
         [input.email, input.cpf_cnpj],
       );
-      if (dup.rows.some((d) => d.cpf_cnpj === input.cpf_cnpj)) throw new AppError("CONFLITO", "CPF/CNPJ já cadastrado.");
+      if (dup.rows.some((d) => d.cpf_cnpj === input.cpf_cnpj))
+        throw new AppError("CONFLITO", "CPF/CNPJ já cadastrado.");
       if (dup.rows.length) throw new AppError("CONFLITO", "E-mail já cadastrado.");
-      const plano = await q.query<{ id: string; valor: number }>("SELECT id, valor FROM planos WHERE codigo = 'basico'");
-      if (!plano.rows[0]) throw new AppError("INTERNO", "Planos não configurados. Execute as migrações.");
+      const plano = await q.query<{ id: string; valor: number }>(
+        "SELECT id, valor FROM planos WHERE codigo = 'basico'",
+      );
+      if (!plano.rows[0])
+        throw new AppError("INTERNO", "Planos não configurados. Execute as migrações.");
       const { rows } = await q.query<{ id: string }>(
         `INSERT INTO usuarios (email, senha_hash, nome, tipo_pessoa, cpf_cnpj, telefone, plano_id)
          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-        [input.email, senhaHash, input.nome, input.tipo_pessoa, input.cpf_cnpj, input.telefone, plano.rows[0].id],
+        [
+          input.email,
+          senhaHash,
+          input.nome,
+          input.tipo_pessoa,
+          input.cpf_cnpj,
+          input.telefone,
+          plano.rows[0].id,
+        ],
       );
       const id = rows[0]!.id;
       await q.query("INSERT INTO config_fiscal (usuario_id) VALUES ($1)", [id]);
-      await q.query("INSERT INTO preferencias (usuario_id, dados) VALUES ($1, $2)", [id, JSON.stringify(PREFERENCIAS_PADRAO)]);
-      await q.query("INSERT INTO assinaturas (usuario_id, plano_id, valor, observacao) VALUES ($1, $2, $3, $4)", [
-        id, plano.rows[0].id, plano.rows[0].valor, "Plano inicial no cadastro",
+      await q.query("INSERT INTO preferencias (usuario_id, dados) VALUES ($1, $2)", [
+        id,
+        JSON.stringify(PREFERENCIAS_PADRAO),
       ]);
+      await q.query(
+        "INSERT INTO assinaturas (usuario_id, plano_id, valor, observacao) VALUES ($1, $2, $3, $4)",
+        [id, plano.rows[0].id, plano.rows[0].valor, "Plano inicial no cadastro"],
+      );
       await notificar(ctx, q, id, {
         tipo: "sistema",
         titulo: "Bem-vindo(a) à FINC!",
@@ -67,14 +89,22 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
     const { login, senha } = parse(loginSchema, req.body);
     // Login por e-mail ou CPF/CNPJ (funcionalidade preservada da FINC original).
     const porEmail = login.includes("@");
-    const { rows } = await db.query<{ id: string; senha_hash: string; bloqueado_ate: Date | null; falhas_login: number }>(
+    const { rows } = await db.query<{
+      id: string;
+      senha_hash: string;
+      bloqueado_ate: Date | null;
+      falhas_login: number;
+    }>(
       `SELECT id, senha_hash, bloqueado_ate, falhas_login FROM usuarios WHERE ${porEmail ? "email = $1" : "cpf_cnpj = $1"}`,
       [porEmail ? login.toLowerCase() : onlyDigits(login)],
     );
     const u = rows[0];
     const ok = await verifyPassword(senha, u?.senha_hash ?? DUMMY_HASH);
     if (u?.bloqueado_ate && new Date(u.bloqueado_ate) > new Date()) {
-      throw new AppError("MUITAS_REQUISICOES", `Conta bloqueada temporariamente por excesso de tentativas. Tente em ${BLOQUEIO_MIN} minutos.`);
+      throw new AppError(
+        "MUITAS_REQUISICOES",
+        `Conta bloqueada temporariamente por excesso de tentativas. Tente em ${BLOQUEIO_MIN} minutos.`,
+      );
     }
     if (!u || !ok) {
       if (u) {
@@ -89,7 +119,10 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
       }
       throw new AppError("CREDENCIAIS_INVALIDAS");
     }
-    await db.query("UPDATE usuarios SET falhas_login = 0, bloqueado_ate = NULL, ultimo_login_em = now() WHERE id = $1", [u.id]);
+    await db.query(
+      "UPDATE usuarios SET falhas_login = 0, bloqueado_ate = NULL, ultimo_login_em = now() WHERE id = $1",
+      [u.id],
+    );
     const sessao = await criarSessao(ctx, req, res, u.id);
     await audit(db, req, u.id, "auth.login");
     res.json({ ok: true, csrfToken: sessao.csrfToken });
@@ -105,18 +138,30 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
   r.get("/me", auth, async (req, res) => {
     const plano = await planoDoUsuario(db, uid(req));
     res.json({
-      usuario: { id: req.auth!.userId, nome: req.auth!.nome, email: req.auth!.email, papel: req.auth!.papel, plano },
+      usuario: {
+        id: req.auth!.userId,
+        nome: req.auth!.nome,
+        email: req.auth!.email,
+        papel: req.auth!.papel,
+        plano,
+      },
       csrfToken: csrfTokenFor(ctx, req.auth!.sessionId),
     });
   });
 
   r.post("/esqueci-senha", limiters.senha, async (req, res) => {
     const { email } = parse(forgotPasswordSchema, req.body);
-    const { rows } = await db.query<{ id: string; nome: string }>("SELECT id, nome FROM usuarios WHERE email = $1", [email]);
+    const { rows } = await db.query<{ id: string; nome: string }>(
+      "SELECT id, nome FROM usuarios WHERE email = $1",
+      [email],
+    );
     const u = rows[0];
     if (u) {
       const token = randomToken(32);
-      await db.query("UPDATE tokens_redefinicao SET usado_em = now() WHERE usuario_id = $1 AND usado_em IS NULL", [u.id]);
+      await db.query(
+        "UPDATE tokens_redefinicao SET usado_em = now() WHERE usuario_id = $1 AND usado_em IS NULL",
+        [u.id],
+      );
       await db.query(
         "INSERT INTO tokens_redefinicao (usuario_id, token_hash, expira_em) VALUES ($1, $2, now() + interval '1 hour')",
         [u.id, sha256(token)],
@@ -133,14 +178,22 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
           .catch((err) => ctx.logger.error({ err }, "falha ao enviar e-mail de redefinição"));
       } else if (ctx.cfg.NODE_ENV !== "production") {
         // Sem SMTP em desenvolvimento: o link aparece no log do servidor (documentado no README).
-        ctx.logger.warn({ link }, "SMTP não configurado — link de redefinição de senha (apenas desenvolvimento)");
+        ctx.logger.warn(
+          { link },
+          "SMTP não configurado — link de redefinição de senha (apenas desenvolvimento)",
+        );
       } else {
-        ctx.logger.error("SMTP não configurado: não foi possível enviar o e-mail de redefinição de senha");
+        ctx.logger.error(
+          "SMTP não configurado: não foi possível enviar o e-mail de redefinição de senha",
+        );
       }
       await audit(db, req, u.id, "auth.redefinicao_solicitada");
     }
     // Resposta idêntica exista ou não o e-mail (evita enumeração de contas).
-    res.json({ ok: true, message: "Se o e-mail estiver cadastrado, você receberá as instruções em instantes." });
+    res.json({
+      ok: true,
+      message: "Se o e-mail estiver cadastrado, você receberá as instruções em instantes.",
+    });
   });
 
   r.post("/redefinir-senha", limiters.senha, async (req, res) => {
@@ -152,12 +205,20 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
         [sha256(token)],
       );
       const t = rows[0];
-      if (!t) throw new AppError("REGRA_NEGOCIO", "Link de redefinição inválido ou expirado. Solicite um novo.");
+      if (!t)
+        throw new AppError(
+          "REGRA_NEGOCIO",
+          "Link de redefinição inválido ou expirado. Solicite um novo.",
+        );
       await q.query("UPDATE tokens_redefinicao SET usado_em = now() WHERE id = $1", [t.id]);
-      await q.query("UPDATE usuarios SET senha_hash = $2, falhas_login = 0, bloqueado_ate = NULL, atualizado_em = now() WHERE id = $1", [
-        t.usuario_id, senhaHash,
-      ]);
-      await q.query("UPDATE sessoes SET revogada_em = now() WHERE usuario_id = $1 AND revogada_em IS NULL", [t.usuario_id]);
+      await q.query(
+        "UPDATE usuarios SET senha_hash = $2, falhas_login = 0, bloqueado_ate = NULL, atualizado_em = now() WHERE id = $1",
+        [t.usuario_id, senhaHash],
+      );
+      await q.query(
+        "UPDATE sessoes SET revogada_em = now() WHERE usuario_id = $1 AND revogada_em IS NULL",
+        [t.usuario_id],
+      );
       await audit(q, req, t.usuario_id, "auth.senha_redefinida");
     });
     res.json({ ok: true, message: "Senha redefinida. Faça login com a nova senha." });
@@ -165,17 +226,29 @@ export function authRoutes(ctx: AppContext, limiters: ReturnType<typeof createLi
 
   r.post("/alterar-senha", auth, limiters.senha, async (req, res) => {
     const { senha_atual, nova_senha } = parse(changePasswordSchema, req.body);
-    const { rows } = await db.query<{ senha_hash: string }>("SELECT senha_hash FROM usuarios WHERE id = $1", [uid(req)]);
+    const { rows } = await db.query<{ senha_hash: string }>(
+      "SELECT senha_hash FROM usuarios WHERE id = $1",
+      [uid(req)],
+    );
     if (!rows[0] || !(await verifyPassword(senha_atual, rows[0].senha_hash))) {
-      throw new AppError("VALIDACAO", "Senha atual incorreta.", [{ campo: "senha_atual", mensagem: "Senha atual incorreta." }]);
+      throw new AppError("VALIDACAO", "Senha atual incorreta.", [
+        { campo: "senha_atual", mensagem: "Senha atual incorreta." },
+      ]);
     }
-    await db.query("UPDATE usuarios SET senha_hash = $2, atualizado_em = now() WHERE id = $1", [uid(req), await hashPassword(nova_senha)]);
-    // Encerra as demais sessões; mantém a atual.
-    await db.query("UPDATE sessoes SET revogada_em = now() WHERE usuario_id = $1 AND id <> $2 AND revogada_em IS NULL", [
-      uid(req), req.auth!.sessionId,
+    await db.query("UPDATE usuarios SET senha_hash = $2, atualizado_em = now() WHERE id = $1", [
+      uid(req),
+      await hashPassword(nova_senha),
     ]);
+    // Encerra as demais sessões; mantém a atual.
+    await db.query(
+      "UPDATE sessoes SET revogada_em = now() WHERE usuario_id = $1 AND id <> $2 AND revogada_em IS NULL",
+      [uid(req), req.auth!.sessionId],
+    );
     await audit(db, req, uid(req), "auth.senha_alterada");
-    res.json({ ok: true, message: "Senha alterada com sucesso. As outras sessões foram encerradas." });
+    res.json({
+      ok: true,
+      message: "Senha alterada com sucesso. As outras sessões foram encerradas.",
+    });
   });
 
   r.get("/sessoes", auth, async (req, res) => {

@@ -52,12 +52,19 @@ describe("cálculo fiscal", () => {
     expect(t.totalNota).toBe(316.65);
   });
   it("pode não somar impostos (preço com tributos embutidos)", () => {
-    const t = calcularTotais([{ tipo: "produto", quantidade: 1, valorUnitario: 100, icms: 18 }], 0, 0, false);
+    const t = calcularTotais(
+      [{ tipo: "produto", quantidade: 1, valorUnitario: 100, icms: 18 }],
+      0,
+      0,
+      false,
+    );
     expect(t.totalNota).toBe(100);
     expect(t.valorIcms).toBe(18);
   });
   it("nunca fica negativo", () => {
-    expect(calcularTotais([{ tipo: "produto", quantidade: 1, valorUnitario: 10 }], 50).totalNota).toBe(0);
+    expect(
+      calcularTotais([{ tipo: "produto", quantidade: 1, valorUnitario: 10 }], 50).totalNota,
+    ).toBe(0);
   });
   it("restringe tipos de item por tipo de nota", () => {
     expect(tipoItemPermitido("NFS-e", "servico")).toBe(true);
@@ -82,18 +89,35 @@ describe("schemas", () => {
     expect(r.email).toBe("maria@exemplo.com");
   });
   it("rejeita CNPJ inválido para pessoa jurídica", () => {
-    const r = clienteSchema.safeParse({ nome_social: "ACME", tipo_pessoa: "JURIDICA", cpf_cnpj: "52998224725" });
+    const r = clienteSchema.safeParse({
+      nome_social: "ACME",
+      tipo_pessoa: "JURIDICA",
+      cpf_cnpj: "52998224725",
+    });
     expect(r.success).toBe(false);
   });
   it("aceita valores legados PFisica/PJuridica", () => {
-    const r = clienteSchema.parse({ nome_social: "João", tipo_pessoa: "PFisica", cpf_cnpj: "52998224725", email: "" });
+    const r = clienteSchema.parse({
+      nome_social: "João",
+      tipo_pessoa: "PFisica",
+      cpf_cnpj: "52998224725",
+      email: "",
+    });
     expect(r.tipo_pessoa).toBe("FISICA");
     expect(r.email).toBeNull();
   });
   it("valida NCM, CFOP e alíquotas do produto", () => {
     const base = {
-      nome: "Caneta", categoria: "Papelaria", sku: "CAN-1", unidade_medida: "Unidade",
-      preco_unitario: "2,50", ncm: "9608.10.00", cfop: "5102", icms: "18", pis_cofins: "3.65", origem: "0",
+      nome: "Caneta",
+      categoria: "Papelaria",
+      sku: "CAN-1",
+      unidade_medida: "Unidade",
+      preco_unitario: "2,50",
+      ncm: "9608.10.00",
+      cfop: "5102",
+      icms: "18",
+      pis_cofins: "3.65",
+      origem: "0",
     };
     const ok = produtoSchema.parse(base);
     expect(ok.preco_unitario).toBe(2.5);

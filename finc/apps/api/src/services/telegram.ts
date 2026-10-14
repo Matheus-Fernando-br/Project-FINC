@@ -28,9 +28,18 @@ export function createTelegram(cfg: Config): Telegram {
   return {
     enabled: Boolean(token && chatId),
     sendMessage: (text, keyboard) =>
-      call("sendMessage", { chat_id: chatId, text, ...(keyboard ? { reply_markup: keyboard } : {}) }),
+      call("sendMessage", {
+        chat_id: chatId,
+        text,
+        ...(keyboard ? { reply_markup: keyboard } : {}),
+      }),
     editKeyboard: (chat, messageId, keyboard) =>
-      call("editMessageReplyMarkup", { chat_id: chat, message_id: messageId, reply_markup: keyboard }),
-    answerCallback: (callbackId, text = "") => call("answerCallbackQuery", { callback_query_id: callbackId, text }),
+      call("editMessageReplyMarkup", {
+        chat_id: chat,
+        message_id: messageId,
+        reply_markup: keyboard,
+      }),
+    answerCallback: (callbackId, text = "") =>
+      call("answerCallbackQuery", { callback_query_id: callbackId, text }),
   };
 }

@@ -17,14 +17,21 @@ export function sessionCookieOptions(ctx: AppContext): CookieOptions {
 }
 
 /** Token CSRF derivado da sessão (HMAC) — não precisa ser armazenado e muda a cada login. */
-export const csrfTokenFor = (ctx: AppContext, sessionId: string) => hmac(ctx.cfg.sessionSecret, `csrf:${sessionId}`);
+export const csrfTokenFor = (ctx: AppContext, sessionId: string) =>
+  hmac(ctx.cfg.sessionSecret, `csrf:${sessionId}`);
 
 export async function criarSessao(ctx: AppContext, req: Request, res: Response, userId: string) {
   const token = randomToken(32);
   const { rows } = await ctx.db.query<{ id: string }>(
     `INSERT INTO sessoes (usuario_id, token_hash, ip, user_agent, expira_em)
      VALUES ($1, $2, $3, $4, now() + make_interval(hours => $5)) RETURNING id`,
-    [userId, sha256(token), req.ip ?? null, String(req.headers["user-agent"] ?? "").slice(0, 300), ctx.cfg.SESSION_TTL_HORAS],
+    [
+      userId,
+      sha256(token),
+      req.ip ?? null,
+      String(req.headers["user-agent"] ?? "").slice(0, 300),
+      ctx.cfg.SESSION_TTL_HORAS,
+    ],
   );
   const sessionId = rows[0]!.id;
   res.cookie(SESSION_COOKIE, token, sessionCookieOptions(ctx));
@@ -57,7 +64,8 @@ export function requireAuth(ctx: AppContext): RequestHandler {
       [sha256(token)],
     );
     const s = rows[0];
-    if (!s) throw new AppError("NAO_AUTENTICADO", "Sessão inválida ou expirada. Faça login novamente.");
+    if (!s)
+      throw new AppError("NAO_AUTENTICADO", "Sessão inválida ou expirada. Faça login novamente.");
 
     if (!SAFE_METHODS.has(req.method)) {
       const header = req.get("x-csrf-token") ?? "";
@@ -67,7 +75,13 @@ export function requireAuth(ctx: AppContext): RequestHandler {
     if (Date.now() - new Date(s.ultimo_uso_em).getTime() > 5 * 60 * 1000) {
       await ctx.db.query("UPDATE sessoes SET ultimo_uso_em = now() WHERE id = $1", [s.session_id]);
     }
-    req.auth = { userId: s.usuario_id, sessionId: s.session_id, email: s.email, nome: s.nome, papel: s.papel };
+    req.auth = {
+      userId: s.usuario_id,
+      sessionId: s.session_id,
+      email: s.email,
+      nome: s.nome,
+      papel: s.papel,
+    };
     next();
   };
 }

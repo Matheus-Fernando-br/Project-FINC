@@ -39,17 +39,25 @@ const digitsOpt = (pred: (s: string) => boolean, msg: string) =>
     .optional();
 
 const numberFrom = (schema: z.ZodNumber) =>
-  z.preprocess((v) => (v === "" || v === null || v === undefined ? undefined : Number(String(v).replace(",", "."))), schema);
+  z.preprocess(
+    (v) =>
+      v === "" || v === null || v === undefined ? undefined : Number(String(v).replace(",", ".")),
+    schema,
+  );
 
 const numOpt = (schema: z.ZodNumber) =>
   z
     .preprocess(
-      (v) => (v === "" || v === null || v === undefined ? null : Number(String(v).replace(",", "."))),
+      (v) =>
+        v === "" || v === null || v === undefined ? null : Number(String(v).replace(",", ".")),
       schema.nullable(),
     )
     .optional();
 
-export const percentual = z.number({ invalid_type_error: "Percentual inválido" }).min(0, "Mínimo 0%").max(100, "Máximo 100%");
+export const percentual = z
+  .number({ invalid_type_error: "Percentual inválido" })
+  .min(0, "Mínimo 0%")
+  .max(100, "Máximo 100%");
 
 export const emailSchema = z
   .string({ required_error: "E-mail é obrigatório" })
@@ -64,7 +72,10 @@ export const emailOpt = z
 
 export const senhaSchema = z
   .string({ required_error: "Senha é obrigatória" })
-  .refine(isStrongPassword, "Senha inválida: mínimo 8 caracteres, com pelo menos uma letra e um número");
+  .refine(
+    isStrongPassword,
+    "Senha inválida: mínimo 8 caracteres, com pelo menos uma letra e um número",
+  );
 
 export const tipoPessoaSchema = z.preprocess(
   (v) => {
@@ -111,8 +122,12 @@ export const registerSchema = z
     cpf_cnpj: docDigits,
     email: emailSchema,
     senha: senhaSchema,
-    telefone: z.preprocess((v) => onlyDigits(v), z.string()).refine(isValidTelefone, "Telefone inválido"),
-    aceite_termos: z.literal(true, { errorMap: () => ({ message: "É necessário aceitar os termos de uso" }) }),
+    telefone: z
+      .preprocess((v) => onlyDigits(v), z.string())
+      .refine(isValidTelefone, "Telefone inválido"),
+    aceite_termos: z.literal(true, {
+      errorMap: () => ({ message: "É necessário aceitar os termos de uso" }),
+    }),
   })
   .superRefine(refineDocumento);
 
@@ -137,7 +152,9 @@ export const changePasswordSchema = z.object({
 
 export const perfilSchema = z.object({
   nome: reqText(2, 200, "Nome social"),
-  telefone: z.preprocess((v) => onlyDigits(v), z.string()).refine(isValidTelefone, "Telefone inválido"),
+  telefone: z
+    .preprocess((v) => onlyDigits(v), z.string())
+    .refine(isValidTelefone, "Telefone inválido"),
   inscricao_estadual: optText(30),
   inscricao_municipal: optText(30),
   ...enderecoShape,
@@ -166,7 +183,9 @@ export const produtoSchema = z.object({
   descricao: optText(2000),
   sku: reqText(1, 60, "SKU"),
   unidade_medida: reqText(1, 40, "Unidade de medida"),
-  preco_unitario: numberFrom(z.number({ required_error: "Preço é obrigatório" }).min(0, "Preço inválido").max(99999999)),
+  preco_unitario: numberFrom(
+    z.number({ required_error: "Preço é obrigatório" }).min(0, "Preço inválido").max(99999999),
+  ),
   ncm: z
     .preprocess((v) => onlyDigits(v), z.string())
     .refine((v) => v.length === 8, "NCM deve ter 8 dígitos"),
@@ -193,9 +212,13 @@ export const servicoSchema = z.object({
   categoria: reqText(1, 80, "Categoria"),
   codigo_interno: optText(60),
   descricao_detalhada: optText(2000),
-  preco: numberFrom(z.number({ required_error: "Preço é obrigatório" }).min(0, "Preço inválido").max(99999999)),
+  preco: numberFrom(
+    z.number({ required_error: "Preço é obrigatório" }).min(0, "Preço inválido").max(99999999),
+  ),
   unidade_medida: reqText(1, 40, "Unidade de medida"),
-  cnae: z.preprocess((v) => onlyDigits(v), z.string()).refine((v) => v.length === 7, "CNAE deve ter 7 dígitos"),
+  cnae: z
+    .preprocess((v) => onlyDigits(v), z.string())
+    .refine((v) => v.length === 7, "CNAE deve ter 7 dígitos"),
   codigo_servico: reqText(1, 20, "Código do serviço"),
   item_lista: optText(10),
   aliquota_iss: numOpt(percentual),
@@ -230,7 +253,10 @@ export const notaItemSchema = z
     valor_unitario: numberFrom(z.number().min(0).max(99999999)).optional(),
     info: optText(500),
   })
-  .refine((i) => Boolean(i.produto_id) !== Boolean(i.servico_id), "Cada item deve referenciar um produto OU um serviço");
+  .refine(
+    (i) => Boolean(i.produto_id) !== Boolean(i.servico_id),
+    "Cada item deve referenciar um produto OU um serviço",
+  );
 
 export const transporteSchema = z.object({
   incluir_frete: z.boolean().default(false),
@@ -243,7 +269,9 @@ export const transporteSchema = z.object({
 });
 
 export const notaSchema = z.object({
-  tipo: z.enum(TIPOS_NOTA, { errorMap: () => ({ message: "Selecione o tipo de nota (NF-e / NFC-e / NFS-e)" }) }),
+  tipo: z.enum(TIPOS_NOTA, {
+    errorMap: () => ({ message: "Selecione o tipo de nota (NF-e / NFC-e / NFS-e)" }),
+  }),
   cliente_id: z.string({ required_error: "Selecione um cliente" }).uuid("Selecione um cliente"),
   itens: z.array(notaItemSchema).min(1, "Adicione pelo menos 1 produto/serviço").max(200),
   desconto_incondicional: numOpt(z.number().min(0)),
@@ -264,7 +292,12 @@ export const cancelarNotaSchema = z.object({
 export const contaSchema = z.object({
   tipo: z.enum(["receber", "pagar"]),
   descricao: reqText(2, 200, "Descrição"),
-  valor: numberFrom(z.number({ required_error: "Valor é obrigatório" }).positive("Valor deve ser maior que zero").max(999999999)),
+  valor: numberFrom(
+    z
+      .number({ required_error: "Valor é obrigatório" })
+      .positive("Valor deve ser maior que zero")
+      .max(999999999),
+  ),
   vencimento: z.string().date("Data de vencimento inválida"),
   categoria: optText(80),
   cliente_id: z.preprocess(emptyToNull, z.string().uuid().nullable()).optional(),

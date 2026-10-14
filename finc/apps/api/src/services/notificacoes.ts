@@ -13,10 +13,16 @@ export interface NovaNotificacao {
  * Cria a notificação interna e, se o usuário optou e o SMTP estiver configurado, envia também por e-mail.
  * O envio de e-mail é assíncrono e falhas são registradas em log sem afetar a operação principal.
  */
-export async function notificar(ctx: AppContext, q: Queryable, usuarioId: string, n: NovaNotificacao) {
-  await q.query("INSERT INTO notificacoes (usuario_id, tipo, titulo, mensagem, link) VALUES ($1, $2, $3, $4, $5)", [
-    usuarioId, n.tipo, n.titulo, n.mensagem, n.link ?? null,
-  ]);
+export async function notificar(
+  ctx: AppContext,
+  q: Queryable,
+  usuarioId: string,
+  n: NovaNotificacao,
+) {
+  await q.query(
+    "INSERT INTO notificacoes (usuario_id, tipo, titulo, mensagem, link) VALUES ($1, $2, $3, $4, $5)",
+    [usuarioId, n.tipo, n.titulo, n.mensagem, n.link ?? null],
+  );
   if (!ctx.mailer.enabled) return;
   const { rows } = await q.query<{ email: string; notificar: boolean | null }>(
     `SELECT u.email, (p.dados->>'notificar_email')::boolean AS notificar

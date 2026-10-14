@@ -10,7 +10,10 @@ function limiter(ctx: AppContext, opts: Partial<Options>): RequestHandler {
     legacyHeaders: false,
     handler: (_req, res) => {
       res.status(429).json({
-        error: { code: "MUITAS_REQUISICOES", message: "Muitas requisições. Tente novamente em alguns minutos." },
+        error: {
+          code: "MUITAS_REQUISICOES",
+          message: "Muitas requisições. Tente novamente em alguns minutos.",
+        },
       });
     },
     ...opts,

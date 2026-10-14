@@ -1,5 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { CLIENTE, ENDERECO, PRODUTO, SERVICO, api, registrar, setup, type TestEnv, type Usuario } from "./helpers.js";
+import {
+  CLIENTE,
+  ENDERECO,
+  PRODUTO,
+  SERVICO,
+  api,
+  registrar,
+  setup,
+  type TestEnv,
+  type Usuario,
+} from "./helpers.js";
 
 let env: TestEnv;
 beforeAll(async () => {
@@ -9,9 +19,12 @@ afterAll(() => env.close());
 
 async function preparar(comEndereco = true) {
   const u = await registrar(env, "Loja da Maria");
-  if (comEndereco) await api(u).put("/perfil", { nome: "Loja da Maria", telefone: "11988887777", ...ENDERECO });
+  if (comEndereco)
+    await api(u).put("/perfil", { nome: "Loja da Maria", telefone: "11988887777", ...ENDERECO });
   const cliente = (await api(u).post("/clientes", CLIENTE)).body;
-  const produto = (await api(u).post("/produtos", { ...PRODUTO, controla_estoque: true, estoque_inicial: 5 })).body;
+  const produto = (
+    await api(u).post("/produtos", { ...PRODUTO, controla_estoque: true, estoque_inicial: 5 })
+  ).body;
   const servico = (await api(u).post("/servicos", SERVICO)).body;
   return { u, cliente, produto, servico };
 }
@@ -28,11 +41,23 @@ const notaProduto = (clienteId: string, produtoId: string, qtd = 2) => ({
 describe("documentos fiscais", () => {
   it("aplica a regra de tipo de item por tipo de nota", async () => {
     const { u, cliente, produto, servico } = await preparar();
-    const r1 = await api(u).post("/notas", { tipo: "NFS-e", cliente_id: cliente.id, itens: [{ produto_id: produto.id, quantidade: 1 }] });
+    const r1 = await api(u).post("/notas", {
+      tipo: "NFS-e",
+      cliente_id: cliente.id,
+      itens: [{ produto_id: produto.id, quantidade: 1 }],
+    });
     expect(r1.status).toBe(422);
-    const r2 = await api(u).post("/notas", { tipo: "NF-e", cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 1 }] });
+    const r2 = await api(u).post("/notas", {
+      tipo: "NF-e",
+      cliente_id: cliente.id,
+      itens: [{ servico_id: servico.id, quantidade: 1 }],
+    });
     expect(r2.status).toBe(422);
-    const semItens = await api(u).post("/notas", { tipo: "NF-e", cliente_id: cliente.id, itens: [] });
+    const semItens = await api(u).post("/notas", {
+      tipo: "NF-e",
+      cliente_id: cliente.id,
+      itens: [],
+    });
     expect(semItens.status).toBe(400);
   });
 
@@ -63,7 +88,10 @@ describe("documentos fiscais", () => {
 
   it("emite com numeração sequencial, baixa estoque, lança no financeiro e notifica", async () => {
     const { u, cliente, produto } = await preparar();
-    const n1 = await api(u).post("/notas", { ...notaProduto(cliente.id, produto.id), emitir: true });
+    const n1 = await api(u).post("/notas", {
+      ...notaProduto(cliente.id, produto.id),
+      emitir: true,
+    });
     expect(n1.status).toBe(201);
     expect(n1.body.status).toBe("emitida");
     expect(n1.body.numero).toBe(1);
@@ -75,12 +103,19 @@ describe("documentos fiscais", () => {
     const contas = await api(u).get("/financeiro/contas?tipo=receber");
     expect(contas.body).toHaveLength(2);
     expect(contas.body[0].nota_id).toBeTruthy();
-    expect((await api(u).put(`/notas/${n1.body.id}`, notaProduto(cliente.id, produto.id))).status).toBe(422);
+    expect(
+      (await api(u).put(`/notas/${n1.body.id}`, notaProduto(cliente.id, produto.id))).status,
+    ).toBe(422);
     expect((await api(u).del(`/notas/${n1.body.id}`)).status).toBe(422);
     const notifs = await api(u).get("/notificacoes");
-    expect(notifs.body.items.some((n: { titulo: string }) => n.titulo === "NF-e nº 1 emitida")).toBe(true);
+    expect(
+      notifs.body.items.some((n: { titulo: string }) => n.titulo === "NF-e nº 1 emitida"),
+    ).toBe(true);
     // estoque insuficiente bloqueia emissão
-    const r = await api(u).post("/notas", { ...notaProduto(cliente.id, produto.id, 50), emitir: true });
+    const r = await api(u).post("/notas", {
+      ...notaProduto(cliente.id, produto.id, 50),
+      emitir: true,
+    });
     expect(r.status).toBe(422);
     expect(r.body.error.message).toContain("Estoque insuficiente");
   });
@@ -88,16 +123,19 @@ describe("documentos fiscais", () => {
   it("gera PDF e XML com escape de caracteres especiais", async () => {
     const { u, cliente, produto } = await preparar();
     const n = await api(u).post("/notas", { ...notaProduto(cliente.id, produto.id), emitir: true });
-    const pdf = await api(u).get(`/notas/${n.body.id}/pdf`).buffer(true).parse((res, cb) => {
-      const chunks: Buffer[] = [];
-      res.on("data", (c: Buffer) => chunks.push(c));
-      res.on("end", () => cb(null, Buffer.concat(chunks)));
-    });
+    const pdf = await api(u)
+      .get(`/notas/${n.body.id}/pdf`)
+      .buffer(true)
+      .parse((res, cb) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c: Buffer) => chunks.push(c));
+        res.on("end", () => cb(null, Buffer.concat(chunks)));
+      });
     expect(pdf.headers["content-type"]).toBe("application/pdf");
     expect((pdf.body as Buffer).subarray(0, 5).toString()).toBe("%PDF-");
     const xml = await api(u).get(`/notas/${n.body.id}/xml`);
     expect(xml.headers["content-type"]).toContain("application/xml");
-    expect(xml.text).toContain("<notaFiscal xmlns=\"urn:finc:documento:2.0\">");
+    expect(xml.text).toContain('<notaFiscal xmlns="urn:finc:documento:2.0">');
     expect(xml.text).toContain("<numero>000000001</numero>");
     expect(xml.text).toContain("Pedido &lt;urgente&gt; &amp; especial");
     expect(xml.text).toContain("<modalidadeFrete>0 - Por conta do remetente</modalidadeFrete>");
@@ -107,13 +145,20 @@ describe("documentos fiscais", () => {
   it("cancela com justificativa, estorna estoque e cancela o recebível", async () => {
     const { u, cliente, produto } = await preparar();
     const n = await api(u).post("/notas", { ...notaProduto(cliente.id, produto.id), emitir: true });
-    expect((await api(u).post(`/notas/${n.body.id}/cancelar`, { motivo: "curto" })).status).toBe(400);
+    expect((await api(u).post(`/notas/${n.body.id}/cancelar`, { motivo: "curto" })).status).toBe(
+      400,
+    );
     // recebimento baixado impede o cancelamento
     const conta = (await api(u).get("/financeiro/contas")).body[0];
     await api(u).post(`/financeiro/contas/${conta.id}/baixar`, {});
-    expect((await api(u).post(`/notas/${n.body.id}/cancelar`, { motivo: "Erro na digitação do pedido" })).status).toBe(422);
+    expect(
+      (await api(u).post(`/notas/${n.body.id}/cancelar`, { motivo: "Erro na digitação do pedido" }))
+        .status,
+    ).toBe(422);
     await api(u).post(`/financeiro/contas/${conta.id}/estornar`);
-    const c = await api(u).post(`/notas/${n.body.id}/cancelar`, { motivo: "Erro na digitação do pedido" });
+    const c = await api(u).post(`/notas/${n.body.id}/cancelar`, {
+      motivo: "Erro na digitação do pedido",
+    });
     expect(c.status).toBe(200);
     expect(c.body.status).toBe("cancelada");
     expect((await api(u).get(`/produtos/${produto.id}`)).body.estoque_atual).toBe(5);
@@ -122,13 +167,29 @@ describe("documentos fiscais", () => {
 
   it("NFS-e soma ISS; ambiente de produção exige provedor fiscal", async () => {
     const { u, cliente, servico } = await preparar();
-    const n = await api(u).post("/notas", { tipo: "NFS-e", cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 2 }], emitir: true });
+    const n = await api(u).post("/notas", {
+      tipo: "NFS-e",
+      cliente_id: cliente.id,
+      itens: [{ servico_id: servico.id, quantidade: 2 }],
+      emitir: true,
+    });
     expect(n.body.valor_servicos).toBe(400);
     expect(n.body.valor_iss).toBe(20);
     expect(n.body.total).toBe(420);
     const cfg = (await api(u).get("/config/fiscal")).body;
-    await api(u).put("/config/fiscal", { ...cfg, ambiente: "producao", somar_impostos: false, cfop_padrao: null, natureza_operacao: null });
-    const r = await api(u).post("/notas", { tipo: "NFS-e", cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 1 }], emitir: true });
+    await api(u).put("/config/fiscal", {
+      ...cfg,
+      ambiente: "producao",
+      somar_impostos: false,
+      cfop_padrao: null,
+      natureza_operacao: null,
+    });
+    const r = await api(u).post("/notas", {
+      tipo: "NFS-e",
+      cliente_id: cliente.id,
+      itens: [{ servico_id: servico.id, quantidade: 1 }],
+      emitir: true,
+    });
     expect(r.status).toBe(503);
     expect(r.body.error.code).toBe("INTEGRACAO_NAO_CONFIGURADA");
   });
@@ -137,7 +198,12 @@ describe("documentos fiscais", () => {
     const { u, cliente, servico } = await preparar();
     await env.ctx.db.query("UPDATE planos SET limite_notas_mes = 2 WHERE codigo = 'basico'");
     try {
-      const body = { tipo: "NFS-e", cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 1 }], emitir: true };
+      const body = {
+        tipo: "NFS-e",
+        cliente_id: cliente.id,
+        itens: [{ servico_id: servico.id, quantidade: 1 }],
+        emitir: true,
+      };
       expect((await api(u).post("/notas", body)).status).toBe(201);
       expect((await api(u).post("/notas", body)).status).toBe(201);
       const r = await api(u).post("/notas", body);
@@ -150,13 +216,25 @@ describe("documentos fiscais", () => {
 
   it("envia o documento ao contador por e-mail com PDF e XML anexos", async () => {
     const { u, cliente, servico } = await preparar();
-    const contador = (await api(u).post("/contadores", { nome: "Contábil", email: "contabil@escritorio.com" })).body;
-    const n = await api(u).post("/notas", { tipo: "NFS-e", cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 1 }], emitir: true });
-    const r = await api(u).post(`/notas/${n.body.id}/enviar-contador`, { contador_id: contador.id });
+    const contador = (
+      await api(u).post("/contadores", { nome: "Contábil", email: "contabil@escritorio.com" })
+    ).body;
+    const n = await api(u).post("/notas", {
+      tipo: "NFS-e",
+      cliente_id: cliente.id,
+      itens: [{ servico_id: servico.id, quantidade: 1 }],
+      emitir: true,
+    });
+    const r = await api(u).post(`/notas/${n.body.id}/enviar-contador`, {
+      contador_id: contador.id,
+    });
     expect(r.status).toBe(200);
     const email = env.emails.at(-1)!;
     expect(email.to).toBe("contabil@escritorio.com");
-    expect(email.attachments?.map((a) => a.filename)).toEqual(["finc-nfse-serie1-000000001.pdf", "finc-nfse-serie1-000000001.xml"]);
+    expect(email.attachments?.map((a) => a.filename)).toEqual([
+      "finc-nfse-serie1-000000001.pdf",
+      "finc-nfse-serie1-000000001.xml",
+    ]);
   });
 
   it("isola documentos entre contas", async () => {
@@ -174,12 +252,21 @@ describe("documentos fiscais", () => {
 describe("pedidos de venda", () => {
   it("cria pedido, gera rascunho de nota e marca como faturado", async () => {
     const { u, cliente, produto, servico } = await preparar();
-    const p = await api(u).post("/pedidos", { cliente_id: cliente.id, itens: [{ produto_id: produto.id, quantidade: 3, valor_unitario: 9 }], desconto: 2 });
+    const p = await api(u).post("/pedidos", {
+      cliente_id: cliente.id,
+      itens: [{ produto_id: produto.id, quantidade: 3, valor_unitario: 9 }],
+      desconto: 2,
+    });
     expect(p.status).toBe(201);
     expect(p.body.numero).toBe(1);
     expect(p.body.total).toBe(25);
-    const misto = await api(u).post("/pedidos", { cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 1 }] });
-    expect((await api(u).post(`/pedidos/${misto.body.id}/gerar-nota`, { tipo: "NF-e" })).status).toBe(422);
+    const misto = await api(u).post("/pedidos", {
+      cliente_id: cliente.id,
+      itens: [{ servico_id: servico.id, quantidade: 1 }],
+    });
+    expect(
+      (await api(u).post(`/pedidos/${misto.body.id}/gerar-nota`, { tipo: "NF-e" })).status,
+    ).toBe(422);
     const g = await api(u).post(`/pedidos/${p.body.id}/gerar-nota`, { tipo: "NF-e" });
     expect(g.status).toBe(201);
     const nota = (await api(u).get(`/notas/${g.body.nota_id}`)).body;
@@ -197,13 +284,34 @@ describe("pedidos de venda", () => {
 describe("financeiro e painel", () => {
   it("contas a pagar/receber, baixa, estorno, resumo e dashboard com dados reais", async () => {
     const { u, cliente, servico } = await preparar();
-    const pagar = await api(u).post("/financeiro/contas", { tipo: "pagar", descricao: "Aluguel", valor: "1.500,00".replace(".", ""), vencimento: "2020-01-10", categoria: "Aluguel" });
+    const pagar = await api(u).post("/financeiro/contas", {
+      tipo: "pagar",
+      descricao: "Aluguel",
+      valor: "1.500,00".replace(".", ""),
+      vencimento: "2020-01-10",
+      categoria: "Aluguel",
+    });
     expect(pagar.status).toBe(201);
     expect(pagar.body.valor).toBe(1500);
-    expect((await api(u).post("/financeiro/contas", { tipo: "pagar", descricao: "X", valor: 0, vencimento: "2024-01-01" })).status).toBe(400);
+    expect(
+      (
+        await api(u).post("/financeiro/contas", {
+          tipo: "pagar",
+          descricao: "X",
+          valor: 0,
+          vencimento: "2024-01-01",
+        })
+      ).status,
+    ).toBe(400);
     const vencidas = await api(u).get("/financeiro/contas?status=vencida");
     expect(vencidas.body).toHaveLength(1);
-    await api(u).post("/notas", { tipo: "NFS-e", cliente_id: cliente.id, itens: [{ servico_id: servico.id, quantidade: 1 }], emitir: true, vencimento: "2099-01-01" });
+    await api(u).post("/notas", {
+      tipo: "NFS-e",
+      cliente_id: cliente.id,
+      itens: [{ servico_id: servico.id, quantidade: 1 }],
+      emitir: true,
+      vencimento: "2099-01-01",
+    });
     let resumo = (await api(u).get("/financeiro/resumo")).body;
     expect(resumo.a_receber).toBe(210);
     expect(resumo.a_pagar).toBe(1500);
